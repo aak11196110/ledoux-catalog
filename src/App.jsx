@@ -899,8 +899,10 @@ export default function App() {
                   </div>
                   <div className="pcard-price">
                     <div>
-                      <div className="price-std-val">NT$ {p.stdPrice?.toLocaleString()}</div>
-                      {isVip&&<div><span className="price-proj-label">專案價 </span><span className="price-proj-val">NT$ {p.projPrice?.toLocaleString()}</span></div>}
+                      {isVip
+                        ? <><div className="price-proj-label" style={{marginBottom:2}}>專案價</div><div className="price-std-val" style={{color:"var(--gold)"}}>NT$ {p.projPrice?.toLocaleString()}</div></>
+                        : <div className="price-std-val">NT$ {p.stdPrice?.toLocaleString()}</div>
+                      }
                     </div>
                   </div>
                 </div>
@@ -1092,8 +1094,11 @@ export default function App() {
           {selProd.video&&<div className="drawer-video"><iframe src={selProd.video} title="產品影片" allowFullScreen/></div>}
           {selProd.note&&<div className="drawer-note">📌 {selProd.note}</div>}
           <div className="price-block">
-            <div><div className="pb-label">標準售價</div><div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div></div>
-            {isVip&&<div><div className="pb-label">專案價</div><div className="pb-val gold">NT$ {selProd.projPrice?.toLocaleString()}</div></div>}
+            <div>
+              <div className="pb-label">{isVip?"專案價":"售價"}</div>
+              <div className={`pb-val ${isVip?"gold":""}`}>NT$ {isVip?selProd.projPrice?.toLocaleString():selProd.stdPrice?.toLocaleString()}</div>
+              {!isVip&&<div style={{fontSize:11,color:"var(--muted)",marginTop:6}}>如需專案報價，請洽業務專員</div>}
+            </div>
           </div>
           <div className="drawer-actions">
             <button className={`btn-add-cart ${isVip?"btn-add-cart-gold":""}`} onClick={()=>addToCart(selProd)}>加入詢價單</button>
