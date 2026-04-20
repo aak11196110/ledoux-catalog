@@ -610,8 +610,8 @@ function Carousel({ images }) {
   const imgs=images?.filter(Boolean)||[];
   if(!imgs.length) return <div className="carousel" style={{display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontSize:64,color:"var(--bdr)"}}>◎</span></div>;
   return <div className="carousel">
-    <div className="carousel-img"><img src={imgs[idx]} alt="" onError={e=>e.target.style.display="none"}/></div>
-    {imgs.length>1&&<><button className="carousel-prev" onClick={()=>setIdx(i=>(i-1+imgs.length)%imgs.length)}>‹</button><button className="carousel-next" onClick={()=>setIdx(i=>(i+1)%imgs.length)}>›</button><div className="carousel-dots">{imgs.map((_,i)=><div key={i} className={`cdot ${i===idx?"on":""}`} onClick={()=>setIdx(i)}/>)}</div></>}
+    <div className="carousel-img"><img src={imgs[idx]} alt="" onError={e=>{e.target.style.display="none"}}/></div>
+    {imgs.length>1&&<><button className="carousel-prev" onClick={()=>setIdx(i=>(i-1+imgs.length)%imgs.length)}>‹</button><button className="carousel-next" onClick={()=>setIdx(i=>(i+1)%imgs.length)}>›</button><div className="carousel-dots">{imgs.map((_,i)=><div key={i} className={`cdot ${i===idx?"on":""}`} onClick={()=>setIdx(i)}/>)}</div></div></>}
   </div>;
 }
 
@@ -632,6 +632,27 @@ function getSuggestions(products, q) {
   const lq = q.toLowerCase();
   const all = [...new Set(products.flatMap(p=>[p.model,p.series,p.category,p.watt,p.cct,p.color]))];
   return all.filter(v=>v&&v.toLowerCase().includes(lq)).slice(0,6);
+}
+
+function InstallCalcBox({ region, groups, calcInstall, INSTALL_MIN }) {
+  if (!region) return null;
+  const c = calcInstall(region, groups);
+  if (!c) return null;
+  return (
+    <div className="calc-box">
+      <div className="calc-row"><span>安裝工資（{c.totalQty} 盞）</span><span>NT$ {c.laborTotal.toLocaleString()}</span></div>
+      <div className="calc-row"><span>車馬費</span><span>{c.travelFee===null?"專案另議":c.travelFee===0?<span style={{color:"var(--green)"}}>免收 ✓</span>:`NT$ ${c.travelFee.toLocaleString()}`}</span></div>
+      {c.laborTotal===INSTALL_MIN&&<div style={{fontSize:9,color:"#8a7a6a",marginTop:4}}>＊ 已適用最低出勤費 NT$1,500</div>}
+      {c.hasVHigh&&<div className="calc-warn">⚠ 4.5m 以上高空作業需另行報價</div>}
+      {!c.hasVHigh&&c.travelFee!==null&&(
+        <div className="calc-row" style={{marginTop:8,paddingTop:8,borderTop:"1px solid #2a2520"}}>
+          <span>預估安裝服務費合計</span>
+          <span>NT$ {(c.laborTotal+(c.travelFee||0)).toLocaleString()}</span>
+        </div>
+      )}
+      {c.reg.freeAt&&c.totalQty<c.reg.freeAt&&<div style={{fontSize:9,color:"#6a5a4a",marginTop:6}}>再增加 {c.reg.freeAt-c.totalQty} 盞可免車馬費（省 NT$ {c.reg.travel.toLocaleString()}）</div>}
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -879,7 +900,10 @@ export default function App() {
           </>)}
         </div>
       </div>
-    </div></>
+    </div>
+    </div>
+    </div>
+    </>
   );
 
   // ── LOGGED IN ──
@@ -1165,25 +1189,7 @@ export default function App() {
                 <button className="btn-add-group" onClick={()=>setInstallGroups(gs=>[...gs,{ceilingId:"std",qty:1}])}>＋ 新增不同天花高度</button>
               </div>
               {/* 即時計算 */}
-              {installRegion&&(()=>{
-                const c=calcInstall(installRegion,installGroups);
-                if(!c) return null;
-                return (
-                  <div className="calc-box">
-                    <div className="calc-row"><span>安裝工資（{c.totalQty} 盞）</span><span>NT$ {c.laborTotal.toLocaleString()}</span></div>
-                    <div className="calc-row"><span>車馬費</span><span>{c.travelFee===null?"專案另議":c.travelFee===0?<span style={{color:"var(--green)"}}>免收 ✓</span>:`NT$ ${c.travelFee.toLocaleString()}`}</span></div>
-                    {c.laborTotal===INSTALL_MIN&&<div style={{fontSize:9,color:"#8a7a6a",marginTop:4}}>＊ 已適用最低出勤費 NT$1,500</div>}
-                    {c.hasVHigh&&<div className="calc-warn">⚠ 4.5m 以上高空作業需另行報價</div>}
-                    {!c.hasVHigh&&c.travelFee!==null&&(
-                      <div className="calc-row" style={{marginTop:8,paddingTop:8,borderTop:"1px solid #2a2520"}}>
-                        <span>預估安裝服務費合計</span>
-                        <span>NT$ {(c.laborTotal+(c.travelFee||0)).toLocaleString()}</span>
-                      </div>
-                    )}
-                    {c.reg.freeAt&&c.totalQty<c.reg.freeAt&&<div style={{fontSize:9,color:"#6a5a4a",marginTop:6}}>再增加 {c.reg.freeAt-c.totalQty} 盞可免車馬費（省 NT$ {c.reg.travel.toLocaleString()}）</div>}
-                  </div>
-                );
-              })()}
+              <InstallCalcBox region={installRegion} groups={installGroups} calcInstall={calcInstall} INSTALL_MIN={INSTALL_MIN}/>
               {/* 備註 */}
               <div className="ip-section" style={{marginTop:16}}>
                 <div className="ip-section-title">備註</div>
@@ -1198,7 +1204,7 @@ export default function App() {
         </div>}
       </div>
 
-        {/* 產品目錄 */}
+      <div className="content">
         {page==="catalog"&&<>
           <div className="phead">
             <div>
@@ -1536,6 +1542,10 @@ export default function App() {
         </div>
       </div>
     </div>}
+    </div>
+    </div>
+    </div>
+    </div>
 
     {toast&&<div className="toast">{toast}</div>}
     </>
