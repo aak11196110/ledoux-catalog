@@ -1,16 +1,16 @@
-import { useState, useRef, useEffect } from "react"；
-
+import { useState, useRef, useEffect } from "react";
+ 
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
 const FORMSPREE_ID = "YOUR_FORM_ID";
-
+ 
 const INIT_MEMBERS = [
   { id:1, username:"xxx3903052", password:"zzz3909086", name:"管理員", position:"管理者", company:"Ledoux Taiwan", phone:"", email:"", taxId:"", role:"admin", status:"approved", approvedAt:"2026-04-18" },
   { id:2, username:"test001", password:"test001", name:"測試客戶", position:"設計師", company:"測試設計公司", phone:"", email:"test@test.com", taxId:"", role:"standard", status:"approved", approvedAt:"2026-04-18" },
   { id:3, username:"vip001", password:"vip001", name:"VIP測試", position:"採購經理", company:"VIP測試公司", phone:"", email:"vip@test.com", taxId:"", role:"vip", status:"approved", approvedAt:"2026-04-18" },
 ];
-
+ 
 const INIT_PRODUCTS = [
   // ══════════════════════════════════════
   // HEPBURN 赫本系列 崁燈
@@ -143,13 +143,13 @@ const COMPANY = {
   name:"台灣諾科照明有限公司", eng:"Ledoux Lighting Taiwan Co., Ltd.",
   addr:"台灣", tel:"", fax:"", email:"info@ledouxlight.com", taxId:"",
 };
-
+ 
 // ─────────────────────────────────────────────
 //  INSTALLATION SERVICE CONSTANTS
 // ─────────────────────────────────────────────
 const INSTALL_BASE = 200; // 每盞崁燈基本安裝費 (NT$)
 const INSTALL_MIN  = 1500; // 最低出勤費
-
+ 
 const INSTALL_REGIONS = [
   { id:"core",    label:"桃園核心區",       areas:"八德、桃園、中壢、大溪、鶯歌",           travel:600,  freeAt:15  },
   { id:"outer",   label:"桃園外環區",       areas:"大園、觀音、新屋、龜山、蘆竹",           travel:1000, freeAt:25  },
@@ -158,14 +158,14 @@ const INSTALL_REGIONS = [
   { id:"south",   label:"彰化以南 ／ 宜蘭", areas:"彰化、雲林、嘉義、台南、高雄、屏東、宜蘭", travel:5000, freeAt:null },
   { id:"remote",  label:"花東 ／ 偏鄉",     areas:"花蓮、台東、南投山區",                   travel:null, freeAt:null },
 ];
-
+ 
 // ceiling surcharge groups
 const CEILING_GROUPS = [
   { id:"std",   label:"3m 以下（標準）",    surcharge:0   },
   { id:"high",  label:"3m～4.5m（挑高）",  surcharge:150 }, // avg of 100~200
   { id:"vhigh", label:"4.5m 以上（高空）", surcharge:null }, // custom quote
 ];
-
+ 
 // synonym map for search
 const SYNONYMS = {
   "坎灯":"崁燈","坎燈":"崁燈","崁灯":"崁燈","嵌灯":"崁燈","嵌燈":"崁燈",
@@ -184,9 +184,9 @@ const SYNONYMS = {
   "高显色":"Ra≥90","高顯色":"Ra≥90","ra98":"Ra≥98","ra95":"Ra≥95",
   "调色温":"矽膠燈帶","调色溫":"矽膠燈帶","rgbw":"矽膠燈帶",
 };
-
+ 
 const HOT_KEYWORDS = ["崁燈","軌道燈","磁吸系統","鋁條燈","矽膠燈帶","戶外燈","HEPBURN","EOS","48V","Ra≥95","調光","珠寶燈"];
-
+ 
 // ─────────────────────────────────────────────
 //  CSS
 // ─────────────────────────────────────────────
@@ -195,7 +195,7 @@ const G = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--ivory:#f7f4ef;--ivory2:#efe9e0;--black:#0e0d0c;--black2:#1c1a18;--gold:#b8935a;--gold2:#d4a96a;--muted:#8a8278;--bdr:#d8d0c4;--bdr2:#e8e2d8;--red:#9b3a3a;--green:#3a6b4a}
 body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased}
-
+ 
 /* AUTH */
 .auth-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--black)}
 @media(max-width:768px){.auth-page{grid-template-columns:1fr}.auth-visual{display:none}}
@@ -235,7 +235,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .auth-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.8;letter-spacing:.5px}
 .auth-err{font-size:11px;color:var(--red);text-align:center;margin-top:14px}
 .first-notice{background:#f9f5ee;border:1px solid var(--gold);border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:24px;font-size:11px;color:var(--gold);line-height:1.7}
-
+ 
 /* INFO */
 .info-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ivory);padding:24px}
 .info-card{max-width:480px;width:100%;border:1px solid var(--bdr);padding:56px 48px;text-align:center}
@@ -248,7 +248,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .info-row span:first-child{color:var(--muted)}
 .btn-outline{padding:12px 32px;background:transparent;border:1px solid var(--black);color:var(--black);font-family:'Noto Sans TC',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-top:28px;transition:all .2s}
 .btn-outline:hover{background:var(--black);color:var(--ivory)}
-
+ 
 /* APP */
 .app{min-height:100vh;background:var(--ivory);display:flex;flex-direction:column}
 .topnav{background:var(--black);color:var(--ivory);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;position:sticky;top:0;z-index:50;border-bottom:1px solid #1e1c18}
@@ -271,7 +271,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .icon-btn:hover{color:var(--gold)}
 .icon-badge{position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--black);font-size:8px;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:500}
 .icon-badge.red{background:var(--red);color:#fff}
-
+ 
 /* SEARCH BAR */
 .search-wrap{position:relative;flex:1;max-width:360px}
 .search-input{width:100%;padding:8px 14px 8px 36px;background:#1a1814;border:1px solid #2a2520;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:12px;outline:none;border-radius:0;transition:border-color .2s}
@@ -285,7 +285,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .sd-item{padding:9px 14px;font-size:12px;color:#8a7a6a;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
 .sd-item:hover{background:#261e18;color:var(--ivory)}
 .sd-item.highlight{color:var(--gold)}
-
+ 
 /* SIDEMENU */
 .sidemenu-overlay{position:fixed;inset:0;background:rgba(14,13,12,.5);z-index:100}
 .sidemenu{position:fixed;top:0;left:0;bottom:0;width:300px;background:var(--black);z-index:101;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
@@ -316,7 +316,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .sm-foot{padding:16px 24px;border-top:1px solid #1e1c18}
 .btn-out3{width:100%;padding:10px;background:transparent;border:1px solid #2a2520;color:#6a5a4a;font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .btn-out3:hover{border-color:#9b3a3a;color:#9b3a3a}
-
+ 
 /* CONTENT */
 .content{flex:1;padding:48px;max-width:1400px;margin:0 auto;width:100%}
 @media(max-width:768px){.content{padding:24px 16px}}
@@ -324,13 +324,13 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .ptitle{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--black);line-height:1}
 .psub{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:8px}
 .pcount{font-size:11px;color:var(--muted)}
-
+ 
 /* CATBAR */
 .catbar{display:flex;gap:0;margin-bottom:36px;border-bottom:1px solid var(--bdr2);overflow-x:auto}
 .catbtn{padding:12px 24px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Noto Sans TC',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-bottom:-1px;transition:all .2s}
 .catbtn:hover{color:var(--black)}
 .catbtn.on{color:var(--black);border-bottom-color:var(--gold)}
-
+ 
 /* PRODUCT GRID */
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--bdr2);border:1px solid var(--bdr2)}
 .pcard{background:var(--ivory);cursor:pointer;transition:background .2s;display:flex;flex-direction:column}
@@ -348,7 +348,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .price-std-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--black)}
 .price-proj-val{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--muted)}
 .price-proj-label{font-size:8px;letter-spacing:1px;color:var(--muted)}
-
+ 
 /* DRAWER */
 .drawer-overlay{position:fixed;inset:0;background:rgba(14,13,12,.6);z-index:200;display:flex;justify-content:flex-end;backdrop-filter:blur(2px)}
 .drawer{width:520px;max-width:95vw;background:var(--ivory);height:100vh;overflow-y:auto;display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.15)}
@@ -387,7 +387,7 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .btn-sample{flex:1;padding:12px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Noto Sans TC',sans-serif;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .2s;min-width:120px}
 .btn-sample:hover{background:var(--gold);color:var(--black)}
 .btn-sample.requested{border-color:var(--green);color:var(--green);cursor:default}
-
+ 
 /* ADMIN */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr2);border:1px solid var(--bdr2);margin-bottom:36px}
 .stat-box{background:var(--ivory);padding:24px 28px}
@@ -428,7 +428,7 @@ tr:hover td{background:#f7f2eb}
 .btn-confirm{padding:11px 28px;background:var(--black);border:none;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer}
 .btn-confirm:hover{background:var(--black2)}
 .btn-cancel2{padding:11px 20px;background:transparent;border:1px solid var(--bdr);color:var(--muted);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer}
-
+ 
 /* MODAL */
 .modal-wrap{position:fixed;inset:0;background:rgba(14,13,12,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
 .modal-box{background:var(--ivory);width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
@@ -439,7 +439,7 @@ tr:hover td{background:#f7f2eb}
 .applicant-card{background:#f4efe8;border:1px solid var(--bdr2);padding:16px;margin-bottom:24px}
 .ac-name{font-size:14px;font-weight:400;margin-bottom:4px}
 .ac-detail{font-size:11px;color:var(--muted);line-height:1.7}
-
+ 
 /* CART PANEL */
 .cart-panel{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100vw;background:var(--ivory);z-index:250;box-shadow:-20px 0 60px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .cart-panel.open{transform:translateX(0)}
@@ -470,13 +470,13 @@ tr:hover td{background:#f7f2eb}
 .btn-gen-pdf{width:100%;padding:14px;background:var(--black);border:none;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-bottom:10px;transition:background .2s}
 .btn-gen-pdf:hover{background:var(--black2)}
 .btn-gen-pdf:disabled{opacity:.4;cursor:not-allowed}
-
+ 
 /* CHECKLIST */
 .checklist{background:#f4efe8;border:1px solid var(--bdr2);padding:16px;margin-bottom:14px}
 .cl-title{font-size:11px;font-weight:400;margin-bottom:10px;color:var(--black)}
 .cl-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:11px;color:var(--muted);line-height:1.6;cursor:pointer}
 .cl-item input[type=checkbox]{margin-top:2px;accent-color:var(--gold);flex-shrink:0;cursor:pointer}
-
+ 
 /* TRANSFER */
 .transfer-block{background:#f4efe8;border:1px solid var(--bdr2);padding:20px;margin-top:16px}
 .tb-title{font-size:12px;font-weight:400;margin-bottom:12px;color:var(--black)}
@@ -487,7 +487,7 @@ tr:hover td{background:#f7f2eb}
 .btn-transfer{width:100%;padding:11px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s}
 .btn-transfer:hover{background:var(--gold);color:var(--black)}
 .btn-transfer:disabled{opacity:.4;cursor:not-allowed}
-
+ 
 /* CATALOG */
 .catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
 .cat-card{border:1px solid var(--bdr2);padding:24px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;text-decoration:none;color:inherit}
@@ -500,12 +500,12 @@ tr:hover td{background:#f7f2eb}
 .upload-area{border:2px dashed var(--bdr);padding:40px;text-align:center;margin-bottom:24px;cursor:pointer;transition:all .2s}
 .upload-area:hover,.upload-area.drag{border-color:var(--gold);background:#f9f5ee}
 .upload-hint{font-size:11px;color:var(--muted);margin-top:8px}
-
+ 
 /* IMG HINT */
 .img-hint-box{background:#f4efe8;border:1px solid var(--bdr2);border-left:3px solid var(--gold);padding:12px 16px;font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:16px}
 .img-hint-box a{color:var(--gold);text-decoration:none}
 .img-hint-box a:hover{text-decoration:underline}
-
+ 
 /* SAMPLE */
 .sample-panel{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100vw;background:var(--ivory);z-index:250;box-shadow:-20px 0 60px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .sample-panel.open{transform:translateX(0)}
@@ -529,7 +529,7 @@ tr:hover td{background:#f7f2eb}
 .btn-submit-sample{width:100%;padding:14px;background:var(--gold);border:none;color:var(--black);font-family:'Noto Sans TC',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-bottom:8px}
 .btn-submit-sample:hover{background:var(--gold2)}
 .btn-submit-sample:disabled{opacity:.4;cursor:not-allowed}
-
+ 
 /* INSTALL SERVICE */
 .install-panel{position:fixed;top:0;right:0;bottom:0;width:500px;max-width:100vw;background:var(--ivory);z-index:250;box-shadow:-20px 0 60px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .install-panel.open{transform:translateX(0)}
@@ -568,11 +568,11 @@ tr:hover td{background:#f7f2eb}
 .btn-submit-install:hover{background:var(--gold2)}
 .btn-submit-install:disabled{opacity:.4;cursor:not-allowed}
 .hint-box{background:#f4efe8;border-left:3px solid var(--gold);padding:10px 14px;font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:16px}
-
+ 
 /* TOAST */
 .toast{position:fixed;bottom:32px;right:32px;background:var(--black);color:var(--ivory);padding:14px 22px;font-size:11px;letter-spacing:1px;z-index:999;border-left:3px solid var(--gold)}
 `;
-
+ 
 // ─────────────────────────────────────────────
 //  PDF GENERATOR
 // ─────────────────────────────────────────────
@@ -599,12 +599,12 @@ function generatePDF({ cart, projectName, customer, useProj, installCalc }) {
   a.href=url; a.download=`報價單_${projectName}_${quoteNo}.html`; a.click();
   URL.revokeObjectURL(url);
 }
-
+ 
 // ─────────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────────
 const roleLabel = r => ({admin:"管理者",vip:"VIP 客戶",standard:"一般客戶"})[r]||r;
-
+ 
 function Carousel({ images }) {
   const [idx,setIdx]=useState(0);
   const imgs=images?.filter(Boolean)||[];
@@ -614,7 +614,7 @@ function Carousel({ images }) {
     {imgs.length>1&&<><button className="carousel-prev" onClick={()=>setIdx(i=>(i-1+imgs.length)%imgs.length)}>‹</button><button className="carousel-next" onClick={()=>setIdx(i=>(i+1)%imgs.length)}>›</button><div className="carousel-dots">{imgs.map((_,i)=><div key={i} className={`cdot ${i===idx?"on":""}`} onClick={()=>setIdx(i)}/>)}</div></>}
   </div>;
 }
-
+ 
 // smart search
 function searchProducts(products, q) {
   if (!q.trim()) return products;
@@ -626,14 +626,14 @@ function searchProducts(products, q) {
     return terms.some(t => hay.includes(t));
   });
 }
-
+ 
 function getSuggestions(products, q) {
   if (!q || q.length < 1) return [];
   const lq = q.toLowerCase();
   const all = [...new Set(products.flatMap(p=>[p.model,p.series,p.category,p.watt,p.cct,p.color]))];
   return all.filter(v=>v&&v.toLowerCase().includes(lq)).slice(0,6);
 }
-
+ 
 // ─────────────────────────────────────────────
 //  MAIN APP
 // ─────────────────────────────────────────────
@@ -688,18 +688,18 @@ export default function App() {
   const fileInputRef=useRef();
   const [dragOver,setDragOver]=useState(false);
   const searchRef=useRef();
-
+ 
   const toast$=(m)=>{setToast(m);setTimeout(()=>setToast(""),3000)};
   const isVip=user?.role==="vip"||user?.role==="admin";
   const isFirst=members.length===0&&pending.length===0;
   const cartCount=cart.reduce((s,i)=>s+i.qty,0);
   const cartTotal=cart.reduce((s,i)=>{const p=isVip?i.product.projPrice:i.product.stdPrice;return s+p*i.qty;},0);
   const allChecked=Object.values(checkItems).every(Boolean);
-
+ 
   // derived series list from products
   const allSeries=[...new Set(products.map(p=>p.series))];
   const allCats=[...new Set(products.map(p=>p.category))];
-
+ 
   // filtered products
   const filtered=(() => {
     let ps = searchQ.trim() ? searchProducts(products,searchQ) : products;
@@ -707,13 +707,13 @@ export default function App() {
     else if (cat!=="全部") ps=ps.filter(p=>p.category===cat);
     return ps;
   })();
-
+ 
   const suggestions=getSuggestions(products,searchQ);
-
+ 
   // save catalogs to localStorage
   useEffect(()=>{ localStorage.setItem("ledoux_catalogs",JSON.stringify(catalogs)); },[catalogs]);
   useEffect(()=>{ localStorage.setItem("ledoux_search_history",JSON.stringify(searchHistory)); },[searchHistory]);
-
+ 
   const doSearch=(q)=>{
     setSearchQ(q);
     if(q.trim()&&!searchHistory.includes(q)){
@@ -722,14 +722,14 @@ export default function App() {
     setSearchFocus(false);
     setPage("catalog");
   };
-
+ 
   const [rememberMe,setRememberMe]=useState(()=>localStorage.getItem("ledoux_remember")==="1");
-
+ 
   useEffect(()=>{
     const saved=localStorage.getItem("ledoux_saved_cred");
     if(saved){ try{ const {u,p}=JSON.parse(saved); setLoginF({username:u,password:p}); setRememberMe(true); }catch(_){} }
   },[]);
-
+ 
   const doLogin=async()=>{
     const m=members.find(m=>m.username===loginF.username&&m.password===loginF.password);
     if(m){
@@ -739,7 +739,7 @@ export default function App() {
     }
     setLoginErr("帳號或密碼錯誤");
   };
-
+ 
   const doRegister=async()=>{
     const req={name:"姓名",position:"職稱",company:"公司全名",phone:"聯絡電話",email:"Email",username:"帳號",password:"密碼"};
     const errs={};
@@ -753,22 +753,22 @@ export default function App() {
     if(FORMSPREE_ID!=="YOUR_FORM_ID"){try{await fetch(`https://formspree.io/f/${FORMSPREE_ID}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject:`新申請：${regF.name} / ${regF.company}`,...regF})});}catch(_){}}
     setPending(p=>[...p,app]);setWaitInfo(app);setSubmitting(false);
   };
-
+ 
   const doApprove=()=>{ if(!approveF.username||!approveF.password)return; setMembers(x=>[...x,{...approveTarget,...approveF,status:"approved",approvedAt:new Date().toISOString().split("T")[0]}]); setPending(x=>x.filter(p=>p.id!==approveTarget.id)); setApproveTarget(null);toast$("✓ 帳號已開通"); };
   const changeRole=(id,r)=>{ setMembers(x=>x.map(m=>m.id===id?{...m,role:r}:m)); if(user?.id===id)setUser(u=>({...u,role:r})); toast$("✓ 權限已更新"); };
-
+ 
   const doAddProd=()=>{ if(!newProd.model)return; const imgs=newProd.images?newProd.images.split("\n").map(s=>s.trim()).filter(Boolean):[]; setProducts(x=>[...x,{...newProd,id:Date.now(),stdPrice:Number(newProd.stdPrice),projPrice:Number(newProd.projPrice),shipping:Number(newProd.shipping)||90,images:imgs}]); setNewProd({model:"",series:"",category:"崁燈",watt:"",cct:"3000K / 4000K",beam:"24°",voltage:"220V",cri:"Ra≥80",color:"白色",cutout:"",install:"崁入式",shipping:"90",stdPrice:"",projPrice:"",desc:"",images:"",video:"",note:""}); setShowAddProd(false);toast$("✓ 產品已新增"); };
   const startEdit=(p)=>setEditProd({...p,images:(p.images||[]).join("\n")});
   const saveEdit=()=>{ const imgs=editProd.images?editProd.images.split("\n").map(s=>s.trim()).filter(Boolean):[]; setProducts(x=>x.map(p=>p.id===editProd.id?{...editProd,stdPrice:Number(editProd.stdPrice),projPrice:Number(editProd.projPrice),shipping:Number(editProd.shipping)||90,images:imgs}:p)); if(selProd?.id===editProd.id)setSelProd(prev=>({...prev,...editProd,images:imgs})); setEditProd(null);toast$("✓ 產品已更新"); };
-
+ 
   const addToCart=(product)=>{ setCart(c=>{const ex=c.find(i=>i.product.id===product.id);if(ex)return c.map(i=>i.product.id===product.id?{...i,qty:i.qty+1}:i);return [...c,{product,qty:1}];}); toast$(`✓ ${product.model} 已加入詢價單`); };
   const updateQty=(id,delta)=>setCart(c=>c.map(i=>i.product.id===id?{...i,qty:Math.max(1,i.qty+delta)}:i));
   const removeItem=(id)=>setCart(c=>c.filter(i=>i.product.id!==id));
-
+ 
   const addToSample=(product)=>{ setSampleCart(c=>{if(c.find(i=>i.id===product.id))return c;return [...c,product];}); toast$(`✓ ${product.model} 已加入樣品申請`); };
   const removeSample=(id)=>setSampleCart(c=>c.filter(i=>i.id!==id));
   const submitSample=()=>{ if(!sampleForm.name||!sampleForm.phone){toast$("請填寫姓名和電話");return;} const req={id:Date.now(),products:sampleCart.map(p=>p.model),form:sampleForm,date:new Date().toISOString().split("T")[0],status:"pending"}; setSampleRequests(x=>[...x,req]); setSampleDone(true); toast$("✓ 樣品申請已送出"); };
-
+ 
   // ── INSTALL CALC ──
   const calcInstall = (region, groups) => {
     if (!region) return null;
@@ -789,7 +789,7 @@ export default function App() {
       (reg.freeAt && totalQty>=reg.freeAt) ? 0 : reg.travel;
     return { totalQty, laborTotal, travelFee, hasVHigh, reg, totalWithoutVHigh: travelFee===null?null:laborTotal+(travelFee||0) };
   };
-
+ 
   const submitInstall = () => {
     const calc = calcInstall(installRegion, installGroups);
     if (!calc) { toast$("請選擇安裝區域"); return; }
@@ -807,12 +807,12 @@ export default function App() {
     setInstallDone(true);
     toast$("✓ 安裝服務申請已送出，專員將盡快聯繫");
   };
-
+ 
   const resetInstall = () => {
     setInstallRegion(""); setInstallGroups([{ceilingId:"std",qty:1}]);
     setInstallNote(""); setInstallDone(false); setInstallOpen(false);
   };
-
+ 
   const handleGenPDF = () => {
     if (!projectName.trim()) { toast$("請先填寫案名"); return; }
     if (!allChecked) { toast$("請先勾選確認所有注意事項"); return; }
@@ -820,18 +820,18 @@ export default function App() {
     generatePDF({ cart, projectName, customer:{ company:user.company, name:user.name, position:user.position }, useProj:isVip, installCalc });
     toast$("✓ 報價單已下載");
   };
-
+ 
   const handleTransfer=()=>{ if(!transferF.amount||!transferF.account){toast$("請填寫轉帳金額和帳戶尾數");return;} setTransferDone(true);toast$("✓ 轉帳通知已送出"); };
-
+ 
   const handleFiles=(files)=>{ Array.from(files).forEach(f=>{const url=URL.createObjectURL(f);setCatalogs(c=>[...c,{id:Date.now()+Math.random(),name:f.name,url,size:Math.round(f.size/1024)+"KB"}]);}); toast$("✓ 型錄已上傳，已自動儲存"); };
-
+ 
   const resetReg=()=>{setRegF({name:"",position:"",company:"",taxId:"",phone:"",email:"",username:"",password:""});setFe({});setAuthTab("login");};
-
+ 
   // ── screens ──
   if(autoAdmin) return <><style>{G}</style><div className="info-page"><div className="info-card"><div className="info-icon">✦</div><div className="info-title">歡迎加入</div><div className="info-sub">管理者帳號已建立</div><div className="info-desc">您是本系統第一位使用者，已自動取得管理者權限。</div><div className="info-table"><div className="info-row"><span>姓名</span><span>{autoAdmin.name}</span></div><div className="info-row"><span>公司</span><span>{autoAdmin.company}</span></div><div className="info-row"><span>帳號</span><span style={{fontFamily:"monospace"}}>{autoAdmin.username}</span></div><div className="info-row"><span>身份</span><span style={{color:"var(--gold)"}}>管理者</span></div></div><button className="btn-outline" onClick={()=>{setAutoAdmin(null);setLoginF({username:autoAdmin.username,password:autoAdmin.password});}}>進入系統</button></div></div></>;
-
+ 
   if(waitInfo) return <><style>{G}</style><div className="info-page"><div className="info-card"><div className="info-icon">◈</div><div className="info-title">申請已提交</div><div className="info-sub">等待專員審核</div><div className="info-desc">感謝您的申請，專員審核後將開通帳號。</div><div className="info-table"><div className="info-row"><span>姓名</span><span>{waitInfo.name}</span></div><div className="info-row"><span>公司</span><span>{waitInfo.company}</span></div><div className="info-row"><span>帳號</span><span style={{fontFamily:"monospace"}}>{waitInfo.username}</span></div><div className="info-row"><span>申請日期</span><span>{waitInfo.appliedAt}</span></div></div><button className="btn-outline" onClick={()=>{setWaitInfo(null);resetReg();}}>返回登入</button></div></div></>;
-
+ 
   if(!user) return (
     <><style>{G}</style>
     <div className="auth-page">
@@ -881,7 +881,7 @@ export default function App() {
       </div>
     </div></>
   );
-
+ 
   // ── LOGGED IN ──
   const navItems=[
     {id:"catalog",label:"產品目錄"},
@@ -897,11 +897,11 @@ export default function App() {
       {id:"install_admin",label:"安裝申請",badge:installOrders.filter(o=>o.status==="pending").length},
     ]:[]),
   ];
-
+ 
   return (
     <><style>{G}</style>
     <div className="app">
-
+ 
       {/* SIDEMENU */}
       {menuOpen&&<div className="sidemenu-overlay" onClick={()=>setMenuOpen(false)}/>}
       <div className={`sidemenu ${menuOpen?"open":""}`}>
@@ -925,7 +925,7 @@ export default function App() {
               {n.badge>0&&<span className="sm-badge">{n.badge}</span>}
             </div>
           ))}
-
+ 
           {/* SERIES */}
           <div className="sm-divider"/>
           <div className="sm-group-header" onClick={()=>setSeriesExpanded(v=>!v)}>
@@ -937,7 +937,7 @@ export default function App() {
               <span className="sm-dot"/>{s}
             </div>
           ))}
-
+ 
           {/* CATEGORIES */}
           <div className="sm-divider"/>
           <div className="sm-group-header" onClick={()=>setCatExpanded(v=>!v)}>
@@ -949,7 +949,7 @@ export default function App() {
               <span className="sm-dot"/>{c}
             </div>
           ))}
-
+ 
           {user.role==="admin"&&<>
             <div className="sm-divider"/>
             <div className="sm-section">管理</div>
@@ -969,7 +969,7 @@ export default function App() {
         </div>
         <div className="sm-foot"><button className="btn-out3" onClick={()=>{setUser(null);setPage("catalog");setMenuOpen(false);}}>登出系統</button></div>
       </div>
-
+ 
       {/* TOPNAV */}
       <nav className="topnav">
         <div className="tn-left">
@@ -1017,7 +1017,7 @@ export default function App() {
           <button className="btn-out2" onClick={()=>{setUser(null);setPage("catalog");}}>登出</button>
         </div>
       </nav>
-
+ 
       {/* INQUIRY CART PANEL */}
       <div className={`cart-panel ${cartOpen?"open":""}`}>
         <div className="cp-head"><div className="cp-title">詢價單</div><button className="drawer-close" onClick={()=>setCartOpen(false)}>✕</button></div>
@@ -1090,7 +1090,7 @@ export default function App() {
           </button>
         </div>}
       </div>
-
+ 
       {/* SAMPLE PANEL */}
       <div className={`sample-panel ${sampleOpen?"open":""}`}>
         <div className="sp-head"><div className="sp-title">借樣品申請</div><button className="drawer-close" onClick={()=>setSampleOpen(false)}>✕</button></div>
@@ -1120,7 +1120,7 @@ export default function App() {
           <button className="btn-cancel2" style={{width:"100%",textAlign:"center"}} onClick={()=>setSampleOpen(false)}>稍後再說</button>
         </div>}
       </div>
-
+ 
       {/* INSTALL PANEL (slide-in quick estimator) */}
       <div className={`install-panel ${installOpen?"open":""}`}>
         <div className="ip-head"><div className="ip-title">安裝服務估價</div><button className="drawer-close" onClick={()=>setInstallOpen(false)}>✕</button></div>
@@ -1197,7 +1197,7 @@ export default function App() {
           <button className="btn-cancel2" style={{width:"100%",textAlign:"center"}} onClick={()=>setInstallOpen(false)}>稍後再說</button>
         </div>}
       </div>
-
+ 
         {/* 產品目錄 */}
         {page==="catalog"&&<>
           <div className="phead">
@@ -1242,7 +1242,7 @@ export default function App() {
             {filtered.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>— 找不到符合的產品，請試試其他關鍵字 —</div>}
           </div>
         </>}
-
+ 
         {/* 詢價單頁面 */}
         {page==="inquiry"&&<>
           <div className="phead"><div><div className="ptitle">詢價單</div><div className="psub">加入產品、填寫案名後下載報價單</div></div></div>
@@ -1276,7 +1276,7 @@ export default function App() {
             </div>
           </>}
         </>}
-
+ 
         {/* 借樣品頁面 */}
         {page==="sample"&&<>
           <div className="phead"><div><div className="ptitle">借樣品</div><div className="psub">申請試用樣品，2 週內歸還可折抵購買</div></div><button className="btn-add2" onClick={()=>{setSampleOpen(true);}}>查看申請清單 ({sampleCart.length})</button></div>
@@ -1300,7 +1300,7 @@ export default function App() {
             ))}
           </div>
         </>}
-
+ 
         {/* ── 安裝服務說明頁 ── */}
         {page==="install"&&<>
           <div className="phead">
@@ -1354,7 +1354,7 @@ export default function App() {
             <button className="btn-primary" style={{maxWidth:320,margin:"0 auto",display:"block"}} onClick={()=>setInstallOpen(true)}>立即估算安裝費用 →</button>
           </div>
         </>}
-
+ 
         {/* ── 安裝申請管理（管理員）── */}
         {page==="install_admin"&&user.role==="admin"&&<>
           <div className="phead"><div><div className="ptitle">安裝申請管理</div><div className="psub">{installOrders.length} 筆申請</div></div></div>
@@ -1380,7 +1380,7 @@ export default function App() {
               })}</tbody>
             </table></div>}
         </>}
-
+ 
         {/* 電子型錄 */}
         {page==="catalogs"&&<>
           <div className="phead"><div><div className="ptitle">電子型錄</div><div className="psub">下載最新產品型錄</div></div>{user.role==="admin"&&<button className="btn-upload" onClick={()=>fileInputRef.current?.click()}>＋ 上傳型錄</button>}</div>
@@ -1403,7 +1403,7 @@ export default function App() {
             </div>
           }
         </>}
-
+ 
         {/* 待審核 */}
         {page==="pending"&&user.role==="admin"&&<>
           <div className="phead"><div><div className="ptitle">待審核申請</div><div className="psub">核准後設定帳號與權限</div></div></div>
@@ -1424,7 +1424,7 @@ export default function App() {
               <tbody>{pending.map(p=><tr key={p.id}><td style={{fontWeight:400}}>{p.name}</td><td style={{color:"var(--muted)"}}>{p.position}</td><td>{p.company}</td><td style={{color:"var(--muted)"}}>{p.phone}</td><td style={{color:"var(--muted)"}}>{p.appliedAt}</td><td style={{display:"flex",gap:8}}><button className="btn-ok" onClick={()=>{setApproveTarget(p);setApproveF({username:p.username,password:p.password,role:"standard"});}}>核准</button><button className="btn-ng" onClick={()=>{setPending(x=>x.filter(x=>x.id!==p.id));toast$("已拒絕此申請");}}>拒絕</button></td></tr>)}</tbody>
             </table></div>}
         </>}
-
+ 
         {/* 帳號管理 */}
         {page==="members"&&user.role==="admin"&&<>
           <div className="phead"><div><div className="ptitle">帳號管理</div><div className="psub">管理所有已開通帳號</div></div></div>
@@ -1438,7 +1438,7 @@ export default function App() {
             <tbody>{members.map(m=><tr key={m.id}><td style={{fontWeight:400}}>{m.name}</td><td style={{color:"var(--muted)"}}>{m.position}</td><td>{m.company}</td><td style={{fontFamily:"monospace"}}>{m.username}</td><td style={{fontFamily:"monospace",color:"var(--muted)"}}>{m.password}</td><td><span className={`rb r-${m.role}`}>{roleLabel(m.role)}</span></td><td><select className="role-sel" value={m.role} onChange={e=>changeRole(m.id,e.target.value)}><option value="standard">一般</option><option value="vip">VIP</option><option value="admin">管理</option></select></td><td style={{color:"var(--muted)"}}>{m.approvedAt}</td><td>{m.id!==user.id&&<button className="btn-del2" onClick={()=>{setMembers(x=>x.filter(x=>x.id!==m.id));toast$("帳號已刪除");}}>✕</button>}</td></tr>)}</tbody>
           </table></div>
         </>}
-
+ 
         {/* 產品管理 */}
         {page==="products"&&user.role==="admin"&&<>
           <div className="phead"><div><div className="ptitle">產品管理</div><div className="psub">{products.length} 件商品</div></div><button className="btn-add2" onClick={()=>setShowAddProd(v=>!v)}>＋ 新增產品</button></div>
@@ -1457,7 +1457,7 @@ export default function App() {
             </div>
             <div className="form-actions"><button className="btn-confirm" onClick={doAddProd}>確認新增</button><button className="btn-cancel2" onClick={()=>setShowAddProd(false)}>取消</button></div>
           </div>}
-
+ 
           {editProd&&<div className="form-panel" style={{background:"#f0ebe2"}}><div className="fp-title">編輯產品：{editProd.model}</div>
             <div className="fgrid">
               {[["型號","model"],["系列","series"],["瓦數","watt"],["色溫","cct"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["標準價（NT$）","stdPrice"],["專案價（NT$）","projPrice"],["運費（NT$）","shipping"]].map(([lbl,key])=>(
@@ -1472,12 +1472,12 @@ export default function App() {
             </div>
             <div className="form-actions"><button className="btn-confirm" onClick={saveEdit}>儲存修改</button><button className="btn-cancel2" onClick={()=>setEditProd(null)}>取消</button></div>
           </div>}
-
+ 
           <div className="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>開孔</th><th>標準價</th><th>專案價</th><th>運費</th><th>操作</th></tr></thead>
             <tbody>{products.map(p=><tr key={p.id}><td style={{fontWeight:400}}>{p.model}</td><td>{p.series}</td><td>{p.category}</td><td>{p.watt}</td><td>{p.cutout}</td><td>NT$ {p.stdPrice?.toLocaleString()}</td><td style={{color:"var(--gold)"}}>NT$ {p.projPrice?.toLocaleString()}</td><td>NT$ {p.shipping||90}</td><td style={{display:"flex",gap:8}}><button className="btn-edit2" onClick={()=>startEdit(p)}>編輯</button><button className="btn-del2" onClick={()=>{setProducts(x=>x.filter(x=>x.id!==p.id));toast$("產品已刪除");}}>✕</button></td></tr>)}</tbody>
           </table></div>
         </>}
-
+ 
         {/* 樣品申請管理 */}
         {page==="sample_admin"&&user.role==="admin"&&<>
           <div className="phead"><div><div className="ptitle">樣品申請管理</div><div className="psub">{sampleRequests.length} 筆申請</div></div></div>
@@ -1488,7 +1488,7 @@ export default function App() {
         </>}
       </div>
     </div>
-
+ 
     {/* PRODUCT DETAIL DRAWER */}
     {selProd&&<div className="drawer-overlay" onClick={()=>setSelProd(null)}>
       <div className="drawer" onClick={e=>e.stopPropagation()}>
@@ -1536,8 +1536,9 @@ export default function App() {
         </div>
       </div>
     </div>}
-
+ 
     {toast&&<div className="toast">{toast}</div>}
     </>
   );
 }
+ 
