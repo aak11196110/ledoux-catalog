@@ -347,21 +347,21 @@ body{background:var(--ivory);color:var(--black);font-family:'Noto Sans TC',sans-
 .sm-logo{font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:5px;color:var(--gold)}
 .sm-close{background:none;border:none;color:#6a5a4a;font-size:18px;cursor:pointer}
 .sm-close:hover{color:var(--ivory)}
-.sm-user{padding:20px 24px;border-bottom:1px solid #1e1c18}
+.sm-user{padding:20px 24px;border-bottom:1px solid #2a2820}
 .sm-uname{font-size:13px;color:var(--ivory);font-weight:400}
-.sm-ucomp{font-size:10px;color:#6a5a4a;margin-top:3px}
+.sm-ucomp{font-size:10px;color:#9a8a7a;margin-top:3px}
 .sm-ubadge{font-size:8px;padding:2px 8px;border:1px solid;letter-spacing:1px;display:inline-block;margin-top:8px}
 .sm-nav{flex:1;padding:12px 0;overflow-y:auto}
-.sm-section{padding:10px 24px 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#3a3028}
-.sm-item{display:flex;align-items:center;justify-content:space-between;padding:12px 24px 12px 28px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6a5a4a;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
-.sm-item:hover{color:var(--ivory);background:#161410}
-.sm-item.on{color:var(--gold);border-left-color:var(--gold);background:rgba(184,147,90,.05)}
-.sm-group-header{display:flex;align-items:center;justify-content:space-between;padding:10px 24px 10px 28px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#5a5048;cursor:pointer;transition:all .15s}
-.sm-group-header:hover{color:#8a7a6a}
+.sm-section{padding:10px 24px 4px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#7a6a5a}
+.sm-item{display:flex;align-items:center;justify-content:space-between;padding:12px 24px 12px 28px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8b89a;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.sm-item:hover{color:var(--ivory);background:#1e1c1a}
+.sm-item.on{color:var(--gold);border-left-color:var(--gold);background:rgba(184,147,90,.08)}
+.sm-group-header{display:flex;align-items:center;justify-content:space-between;padding:10px 24px 10px 28px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9a8a7a;cursor:pointer;transition:all .15s}
+.sm-group-header:hover{color:#c8b89a}
 .sm-group-arrow{font-size:10px;transition:transform .2s}
 .sm-group-arrow.open{transform:rotate(90deg)}
-.sm-sub{display:flex;align-items:center;padding:8px 24px 8px 40px;font-size:10px;letter-spacing:1px;color:#4a4038;cursor:pointer;transition:all .15s}
-.sm-sub:hover{color:#8a7a6a}
+.sm-sub{display:flex;align-items:center;padding:8px 24px 8px 40px;font-size:10px;letter-spacing:1px;color:#a09080;cursor:pointer;transition:all .15s}
+.sm-sub:hover{color:#d0c0a8}
 .sm-sub.on{color:var(--gold)}
 .sm-dot{width:4px;height:4px;border-radius:50%;background:currentColor;margin-right:10px;opacity:.6}
 .sm-badge{min-width:18px;height:18px;background:#9b3a3a;color:#fff;font-size:9px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
@@ -966,7 +966,13 @@ export default function App() {
         </div>
         <div className="sm-nav">
           <div className="sm-section">主選單</div>
-          {navItems.slice(0,5).map(n=>(
+          {[
+            {id:"catalog", label:"產品目錄"},
+            {id:"inquiry", label:"詢價單", badge:cartCount},
+            {id:"sample",  label:"借樣品", badge:sampleCart.length},
+            {id:"install", label:"安裝服務"},
+            {id:"catalogs",label:"電子型錄"},
+          ].map(n=>(
             <div key={n.id} className={`sm-item ${page===n.id?"on":""}`} onClick={()=>{setPage(n.id);setMenuOpen(false);}}>
               <span>{n.label}</span>
               {n.badge>0&&<span className="sm-badge">{n.badge}</span>}
@@ -1000,7 +1006,13 @@ export default function App() {
           {user.role==="admin"&&<>
             <div className="sm-divider"/>
             <div className="sm-section">管理</div>
-            {navItems.slice(5).map(n=>(
+            {[
+              {id:"pending",       label:"待審核",   badge:pending.length},
+              {id:"members",       label:"帳號管理"},
+              {id:"products",      label:"產品管理"},
+              {id:"sample_admin",  label:"樣品申請", badge:sampleRequests.filter(r=>r.status==="pending").length},
+              {id:"install_admin", label:"安裝申請", badge:installOrders.filter(o=>o.status==="pending").length},
+            ].map(n=>(
               <div key={n.id} className={`sm-item ${page===n.id?"on":""}`} onClick={()=>{setPage(n.id);setMenuOpen(false);}}>
                 <span>{n.label}</span>
                 {n.badge>0&&<span className="sm-badge">{n.badge}</span>}
