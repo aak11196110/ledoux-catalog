@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════
-//  LEDOUX 諾科照明 報價系統 v2.0
-//  新增：Google Sheets 雲端同步 + 台灣現貨庫存
+//  LEDOUX 諾科照明 報價系統 v3.0
+//  訪客/管理員雙入口 + 照明設計服務 + 牌價化
 // ═══════════════════════════════════════════
 import { useState, useRef, useEffect } from "react";
 
@@ -8,7 +8,11 @@ import { useState, useRef, useEffect } from "react";
 // ║  【重要】填入你的 Apps Script 部署 URL   ║
 // ║  空白 = 本地模式（不連雲端）             ║
 // ╚══════════════════════════════════════════╝
-const SHEET_URL = "";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyXSh5X0bh5nXrrDiNX0zm6tU91gKGMLwwy11kzRSBgzJea8w7AwiJNysVY4xJSaQY/exec";
+
+// ── 管理員帳號密碼 ──
+const ADMIN_USERNAME = "xxx3903052";
+const ADMIN_PASSWORD = "zzz3909086";
 
 // ── 雲端 API 輔助函式 ──
 async function sheetGet(action) {
@@ -31,16 +35,22 @@ async function sheetPost(action, data) {
   } catch { return null; }
 }
 
-// ── 預設帳號 ──
+// ── 取整函式（進位到最近的5或10）──
+function roundPrice(n) {
+  const r = n % 10;
+  if (r === 0) return n;
+  if (r <= 5) return n - r + 5;
+  return n - r + 10;
+}
+
+// ── 預設帳號（保留供參考，登入改用單一密碼）──
 const INIT_MEMBERS = [
-  { id:1, username:"xxx3903052", password:"zzz3909086", name:"管理員",  position:"管理者", company:"Ledoux Taiwan",  phone:"", email:"",             taxId:"", role:"admin",    status:"approved", approvedAt:"2026-04-18" },
-  { id:2, username:"test001",    password:"test001",    name:"測試客戶", position:"設計師",  company:"測試設計公司",  phone:"", email:"test@test.com", taxId:"", role:"standard", status:"approved", approvedAt:"2026-04-18" },
-  { id:3, username:"vip001",     password:"vip001",     name:"VIP測試", position:"採購經理",company:"VIP測試公司",   phone:"", email:"vip@test.com",  taxId:"", role:"vip",      status:"approved", approvedAt:"2026-04-18" },
+  { id:1, username:"xxx3903052", password:"zzz3909086", name:"管理員", position:"管理者", company:"Ledoux Taiwan", phone:"", email:"", taxId:"", role:"admin", status:"approved", approvedAt:"2026-04-18" },
 ];
 
-// ── 安裝費率 ──
-const INSTALL_BASE = 200;
-const INSTALL_MIN  = 2000;
+// ── 安裝費率（牌價化）──
+const INSTALL_BASE     = 350;  // 牌價 NT$350/盞
+const INSTALL_MIN      = 2000; // 最低出勤費
 
 // ── 全台分區車馬費 ──
 const INSTALL_REGIONS = [
@@ -527,7 +537,7 @@ const CloudIcon  = ({size=16}) => <svg width={size} height={size} viewBox="0 0 1
 const PlaceholderIcon = () => <svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="var(--bdr)" strokeWidth="0.5"><circle cx="22" cy="22" r="18"/><circle cx="22" cy="22" r="7"/><line x1="22" y1="4" x2="22" y2="15"/><line x1="22" y1="29" x2="22" y2="40"/><line x1="4" y1="22" x2="15" y2="22"/><line x1="29" y1="22" x2="40" y2="22"/></svg>;
 
 // ── Helpers ──
-const roleLabel = r => ({admin:"管理者",vip:"VIP 客戶",standard:"一般客戶"})[r]||r;
+const roleLabel = r => ({admin:"管理者",vip:"VIP 客戶",standard:"一般客戶",guest:"訪客"})[r]||r;
 
 function searchProducts(products, q) {
   if (!q.trim()) return products;
@@ -578,30 +588,42 @@ function Carousel({images}) {
   );
 }
 
-// ── PDF 產生器（保留原有邏輯） ──
-function generatePDF({cart,projectName,customer,isVip,installCalc}) {
+// ── PDF 產生器（雙區塊：燈具 + 安裝，取整）──
+function generatePDF({cart,projectName,customer,installCalc}) {
   const today=new Date();
   const ds=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const qn=`Q${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
-  const subtotal=cart.reduce((s,it)=>s+(isVip?it.product.projPrice:it.product.stdPrice)*it.qty,0);
-  const needShip=subtotal<3000;
-  const shipFee=needShip?cart.reduce((s,it)=>s+(it.product.shipping||90)*it.qty,0):0;
-  const instTotal=installCalc&&!installCalc.hasVHigh&&installCalc.travelFee!==null?installCalc.laborTotal+(installCalc.travelFee||0):0;
-  const tax=Math.round(subtotal*0.05);
-  const total=subtotal+tax+shipFee+instTotal;
-  const rows=cart.map((item,i)=>{
-    const p=isVip?item.product.projPrice:item.product.stdPrice;
-    return `<tr><td>${i+1}</td><td><b>${item.product.model}</b><br><span style="font-size:10px;color:#666">${item.product.series}</span></td><td>${item.product.watt||""}</td><td>${item.product.beam||""}</td><td>${item.product.cct||""}</td><td>${item.product.voltage||""}</td><td>${item.product.cri||""}</td><td style="text-align:center">${item.qty}</td><td>組</td><td style="text-align:right">NT$ ${p.toLocaleString()}</td><td style="text-align:right">NT$ ${(p*item.qty).toLocaleString()}</td></tr>`;
+
+  const lampSubtotal = cart.reduce((s,it)=>s+it.product.stdPrice*it.qty,0);
+  const needShip = lampSubtotal<3000;
+  const shipFee  = needShip?cart.reduce((s,it)=>s+(it.product.shipping||90)*it.qty,0):0;
+  const instSubtotal = installCalc&&!installCalc.hasVHigh&&installCalc.travelFee!==null
+    ? installCalc.laborTotal+(installCalc.travelFee||0) : 0;
+  const rawTotal = lampSubtotal + shipFee + instSubtotal;
+  const total    = roundPrice(rawTotal);
+
+  const lampRows = cart.map((item,i)=>{
+    const p=item.product.stdPrice;
+    return `<tr><td>${i+1}</td><td><b>${item.product.model}</b><br><span style="font-size:10px;color:#666">${item.product.series}</span></td><td>${item.product.watt||""}</td><td>${item.product.beam||""}</td><td>${item.product.cct||""}</td><td>${item.product.voltage||""}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">NT$ ${p.toLocaleString()}</td><td style="text-align:right">NT$ ${(p*item.qty).toLocaleString()}</td></tr>`;
   }).join("");
-  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>報價單 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.co-sub{font-size:10px;color:#555;margin-top:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:14px}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666;letter-spacing:1px}.mv{font-weight:500;margin-top:1px}table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:11px}th{background:#111;color:#fff;padding:6px 7px;text-align:left;font-size:9px}td{padding:6px 7px;border-bottom:1px solid #e0e0e0;vertical-align:top}tr:nth-child(even) td{background:#fafafa}.tot{display:flex;justify-content:flex-end;margin-bottom:14px}.tt{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #eee}.tr.bold{font-weight:700;font-size:13px;background:#f5f5f5}.notes{border:1px solid #ccc;padding:12px;margin-bottom:14px;font-size:10px;line-height:2;color:#444}.sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:24px}.sb{border-top:1px solid #ccc;padding-top:6px;font-size:10px;color:#666}.footer{margin-top:18px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;text-align:center}</style></head><body>
+
+  const instRows = instSubtotal>0 ? `
+    <tr><td>1</td><td><b>燈具安裝工資</b><br><span style="font-size:10px;color:#666">${installCalc.totalQty} 盞 × NT$ ${INSTALL_BASE.toLocaleString()}</span></td><td style="text-align:center">${installCalc.totalQty}</td><td style="text-align:right">NT$ ${INSTALL_BASE.toLocaleString()}</td><td style="text-align:right">NT$ ${installCalc.laborTotal.toLocaleString()}</td></tr>
+    ${installCalc.travelFee>0?`<tr><td>2</td><td><b>車馬費</b><br><span style="font-size:10px;color:#666">${installCalc.reg.label}</span></td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${installCalc.travelFee.toLocaleString()}</td><td style="text-align:right">NT$ ${installCalc.travelFee.toLocaleString()}</td></tr>`:""}
+  ` : "";
+
+  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>報價單 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.co-sub{font-size:10px;color:#555;margin-top:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:14px}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666;letter-spacing:1px}.mv{font-weight:500;margin-top:1px}.sec-hd{background:#f5f5f5;border-left:3px solid #111;padding:6px 10px;font-size:11px;font-weight:700;margin:14px 0 6px;letter-spacing:1px}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:11px}th{background:#111;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:5px 7px;border-bottom:1px solid #e8e8e8;vertical-align:top}tr:nth-child(even) td{background:#fafafa}.subtotal-row{background:#f9f5ee!important}.subtotal-row td{font-weight:600;color:#b8935a}.tot{display:flex;justify-content:flex-end;margin:12px 0}.tt{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid #eee;font-size:11px}.tr.bold{font-weight:700;font-size:14px;background:#0e0d0c;color:#fff;padding:10px 12px}.price-note{background:#fdf8ee;border:1px solid #d4a96a;border-left:3px solid #b8935a;padding:10px 14px;margin-bottom:14px;font-size:10px;line-height:1.8;color:#6a5a3a}.notes{border:1px solid #ccc;padding:10px 12px;margin-bottom:12px;font-size:10px;line-height:2;color:#444}.sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:20px}.sb{border-top:1px solid #ccc;padding-top:6px;font-size:10px;color:#666}.footer{margin-top:14px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;text-align:center}</style></head><body>
 <div class="hd"><div><div class="co-name">${COMPANY.name}</div><div class="co-sub">${COMPANY.eng}</div></div><div style="font-size:10px;color:#555;text-align:right">${COMPANY.email}</div></div>
 <div class="doc-title">報　價　單</div>
 <div class="meta"><div class="mc"><div class="ml">報價單號</div><div class="mv">${qn}</div></div><div class="mc"><div class="ml">報價日期</div><div class="mv">${ds}</div></div><div class="mc"><div class="ml">客戶公司</div><div class="mv">${customer.company||"—"}</div></div><div class="mc"><div class="ml">聯絡人</div><div class="mv">${customer.name||"—"}</div></div><div class="mc"><div class="ml">案名</div><div class="mv">${projectName}</div></div><div class="mc"><div class="ml">有效期限</div><div class="mv">${ds} 起 30 天</div></div></div>
-<table><thead><tr><th>#</th><th>型號／系列</th><th>瓦數</th><th>角度</th><th>色溫</th><th>電壓</th><th>演色性</th><th>數量</th><th>單位</th><th>單價</th><th>金額</th></tr></thead><tbody>${rows}</tbody></table>
-<div class="tot"><div class="tt">${needShip?`<div class="tr"><span>運費</span><span>NT$ ${shipFee.toLocaleString()}</span></div>`:""}<div class="tr"><span>稅金（5%）</span><span>NT$ ${tax.toLocaleString()}</span></div>${instTotal>0?`<div class="tr"><span>安裝服務費</span><span>NT$ ${instTotal.toLocaleString()}</span></div>`:""}<div class="tr bold"><span>總計</span><span>NT$ ${total.toLocaleString()}</span></div></div></div>
+<div class="price-note">⚠ 本表所列價格均為<strong>建議牌價</strong>，特定設計公司或專案採購，請聯繫業務獲取<strong>專屬折扣報價</strong>。</div>
+<div class="sec-hd">一、燈具產品清單</div>
+<table><thead><tr><th>#</th><th>型號／系列</th><th>瓦數</th><th>角度</th><th>色溫</th><th>電壓</th><th>數量</th><th>建議牌價</th><th>小計</th></tr></thead><tbody>${lampRows}<tr class="subtotal-row"><td colspan="7" style="text-align:right">燈具小計</td><td></td><td style="text-align:right">NT$ ${lampSubtotal.toLocaleString()}</td></tr>${needShip?`<tr><td colspan="7" style="text-align:right;color:#999">運費</td><td></td><td style="text-align:right">NT$ ${shipFee.toLocaleString()}</td></tr>`:""}</tbody></table>
+${instSubtotal>0?`<div class="sec-hd">二、專業安裝服務</div><table><thead><tr><th>#</th><th>項目</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>${instRows}<tr class="subtotal-row"><td colspan="3" style="text-align:right">安裝小計</td><td></td><td style="text-align:right">NT$ ${instSubtotal.toLocaleString()}</td></tr></tbody></table>`:""}
+<div class="tot"><div class="tt"><div class="tr bold"><span>合計總價（已取整）</span><span>NT$ ${total.toLocaleString()}</span></div></div></div>
 <div class="notes"><b>備　註：</b><br>A. 單筆未滿 NT$3,000，運費由買方自付。<br>B. 庫存不足時，生產交期約 4 週起。<br>C. 保固：室內 3 年、戶外 2 年（人為損壞不在保固範圍）。<br>D. 安裝最低出勤費 NT$2,000，4.5m 以上需鷹架，費用另計。<br>E. 有效期限 30 天，請於期限內回簽確認。</div>
 <div class="sign"><div class="sb">業務代表簽章</div><div class="sb">客戶確認簽章</div><div class="sb">日期</div></div>
-<div class="footer">${COMPANY.name} · 本報價單僅供核可客戶使用，請勿外流</div>
+<div class="footer">${COMPANY.name} · 本報價單所列均為建議牌價，如需專案折扣請洽業務</div>
 </body></html>`;
   const blob=new Blob([html],{type:"text/html;charset=utf-8"});
   const url=URL.createObjectURL(blob);
@@ -736,8 +758,18 @@ export default function App() {
   };
 
   const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
-  const isVip  = user?.role==="vip"||user?.role==="admin";
-  const isFirst= members.length===0&&pending.length===0;
+  const isGuest = user?.role==="guest";
+  const isAdmin = user?.role==="admin";
+  const isVip   = user?.role==="vip"||isAdmin;
+  const isFirst = members.length===0&&pending.length===0;
+
+  // ── 訪客資料 Modal 狀態 ──
+  const [guestModal, setGuestModal] = useState(false);
+  const [guestInfo,  setGuestInfo]  = useState({company:"",contact:"",phone:""});
+  const [guestErr,   setGuestErr]   = useState({});
+  // ── 產品 inline 編輯（管理員直接在目錄頁點擊修改） ──
+  const [inlineEdit, setInlineEdit] = useState(null);
+  const [inlineData, setInlineData] = useState({});
   const cartCount = cart.reduce((s,i)=>s+i.qty,0);
   const cartTotal = cart.reduce((s,i)=>s+(isVip?i.product.projPrice:i.product.stdPrice)*i.qty,0);
   const allChecked = Object.values(checks).every(Boolean);
@@ -769,27 +801,31 @@ export default function App() {
   };
 
   const doLogin = () => {
-    const m = members.find(m=>m.username===loginF.username&&m.password===loginF.password);
-    if (m) { setUser(m); setLoginErr(""); }
-    else setLoginErr("帳號或密碼錯誤");
+    if (loginF.username === ADMIN_USERNAME && loginF.password === ADMIN_PASSWORD) {
+      setUser({ id:1, username:ADMIN_USERNAME, name:"管理員", position:"管理者", company:"Ledoux Taiwan", role:"admin" });
+      setLoginErr("");
+    } else {
+      setLoginErr("帳號或密碼錯誤");
+    }
   };
 
-  const doRegister = () => {
-    const req={name:"姓名",position:"職稱",company:"公司全名",phone:"聯絡電話",email:"Email",username:"帳號",password:"密碼"};
-    const errs={};
-    Object.entries(req).forEach(([k,lbl])=>{if(!regF[k]?.trim())errs[k]=`${lbl} 為必填`;});
-    if(members.find(m=>m.username===regF.username)||pending.find(p=>p.username===regF.username))errs.username="帳號已被使用";
-    setFe(errs); if(Object.keys(errs).length>0)return;
-    setSubmitting(true);
-    if(isFirst){const a={id:Date.now(),...regF,role:"admin",status:"approved",approvedAt:new Date().toISOString().split("T")[0]};setMembers([a]);setAutoAdmin(a);setSubmitting(false);return;}
-    const app={id:Date.now(),...regF,status:"pending",appliedAt:new Date().toISOString().split("T")[0]};
-    setPending(p=>[...p,app]);setWaitInfo(app);setSubmitting(false);
-  };
-
-  const doApprove = () => {
-    if(!approveF.username||!approveF.password)return;
-    setMembers(x=>[...x,{...approveT,...approveF,status:"approved",approvedAt:new Date().toISOString().split("T")[0]}]);
-    setPending(x=>x.filter(p=>p.id!==approveT.id));setApproveT(null);toast$("帳號已開通");
+  // ── 照明設計配燈服務申請 ──
+  const [designForm, setDesignForm] = useState({company:"",name:"",phone:"",project:""});
+  const [designDone, setDesignDone] = useState(false);
+  const submitDesignForm = async () => {
+    if(!designForm.company||!designForm.name||!designForm.phone){toast$("請填寫必填欄位");return;}
+    if(sheetUrl){
+      await sheetPost("saveOrder",{
+        id:"DESIGN"+Date.now(),
+        date:new Date().toISOString().split("T")[0],
+        customerName:designForm.name,
+        company:designForm.company,
+        projectName:designForm.project||"配燈服務申請",
+        items:"照明設計配燈服務",
+        subtotal:0,tax:0,shipping:0,total:0,isVip:"設計服務"
+      });
+    }
+    setDesignDone(true);toast$("申請已送出，專員將盡快聯繫");
   };
 
   const addToCart = p => {
@@ -855,7 +891,36 @@ export default function App() {
   const handleGenPDF = () => {
     if(!projName.trim()){toast$("請先填寫案名");return;}
     if(!allChecked){toast$("請先勾選確認所有注意事項");return;}
-    generatePDF({cart,projectName:projName,customer:{company:user.company,name:user.name,position:user.position},isVip,installCalc:instRegion?instCalc:null});
+    // 訪客必須先填公司資料
+    if(isGuest){
+      const errs={};
+      if(!guestInfo.company.trim()) errs.company="必填";
+      if(!guestInfo.contact.trim()) errs.contact="必填";
+      if(!guestInfo.phone.trim())   errs.phone="必填";
+      setGuestErr(errs);
+      if(Object.keys(errs).length>0){setGuestModal(true);return;}
+    }
+    const customer = isGuest
+      ? {company:guestInfo.company, name:guestInfo.contact, position:"", phone:guestInfo.phone}
+      : {company:user.company, name:user.name, position:user.position};
+    generatePDF({cart,projectName:projName,customer,installCalc:instRegion?instCalc:null});
+    // 自動記錄到 Google Sheets
+    if(sheetUrl){
+      const orderData={
+        id:"ORD"+Date.now(),
+        date:new Date().toISOString().split("T")[0],
+        customerName:customer.name,
+        company:customer.company,
+        projectName:projName,
+        items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),
+        subtotal:cart.reduce((s,i)=>s+(isVip?i.product.projPrice:i.product.stdPrice)*i.qty,0),
+        tax:Math.round(cart.reduce((s,i)=>s+(isVip?i.product.projPrice:i.product.stdPrice)*i.qty,0)*0.05),
+        shipping:0,
+        total:0,
+        isVip:isVip?"是":"否"
+      };
+      sheetPost("saveOrder",orderData);
+    }
     toast$("報價單已下載");
   };
 
@@ -866,10 +931,53 @@ export default function App() {
     return {cls:"in-stock",label:"現貨供應"};
   };
 
-  // ── 未登入 ──
-  if(autoAdmin) return(<><style>{G}</style><div className="info-page"><div className="info-card"><div className="info-rule"/><div className="info-title">歡迎加入</div><div className="info-sub">管理者帳號已建立</div><div className="info-desc">您是本系統第一位使用者，已自動取得管理者權限。</div><div style={{borderTop:"0.5px solid var(--bdr2)"}}>{[["姓名",autoAdmin.name],["公司",autoAdmin.company],["帳號",autoAdmin.username],["身份","管理者"]].map(([k,v])=>(<div key={k} className="info-row"><span>{k}</span><span style={k==="身份"?{color:"var(--gold)"}:{}}>{v}</span></div>))}</div><button className="btn-outline" onClick={()=>{setAutoAdmin(null);setLoginF({username:autoAdmin.username,password:autoAdmin.password});}}>進入系統</button></div></div></>);
-  if(waitInfo) return(<><style>{G}</style><div className="info-page"><div className="info-card"><div className="info-rule"/><div className="info-title">申請已提交</div><div className="info-sub">等待專員審核</div><div className="info-desc">感謝您的申請，審核後將開通帳號。</div><div style={{borderTop:"0.5px solid var(--bdr2)"}}>{[["姓名",waitInfo.name],["公司",waitInfo.company],["帳號",waitInfo.username],["申請日",waitInfo.appliedAt]].map(([k,v])=>(<div key={k} className="info-row"><span>{k}</span><span>{v}</span></div>))}</div><button className="btn-outline" onClick={()=>{setWaitInfo(null);setAuthTab("login");}}>返回登入</button></div></div></>);
-  if(!user) return(<><style>{G}</style><div className="auth-page"><div className="auth-visual"><div className="av-logo">LEDOUX</div><div style={{marginTop:"auto",position:"relative",zIndex:1}}><div className="av-rule"/><div className="av-title">Quotation<br/>Platform</div><div className="av-sub">Authorized Partners Only</div></div></div><div className="auth-form-side"><div className="auth-inner"><div className="auth-logo-sm">LEDOUX</div><div className="auth-tagline">Taiwan · 專業報價系統</div><div className="auth-tabs"><div className={`atab ${authTab==="login"?"on":""}`} onClick={()=>{setAuthTab("login");setLoginErr("");setFe({});}}>登入</div><div className={`atab ${authTab==="register"?"on":""}`} onClick={()=>{setAuthTab("register");setLoginErr("");setFe({});}}>申請帳號</div></div>{authTab==="login"?(<><div className="lf"><label>帳號</label><input value={loginF.username} onChange={e=>setLoginF(p=>({...p,username:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入帳號"/></div><div className="lf"><label>密碼</label><input type="password" value={loginF.password} onChange={e=>setLoginF(p=>({...p,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入密碼"/></div><button className="btn-primary" onClick={doLogin}>進入系統</button>{loginErr&&<div className="auth-err">{loginErr}</div>}<div className="auth-hint">本系統為 Ledoux Taiwan 授權合作夥伴專屬平台<br/>帳號需由專員審核後開通</div></>):(<>{isFirst&&<div className="first-notice">本系統尚無帳號，您將自動成為第一位管理者</div>}<div className="r2"><div className="lf"><label>姓名<span className="req">*</span></label><input value={regF.name} onChange={e=>{setRegF(p=>({...p,name:e.target.value}));setFe(p=>({...p,name:""}));}} placeholder="您的姓名"/>{fe.name&&<div className="ferr">{fe.name}</div>}</div><div className="lf"><label>職稱<span className="req">*</span></label><input value={regF.position} onChange={e=>{setRegF(p=>({...p,position:e.target.value}));setFe(p=>({...p,position:""}));}} placeholder="採購經理"/>{fe.position&&<div className="ferr">{fe.position}</div>}</div></div><div className="lf"><label>公司全名<span className="req">*</span></label><input value={regF.company} onChange={e=>{setRegF(p=>({...p,company:e.target.value}));setFe(p=>({...p,company:""}));}} placeholder="含有限公司／股份有限公司"/>{fe.company&&<div className="ferr">{fe.company}</div>}</div><div className="r2"><div className="lf"><label>統一編號</label><input value={regF.taxId} onChange={e=>{setRegF(p=>({...p,taxId:e.target.value}));setFe(p=>({...p,taxId:""}));}} placeholder="選填 8 位數字" maxLength={8}/></div><div className="lf"><label>聯絡電話<span className="req">*</span></label><input value={regF.phone} onChange={e=>{setRegF(p=>({...p,phone:e.target.value}));setFe(p=>({...p,phone:""}));}} placeholder="0912-345-678"/>{fe.phone&&<div className="ferr">{fe.phone}</div>}</div></div><div className="lf"><label>Email<span className="req">*</span></label><input value={regF.email} onChange={e=>{setRegF(p=>({...p,email:e.target.value}));setFe(p=>({...p,email:""}));}} placeholder="name@company.com"/>{fe.email&&<div className="ferr">{fe.email}</div>}</div><div className="sec-lbl">設定登入帳號</div><div className="r2"><div className="lf"><label>帳號<span className="req">*</span></label><input value={regF.username} onChange={e=>{setRegF(p=>({...p,username:e.target.value}));setFe(p=>({...p,username:""}));}} placeholder="自訂帳號"/>{fe.username&&<div className="ferr">{fe.username}</div>}</div><div className="lf"><label>密碼<span className="req">*</span></label><input type="password" value={regF.password} onChange={e=>{setRegF(p=>({...p,password:e.target.value}));setFe(p=>({...p,password:""}));}} placeholder="設定密碼"/>{fe.password&&<div className="ferr">{fe.password}</div>}</div></div><button className="btn-primary" onClick={doRegister} disabled={submitting}>{submitting?"送出中...":isFirst?"建立管理者帳號":"送出申請"}</button></>)}</div></div></div></>);
+  // ── 未登入：雙入口頁面 ──
+  if(!user) return(
+    <><style>{G}</style>
+    <div className="auth-page">
+      <div className="auth-visual">
+        <div className="av-logo">LEDOUX</div>
+        <div style={{marginTop:"auto",position:"relative",zIndex:1}}>
+          <div className="av-rule"/>
+          <div className="av-title">Quotation<br/>Platform</div>
+          <div className="av-sub">諾科照明 · 專業報價系統</div>
+        </div>
+      </div>
+      <div className="auth-form-side">
+        <div className="auth-inner">
+          <div className="auth-logo-sm">LEDOUX</div>
+          <div className="auth-tagline">Taiwan · 諾科照明</div>
+
+          {/* 訪客入口 */}
+          <div style={{marginBottom:28}}>
+            <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:14,paddingBottom:10,borderBottom:"0.5px solid var(--bdr2)"}}>訪客瀏覽</div>
+            <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.8,marginBottom:14}}>
+              免帳號直接瀏覽產品目錄、選燈、產生報價單。<br/>
+              下載報價單前需填寫公司基本資料。
+            </div>
+            <button className="btn-primary" onClick={()=>setUser({role:"guest",name:"訪客",company:"",position:"",username:"guest"})}>
+              訪客瀏覽 · 免登入
+            </button>
+          </div>
+
+          <div className="sec-lbl">管理員登入</div>
+
+          {/* 管理員入口 */}
+          <div className="lf">
+            <label>帳號</label>
+            <input value={loginF.username} onChange={e=>setLoginF(p=>({...p,username:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入帳號"/>
+          </div>
+          <div className="lf">
+            <label>密碼</label>
+            <input type="password" value={loginF.password} onChange={e=>setLoginF(p=>({...p,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入密碼"/>
+          </div>
+          <button className="btn-outline" style={{width:"100%",marginTop:6}} onClick={doLogin}>管理員登入</button>
+          {loginErr&&<div className="auth-err">{loginErr}</div>}
+        </div>
+      </div>
+    </div>
+    </>
+  );
 
   // ── 主畫面 ──
   return (
@@ -887,7 +995,7 @@ export default function App() {
         </div>
         <div className="sm-nav">
           <div className="sm-sec">主選單</div>
-          {[{id:"catalog",label:"產品目錄"},{id:"inquiry",label:"詢價單",badge:cartCount},{id:"sample",label:"借樣品",badge:sampCart.length},{id:"install",label:"安裝服務"}].map(n=>(
+          {[{id:"catalog",label:"產品目錄"},{id:"inquiry",label:"詢價單",badge:cartCount},{id:"sample",label:"借樣品",badge:sampCart.length},{id:"install",label:"安裝服務"},{id:"design",label:"照明設計服務"}].map(n=>(
             <div key={n.id} className={`sm-item ${page===n.id?"on":""}`} onClick={()=>{setPage(n.id);setMenuOpen(false);}}>
               <span>{n.label}</span>{n.badge>0&&<span className="sm-badge">{n.badge}</span>}
             </div>
@@ -999,30 +1107,93 @@ export default function App() {
             </div>
           </div>
           {!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats].map(c=><button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>setCat(c)}>{c}</button>)}</div>}
+          {/* 訪客資料 Modal */}
+          {guestModal&&<div className="modal-wrap" onClick={()=>setGuestModal(false)}>
+            <div className="modal-box" onClick={e=>e.stopPropagation()}>
+              <div className="modal-head"><div className="modal-title">填寫公司資料</div><button className="close-btn" onClick={()=>setGuestModal(false)}><CloseIcon/></button></div>
+              <div className="modal-body">
+                <div className="hint-box" style={{marginBottom:16}}>下載報價單前請填寫基本聯絡資料，資料僅用於報價單顯示。</div>
+                {[["公司名稱","company","公司全名"],["聯絡人","contact","姓名"],["聯絡電話","phone","0912-345-678"]].map(([l,k,ph])=>(
+                  <div key={k} className="lf">
+                    <label>{l} <span className="req">*</span></label>
+                    <input value={guestInfo[k]} onChange={e=>setGuestInfo(p=>({...p,[k]:e.target.value}))} placeholder={ph}/>
+                    {guestErr[k]&&<div className="ferr">{guestErr[k]}</div>}
+                  </div>
+                ))}
+                <div className="form-actions" style={{marginTop:18}}>
+                  <button className="btn-confirm" onClick={()=>{
+                    const errs={};
+                    if(!guestInfo.company.trim())errs.company="必填";
+                    if(!guestInfo.contact.trim())errs.contact="必填";
+                    if(!guestInfo.phone.trim())errs.phone="必填";
+                    setGuestErr(errs);
+                    if(Object.keys(errs).length>0)return;
+                    setGuestModal(false);
+                    handleGenPDF();
+                  }}>確認並下載</button>
+                  <button className="btn-cancel-sm" onClick={()=>setGuestModal(false)}>取消</button>
+                </div>
+              </div>
+            </div>
+          </div>}
+
           <div className="pgrid">
-            {filtered.map(p=>(
-              <div key={p.id} className="pcard" onClick={()=>setSelProd(p)}>
+            {filtered.map(p=>{
+              const isEditing = isAdmin && inlineEdit===p.id;
+              const d = isEditing ? inlineData : p;
+              return(
+              <div key={p.id} className="pcard" onClick={()=>!isEditing&&setSelProd(p)}>
                 {hasStock(p.model)&&<div className="pcard-stock-badge"><span className="pcard-stock-dot"/>台灣現貨</div>}
                 <div className="pcard-img">{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div>
                 <div className="pcard-body">
                   <div className="pcard-series">{p.series}</div>
                   <div className="pcard-model">{p.model}</div>
-                  <div className="pcard-desc">{p.desc}</div>
+                  {isEditing?(
+                    <div onClick={e=>e.stopPropagation()} style={{marginBottom:8}}>
+                      {[["瓦數","watt"],["色溫","cct"],["開孔","cutout"],["建議牌價","stdPrice"],["庫存備註","note"]].map(([l,k])=>(
+                        <div key={k} style={{marginBottom:6}}>
+                          <div style={{fontSize:"7px",letterSpacing:"2px",textTransform:"uppercase",color:"var(--muted)",marginBottom:2}}>{l}</div>
+                          <input
+                            type={k==="stdPrice"?"number":"text"}
+                            value={d[k]||""}
+                            onChange={e=>setInlineData(x=>({...x,[k]:e.target.value}))}
+                            style={{width:"100%",padding:"5px 7px",border:"0.5px solid var(--gold)",background:"#fffef9",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none"}}
+                          />
+                        </div>
+                      ))}
+                      <div style={{display:"flex",gap:6,marginTop:8}}>
+                        <button className="btn-save-inv" onClick={()=>{
+                          const updated={...p,...inlineData,stdPrice:Number(inlineData.stdPrice||p.stdPrice),projPrice:Number(inlineData.projPrice||p.projPrice)};
+                          const newList=products.map(x=>x.id===p.id?updated:x);
+                          setProducts(newList);syncProducts(newList);
+                          setInlineEdit(null);toast$(`${p.model} 已儲存並同步雲端`);
+                        }}>儲存變更</button>
+                        <button className="btn-cancel-sm" style={{padding:"4px 9px",fontSize:9}} onClick={()=>setInlineEdit(null)}>取消</button>
+                      </div>
+                    </div>
+                  ):(
+                    <div className="pcard-desc">{p.desc}</div>
+                  )}
                   <div className="pcard-tags">
                     {p.watt&&<span className="ptag">{p.watt}</span>}
                     {p.beam&&<span className="ptag">{p.beam}</span>}
                     {p.cct&&<span className="ptag">{p.cct}</span>}
                     {hasStock(p.model)&&<span className="ptag stag">當日出貨</span>}
-                    {p.video&&<span className="ptag vtag">影片</span>}
                   </div>
                   <div className="pcard-price">
-                    {isVip?<div className="price-val gold">NT$ {p.projPrice?.toLocaleString()}</div>
-                      :(p.stdPrice>0?<div className="price-val">NT$ {p.stdPrice?.toLocaleString()}</div>
-                        :<div className="price-nq">請洽業務報價</div>)}
+                    <div style={{fontSize:"7px",letterSpacing:"2px",color:"var(--muted)",textTransform:"uppercase",marginBottom:2}}>建議牌價</div>
+                    {p.stdPrice>0?<div className="price-val">NT$ {p.stdPrice?.toLocaleString()}</div>:<div className="price-nq">請洽業務報價</div>}
                   </div>
+                  {isAdmin&&!isEditing&&(
+                    <button onClick={e=>{e.stopPropagation();setInlineEdit(p.id);setInlineData({watt:p.watt,cct:p.cct,cutout:p.cutout,stdPrice:p.stdPrice,projPrice:p.projPrice,note:p.note});}}
+                      style={{marginTop:8,width:"100%",padding:"5px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"8px",letterSpacing:"2px",cursor:"pointer",textTransform:"uppercase"}}>
+                      編輯規格
+                    </button>
+                  )}
                 </div>
               </div>
-            ))}
+            );})}
+
             {filtered.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>找不到符合的產品</div>}
           </div>
         </>}
@@ -1088,6 +1259,74 @@ export default function App() {
               );
             })}
             {filteredInv.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>此分類目前無現貨</div>}
+          </div>
+        </>}
+
+        {/* 照明設計配燈服務 */}
+        {page==="design"&&<>
+          <div className="phead">
+            <div>
+              <div className="ptitle">照明設計配燈服務</div>
+              <div className="psub">專業規劃 · 預算最適化</div>
+            </div>
+          </div>
+          {/* 服務說明 */}
+          <div style={{background:"linear-gradient(135deg,#0e0d0c,#1a1612)",padding:"32px 36px",marginBottom:28,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 70% 50%,rgba(184,147,90,.08),transparent 60%)"}}/>
+            <div style={{fontSize:"7px",letterSpacing:"5px",textTransform:"uppercase",color:"var(--gold)",marginBottom:12,position:"relative",zIndex:1}}>服務說明</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:"#e8e0d4",lineHeight:1.5,marginBottom:14,position:"relative",zIndex:1}}>
+              根據您的預算規劃最適燈具數量
+            </div>
+            <div style={{fontSize:13,color:"#8a7a6a",lineHeight:1.9,maxWidth:560,position:"relative",zIndex:1}}>
+              預收專案總價之 <strong style={{color:"var(--gold)"}}>10%</strong> 作為設計服務費。<br/>
+              若最終燈具採購金額達到預算之 <strong style={{color:"var(--gold)"}}>70% 以上</strong>，此費用將<strong style={{color:"var(--gold)"}}>全額折抵貨款</strong>。
+            </div>
+          </div>
+          {/* 服務流程 */}
+          <div style={{marginBottom:32}}>
+            <div style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:16}}>服務流程</div>
+            <div style={{display:"flex",gap:0,overflowX:"auto"}}>
+              {[
+                ["01","提供需求","提供 CAD 圖與預算需求"],
+                ["02","業務聯繫","專員確認細節與時程"],
+                ["03","支付預付款","支付專案總價 10% 設計費"],
+                ["04","專業配燈","出具配燈規劃報告"],
+                ["05","確認下單","採購達標即全額折抵"],
+              ].map(([n,t,d],i,arr)=>(
+                <div key={n} style={{display:"flex",alignItems:"stretch",flex:1,minWidth:120}}>
+                  <div style={{flex:1,border:"0.5px solid var(--bdr2)",padding:"16px 14px",background:"var(--ivory)"}}>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:"var(--gold)",marginBottom:4}}>{n}</div>
+                    <div style={{fontSize:11,fontWeight:400,marginBottom:4}}>{t}</div>
+                    <div style={{fontSize:9,color:"var(--muted)",lineHeight:1.7}}>{d}</div>
+                  </div>
+                  {i<arr.length-1&&<div style={{display:"flex",alignItems:"center",padding:"0 6px",color:"var(--bdr)",fontSize:16,flexShrink:0}}>›</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* 申請表單 */}
+          <div style={{maxWidth:460}}>
+            <div style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:16,paddingBottom:8,borderBottom:"0.5px solid var(--bdr2)"}}>申請配燈服務</div>
+            {designDone?(
+              <div style={{textAlign:"center",padding:"40px 0",color:"var(--green)",fontSize:14,lineHeight:2}}>
+                申請已送出 ✓<br/>
+                <span style={{fontSize:11,color:"var(--muted)"}}>專員將於 1–2 個工作日聯繫您</span><br/>
+                <button className="btn-outline" style={{marginTop:16}} onClick={()=>{setDesignDone(false);setDesignForm({company:"",name:"",phone:"",project:""});}}>重新申請</button>
+              </div>
+            ):(
+              <>
+                {[["公司名稱","company","必填"],["聯絡人","name","姓名"],["聯絡電話","phone","0912-345-678"],["案名","project","選填，方便業務了解專案背景"]].map(([l,k,ph])=>(
+                  <div key={k} className="lf">
+                    <label>{l}{k!=="project"&&<span className="req"> *</span>}</label>
+                    <input value={designForm[k]} onChange={e=>setDesignForm(p=>({...p,[k]:e.target.value}))} placeholder={ph}/>
+                  </div>
+                ))}
+                <button className="btn-primary" style={{marginTop:8}} onClick={submitDesignForm}>我需要配燈服務</button>
+                <div style={{fontSize:10,color:"var(--muted)",marginTop:10,lineHeight:1.8}}>
+                  提交後專員將主動聯繫，協助評估專案規模與設計費用。
+                </div>
+              </>
+            )}
           </div>
         </>}
 
