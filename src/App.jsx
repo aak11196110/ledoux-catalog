@@ -5,7 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 
 // ✅ 已更新為最新 Apps Script 部署 URL
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbylNuQW2ADr6behwvzj95GwTeGnFfkH-PQKe7M2jomgPMW1d1x7e2LkNHhDU7TvIKQyNg/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzUt6rAkwrPbf0FsToBrkgq6Vq8hh70-QPQ_11yu9uVteFBYec7MZNzEuV6DfFvs_CezA/exec";
 const ADMIN_USERNAME = "xxx3903052";
 const ADMIN_PASSWORD = "zzz3909086";
 
@@ -64,11 +64,9 @@ async function sheetGet(action) {
 async function sheetPost(action, data) {
   if (!SHEET_URL) return null;
   try {
-    const res = await fetch(SHEET_URL, {
-      method: "POST",
-      body: JSON.stringify({ action, data }),
-      headers: { "Content-Type": "application/json" }
-    });
+    // 改用 GET 請求傳送，解決瀏覽器 CORS 限制
+    const payload = encodeURIComponent(JSON.stringify(data));
+    const res = await fetch(`${SHEET_URL}?action=${action}&payload=${payload}`);
     return await res.json();
   } catch { return null; }
 }
