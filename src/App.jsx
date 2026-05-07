@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from "react";
 // ║  【重要】填入你的 Apps Script 部署 URL   ║
 // ║  空白 = 本地模式（不連雲端）             ║
 // ╚══════════════════════════════════════════╝
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyXSh5X0bh5nXrrDiNX0zm6tU91gKGMLwwy11kzRSBgzJea8w7AwiJNysVY4xJSaQY/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzk68Je0zDC9-SraYqaP5BVSta1E4sc3ouPOJgFNrKZhrqjhw9hNkauDcxUA2DwkSAQ/exec";
 
 // ── 管理員帳號密碼 ──
 const ADMIN_USERNAME = "xxx3903052";
