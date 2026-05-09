@@ -716,7 +716,7 @@ function ProjBanner({onContact}) {
   );
 }
 
-function generatePDF({cart, projectName, customer, installCalc, isVip, discountRate=1, discountLabel=""}) {
+function generatePDF({cart, projectName, customer, installCalc=null, isVip, discountRate=1, discountLabel=""}) {
   const today = new Date();
   const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`;
@@ -751,6 +751,48 @@ function generatePDF({cart, projectName, customer, installCalc, isVip, discountR
     const baseP = Number(isVip ? p.projPrice : p.stdPrice) || 0;
     return s + Math.round(baseP * discountRate) * item.qty;
   }, 0);
+  // 安裝費計算
+  let installTotal = 0;
+  let installRows = "";
+  if (installCalc && installCalc.instCalc) {
+    const ic = installCalc.instCalc;
+    const iTypes = installCalc.installTypes || [];
+    const iGroups = installCalc.instGroups || [];
+    const lGroups = installCalc.linearGroups || [];
+    let rowIdx = 1;
+    // 崁燈工資
+    if (iTypes.includes("recessed")) {
+      iGroups.filter(g=>Number(g.qty)>0).forEach(g=>{
+        const cg = CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+        if(!cg||cg.surcharge===null) return;
+        const unit = INSTALL_BASE + cg.surcharge;
+        const sub = unit * Number(g.qty);
+        installTotal += sub;
+        installRows += `<tr><td>${rowIdx++}</td><td><b>崁燈安裝（${cg.label}）</b></td><td style="text-align:center">${g.qty} 盞</td><td style="text-align:right">NT$ ${unit.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;
+      });
+    }
+    // 線型燈工資
+    if (iTypes.includes("linear")) {
+      lGroups.filter(g=>Number(g.meters)>0).forEach(g=>{
+        const cg = CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+        if(!cg||cg.surcharge===null) return;
+        const rate = Math.round(INSTALL_LINEAR_M*(1+cg.surcharge/INSTALL_BASE));
+        const sub = rate * Number(g.meters);
+        installTotal += sub;
+        installRows += `<tr><td>${rowIdx++}</td><td><b>線型燈安裝（${cg.label}）</b><br><span style="font-size:10px;color:#666">${g.meters} 米 × NT$${rate}/米</span></td><td style="text-align:center">${g.meters} 米</td><td style="text-align:right">NT$ ${rate.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;
+      });
+    }
+    installTotal = Math.max(installTotal, INSTALL_MIN);
+    // 車馬費
+    const travelFee = ic.travelFee || 0;
+    if (travelFee > 0) {
+      installRows += `<tr><td>—</td><td><b>車馬費</b> (${ic.reg?.label||""})</td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${travelFee.toLocaleString()}</td><td style="text-align:right">NT$ ${travelFee.toLocaleString()}</td></tr>`;
+      installTotal += travelFee;
+    } else if (ic.travelFee === 0) {
+      installRows += `<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達門檻）</td></tr>`;
+    }
+  }
+  const grandTotal = untaxed + Math.round(untaxed * 0.05) + installTotal;
   const tax = Math.round(untaxed * 0.05);
   const total = untaxed + tax;
 
@@ -855,6 +897,26 @@ ${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>
   </div>
 </div>
 
+\${installRows ? `
+<div style="margin-top:14px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:2px;background:#f4efe8;border-left:3px solid #b8935a;padding:6px 12px;margin-bottom:6px;">二、專業安裝服務</div>
+  <table>
+    <thead><tr>
+      <th style="width:30px">No.</th><th class="left">安裝項目</th><th style="width:50px">數量</th><th style="width:70px">單價</th><th style="width:75px">小計</th>
+    </tr></thead>
+    <tbody>\${installRows}</tbody>
+  </table>
+  <div class="totals" style="margin-top:6px;">
+    <div class="totals-inner">
+      <div class="tot-row"><span>安裝費小計</span><span>NT$ \${installTotal.toLocaleString()}</span></div>
+    </div>
+  </div>
+</div>
+<div style="display:flex;justify-content:flex-end;margin:10px 0;">
+  <div style="border:1px solid #ccc;min-width:260px;background:#0e0d0c;color:#fff;padding:12px 14px;font-size:15px;font-weight:700;display:flex;justify-content:space-between;">
+    <span>燈具＋安裝 總計（含稅）</span><span>NT$ \${grandTotal.toLocaleString()}</span>
+  </div>
+</div>` : ""}
 <div class="notes">
   <strong>備　註：</strong><br>
   A. 本報價單有效期限30天，請於期限內回簽訂單。<br>
@@ -968,12 +1030,12 @@ function App() {
   const [seriesExp,  setSeriesExp]  = useState(true);
   const [catExp,     setCatExp]     = useState(true);
   const [instRegion, setInstRegion] = useState("");
-  const [instGroups, setInstGroups] = useState([{ceilingId:"std",qty:1,type:"recessed"}]);
+  const [instGroups, setInstGroups] = useState([{ceilingId:"std",qty:0}]);
   const [instNote,   setInstNote]   = useState("");
   const [instDone,   setInstDone]   = useState(false);
   const [linearMeters,  setLinearMeters]  = useState(1);
   const [quickRecessed, setQuickRecessed] = useState(10);
-  const [linearGroups,  setLinearGroups]  = useState([{meters:1,ceilingId:"std"}]);
+  const [linearGroups,  setLinearGroups]  = useState([{meters:0,ceilingId:"std"}]);
   const [newProd,    setNewProd]    = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K/4000K",beam:"24°",voltage:"220V",cri:"Ra≥80",color:"白色",cutout:"",size:"",install:"崁入式",cert:"",shipping:"90",stdPrice:"",projPrice:"",video:"",desc:"",images:"",note:""});
   const [editInvItem,setEditInvItem]= useState(null);
   const [newInv,     setNewInv]     = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""});
@@ -995,6 +1057,7 @@ function App() {
   const [designDone,    setDesignDone]    = useState(false);
   const [contactModal,  setContactModal]  = useState(false);
   const [activeTags, setActiveTags] = useState([]);
+  const [installTypes, setInstallTypes] = useState([]);
   const blurRef = useRef(null);
 
   // ✅ 必須在 cartTotal 前宣告，否則 "Cannot access isVip before initialization"
@@ -1110,7 +1173,7 @@ function App() {
   // ✅ 安裝申請 + Email 通知
   const submitInst = async () => {
     if(!instCalc){toast$("請選擇安裝區域");return;}
-    const isLinear=instGroups[0]?.type==="linear";
+    const isLinear=installTypes.includes("linear");
     const ord={id:Date.now(),date:new Date().toISOString().split("T")[0],customer:{name:user.name,company:user.company},region:instRegion,groups:instGroups,note:instNote,calc:instCalc,status:"pending"};
     setInstallOrd(x=>[...x,ord]);
     setInstDone(true);
@@ -1124,16 +1187,13 @@ function App() {
     );
   };
 
-  const resetInst = () => { setInstRegion("");setInstGroups([{ceilingId:"std",qty:1,type:"recessed"}]);setInstNote("");setInstDone(false);setInstOpen(false); };
+  const resetInst = () => { setInstRegion("");setInstGroups([{ceilingId:"std",qty:0}]);setLinearGroups([{meters:0,ceilingId:"std"}]);setInstallTypes([]);setInstNote("");setInstDone(false);setInstOpen(false); };
 
   // ✅ 修復：PDF 下載核心函式（訪客白屏問題根本修復）
   const doPdfDownload = (customer) => {
-    // 燈具報價單（含折扣）
-    generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:null,isVip,discountRate,discountLabel});
-    // 若有安裝需求，另外生成安裝報價單
-    if(installChoice===true && instRegion && instCalc){
-      generateInstallPDF({projectName:projName,customer,instCalc,instRegion,instGroups,linearGroups,linearMeters,instNote});
-    }
+    // 整合報價單：燈具（含折扣）+ 安裝費（若有）合為一份 PDF
+    const installData = (installChoice===true && instRegion && instCalc) ? {instCalc,instRegion,instGroups,linearGroups,linearMeters,instNote,installTypes} : null;
+    generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel});
     const baseSubtotal=cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
     const lampSubtotal=Math.round(baseSubtotal*discountRate);
     if(sheetUrl){
@@ -2044,19 +2104,21 @@ function App() {
                 ✦ 設計公司或合作專案享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setInstOpen(false);setContactModal(true);}}>點此聯繫業務</span>
               </div>
               <div style={{marginBottom:16}}>
-                <div className="ip-sec-title">安裝類型</div>
+                <div className="ip-sec-title">安裝類型（可同時選擇兩種）</div>
                 <div style={{display:"flex",gap:6}}>
-                  {[["recessed","崁燈安裝"],["linear","線型燈安裝"]].map(([t,l])=>(
-                    <button key={t} style={{flex:1,padding:"9px",border:"0.5px solid",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"8px",letterSpacing:"2px",cursor:"pointer",transition:"all .2s",background:instGroups[0]?.type===t?"var(--blk)":"transparent",borderColor:instGroups[0]?.type===t?"var(--blk)":"var(--bdr)",color:instGroups[0]?.type===t?"var(--ivory)":"var(--muted)"}}
-                      onClick={()=>setInstGroups([{ceilingId:"std",qty:1,type:t}])}>{l}</button>
-                  ))}
+                  {[["recessed","崁燈安裝"],["linear","線型燈安裝"]].map(([t,l])=>{
+                    const isOn=installTypes.includes(t);
+                    return(<button key={t} style={{flex:1,padding:"9px",border:"0.5px solid",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"8px",letterSpacing:"2px",cursor:"pointer",transition:"all .2s",background:isOn?"var(--blk)":"transparent",borderColor:isOn?"var(--blk)":"var(--bdr)",color:isOn?"var(--ivory)":"var(--muted)"}}
+                      onClick={()=>setInstallTypes(ts=>ts.includes(t)?ts.filter(x=>x!==t):[...ts,t])}>{l}</button>);
+                  })}
                 </div>
+                {installTypes.length===0&&<div style={{fontSize:10,color:"var(--muted)",marginTop:5}}>請選擇安裝類型</div>}
               </div>
               <div style={{marginBottom:18}}>
                 <div className="ip-sec-title">選擇安裝地點區域</div>
                 <div className="region-grid">{INSTALL_REGIONS.map(r=>(<div key={r.id} className={`region-card ${instRegion===r.id?"on":""}`} onClick={()=>setInstRegion(r.id)}><div className="rc-label">{r.label}</div><div className="rc-km">{r.km}</div><div className="rc-fee">{r.travel===null?"另議":`NT$ ${r.travel.toLocaleString()}`}</div>{r.freeAt&&<div className="rc-free">{r.freeAt} 盞以上免收</div>}</div>))}</div>
               </div>
-              {(!instGroups[0]?.type||instGroups[0]?.type==="recessed")&&(
+              {installTypes.includes("recessed")&&(
                 <div style={{marginBottom:18}}>
                   <div className="ip-sec-title">安裝數量 ＆ 天花高度</div>
                   {(()=>{const totalInstQty=instGroups.reduce((s,g)=>s+Number(g.qty||0),0);return cartLampQty>0&&totalInstQty>cartLampQty&&<div style={{fontSize:11,color:"var(--red)",marginBottom:6,padding:"5px 9px",background:"#fdf0f0",border:"0.5px solid var(--red)"}}>⚠ 安裝盞數（{totalInstQty}）超過購物車燈具數量（{cartLampQty}），請確認數量是否正確</div>;})()}
@@ -2079,7 +2141,7 @@ function App() {
                   <button style={{padding:"6px 14px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"7px",letterSpacing:"2px",cursor:"pointer",textTransform:"uppercase"}} onClick={()=>setInstGroups(gs=>[...gs,{ceilingId:"std",qty:1,type:"recessed"}])}>＋ 新增不同高度</button>
                 </div>
               )}
-              {instGroups[0]?.type==="linear"&&(
+              {installTypes.includes("linear")&&(
                 <div style={{marginBottom:18}}>
                   <div className="ip-sec-title">線型燈分段輸入（可新增不同高度）</div>
                   {linearGroups.map((g,i)=>{
@@ -2105,17 +2167,18 @@ function App() {
               {instRegion&&<div className="calc-box">
                 {(()=>{
                   const reg=INSTALL_REGIONS.find(r=>r.id===instRegion);
-                  const isLinear=instGroups[0]?.type==="linear";
+                  const hasRecessed=installTypes.includes("recessed");
+                  const hasLinear=installTypes.includes("linear");
                   const totalLinearM=linearGroups.reduce((s,g)=>s+Number(g.meters||0),0);
-                  const laborCost=isLinear?instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null:instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null;
+                  const laborCost=instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null;
                   const travel=reg?.travel===null?null:(instCalc?.travelFee??reg?.travel??0);
                   const total=laborCost!==null&&travel!==null?laborCost+(travel||0):null;
                   return(<>
-                    {isLinear&&<>
-                      {linearGroups.map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const rate=cg?.surcharge===null?null:Math.round(INSTALL_LINEAR_M*(1+(cg?.surcharge||0)/INSTALL_BASE));return rate?<div key={i} className="calc-row"><span>{cg?.label} {g.meters}m × NT${rate}</span><span>NT$ {(rate*g.meters).toLocaleString()}</span></div>:<div key={i} className="calc-row" style={{color:"var(--red)"}}><span>{cg?.label} {g.meters}m</span><span>另案報價</span></div>;})}
-                      {instCalc&&instCalc.laborTotal<INSTALL_MIN&&<div className="calc-warn">未達最低出勤費，以 NT$2,000 計收</div>}
+                    {hasRecessed&&instCalc&&instCalc.totalQty>0&&<><div className="calc-row"><span>崁燈工資（{instCalc.totalQty} 盞 × NT$200）</span><span>NT$ {(()=>{const rLab=instGroups.reduce((s,g)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);if(!cg||cg.surcharge===null)return s;return s+(INSTALL_BASE+cg.surcharge)*Number(g.qty||0);},0);return rLab.toLocaleString();})()}</span></div>{instCalc.hasVHigh&&<div className="calc-warn">4.5m 以上不含安裝費，需另案報價</div>}</>}
+                    {hasLinear&&totalLinearM>0&&<>
+                      {linearGroups.filter(g=>Number(g.meters)>0).map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const rate=cg?.surcharge===null?null:Math.round(INSTALL_LINEAR_M*(1+(cg?.surcharge||0)/INSTALL_BASE));return rate?<div key={i} className="calc-row"><span>線型燈（{cg?.label}）{g.meters}m × NT${rate}</span><span>NT$ {(rate*Number(g.meters)).toLocaleString()}</span></div>:<div key={i} className="calc-row" style={{color:"var(--red)"}}><span>線型燈（{cg?.label}）{g.meters}m</span><span>另案報價</span></div>;})}
                     </>}
-                    {!isLinear&&instCalc&&<><div className="calc-row"><span>崁燈工資（{instCalc.totalQty} 盞 × NT$200）</span><span>NT$ {instCalc.laborTotal.toLocaleString()}</span></div>{instCalc.hasVHigh&&<div className="calc-warn">4.5m 以上不含安裝費，需另案報價</div>}</>}
+                    {instCalc&&instCalc.laborTotal<=INSTALL_MIN&&(instCalc.totalQty>0||totalLinearM>0)&&<div className="calc-warn">未達最低出勤費，以 NT$2,000 計收</div>}
                     <div className="calc-row"><span>車馬費</span><span>{reg?.travel===null?"另議":instCalc?.travelFee===0?<span style={{color:"var(--green)"}}>免收</span>:`NT$ ${(reg?.travel||0).toLocaleString()}`}</span></div>
                     {instCalc&&<div className="calc-row" style={{fontSize:10,color:"var(--muted)",borderBottom:"none"}}><span>合計單位（崁燈 {instCalc.totalQty||0} 盞 + 線型 {instCalc.totalMeters||0} 米 = {instCalc.totalUnits||0} 單位）</span><span>{instCalc.reg?.freeAt?`門檻：${instCalc.reg.freeAt} 單位`:""}</span></div>}
                     {total!==null&&<div className="calc-row total"><span>預估合計</span><span>NT$ {total.toLocaleString()}</span></div>}
