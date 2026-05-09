@@ -903,7 +903,7 @@ function generateInstallPDF({projectName, customer, instCalc, instRegion, instGr
 // ═══════════════════════════════════════════
 //  主元件
 // ═══════════════════════════════════════════
-export default function App() {
+function App() {
   const [syncStatus, setSyncStatus] = useState("off");
   const [sheetUrl,   setSheetUrl]   = useState(SHEET_URL);
   const [urlInput,   setUrlInput]   = useState(SHEET_URL);
@@ -1386,7 +1386,7 @@ export default function App() {
           <div className="modal-body">
             <div className="hint-box" style={{marginBottom:20}}>
               <strong style={{display:"block",marginBottom:5,color:"var(--blk)"}}>LEDOUX 專業安裝服務</strong>
-              崁燈 NT$340/盞 · 線型燈 NT$840/米 · 最低出勤費 NT$2,000<br/>
+              崁燈 NT$200/盞 · 線型燈 NT$500/米 · 最低出勤費 NT$2,000<br/>
               請事先完成開孔、拉好電線至預定位置。
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
@@ -2047,7 +2047,7 @@ export default function App() {
                   <div className="ip-sec-title">安裝長度（米）</div>
                   <div className="group-row">
                     <input className="gr-qty" type="number" min="1" style={{width:80}} value={linearMeters} onChange={e=>setLinearMeters(Math.max(1,Number(e.target.value)))}/>
-                    <span style={{fontSize:11,color:"var(--muted)"}}>米 × NT$840/米</span>
+                    <span style={{fontSize:11,color:"var(--muted)"}}>米 × NT$500/米</span>
                   </div>
                 </div>
               )}
