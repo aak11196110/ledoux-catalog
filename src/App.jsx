@@ -1508,7 +1508,6 @@ function App() {
           {seriesExp&&COMMERCIAL_SERIES.map(s=>(
             <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{s}
-              {!allSeries.includes(s)&&<span style={{fontSize:"8px",color:"var(--muted)",marginLeft:4}}>（即將上架）</span>}
             </div>
           ))}
           <div className="sm-group-hd" onClick={()=>setCatExp(v=>!v)}>
@@ -1518,7 +1517,6 @@ function App() {
           {catExp&&LINEAR_SERIES_LIST.map(s=>(
             <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{s}
-              {!allSeries.includes(s)&&<span style={{fontSize:"8px",color:"var(--muted)",marginLeft:4}}>（即將上架）</span>}
             </div>
           ))}
           <div className="sm-divider"/>
