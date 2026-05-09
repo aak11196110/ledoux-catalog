@@ -243,7 +243,7 @@ const G = `
   --bdr:#d8d0c4;--bdr2:#e8e2d8;--red:#9b3a3a;--green:#3a6b4a;
   --inv-green:#2d5a3d;--inv-green-light:#edf6f0;
 }
-body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;letter-spacing:.3px;font-size:14px}
+body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;letter-spacing:.3px;font-size:14px;font-feature-settings:'tnum' 1}*{box-sizing:border-box}
 .auth-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--blk)}
 @media(max-width:768px){.auth-page{grid-template-columns:1fr}.auth-visual{display:none}}
 .auth-visual{background:linear-gradient(160deg,#1a1612 0%,#0e0d0c 100%);display:flex;flex-direction:column;padding:64px;border-right:0.5px solid #2a2520;position:relative;overflow:hidden}
@@ -502,7 +502,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .tbl-wrap{border:0.5px solid var(--bdr2);overflow:auto;margin-bottom:18px}
 table{width:100%;border-collapse:collapse;min-width:500px}
 th{text-align:left;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding:9px 12px;border-bottom:0.5px solid var(--bdr2);background:#f4efe8;font-weight:400}
-td{padding:10px 12px;border-bottom:0.5px solid var(--bdr2);font-size:13px}
+td{padding:10px 12px;border-bottom:0.5px solid var(--bdr2);font-size:13px;font-variant-numeric:tabular-nums}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f7f2eb}
 .rb{font-size:7px;padding:2px 7px;letter-spacing:2px;text-transform:uppercase;border:0.5px solid;display:inline-block}
@@ -1348,7 +1348,7 @@ function App() {
     }
     sendNotifyEmail(
       `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
-      `報價單已下載\n\n客戶：${customer.name}\n公司：${customer.company||"—"}\n案名：${projName}\n折扣：${discountLabel||"牌價"}\n\n品項：\n${cart.map(i=>`${i.product.model} × ${i.qty}`).join("\n")}\n小計：NT$ ${lampSubtotal.toLocaleString()}\n時間：${new Date().toLocaleString("zh-TW")}`
+      `━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round((isVip?Number(p.projPrice):Number(p.stdPrice))*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${Math.round(lampSubtotal*0.05).toLocaleString()}\n含稅總計：NT$ ${Math.round(lampSubtotal*1.05).toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`
     );
     toast$("報價單已下載");
   };
@@ -1505,18 +1505,20 @@ function App() {
             <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>商照燈系列</span>
             <span className={`sm-group-arrow ${seriesExp?"open":""}`}>›</span>
           </div>
-          {seriesExp&&COMMERCIAL_SERIES.filter(s=>allSeries.includes(s)).map(s=>(
+          {seriesExp&&COMMERCIAL_SERIES.map(s=>(
             <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{s}
+              {!allSeries.includes(s)&&<span style={{fontSize:"8px",color:"var(--muted)",marginLeft:4}}>（即將上架）</span>}
             </div>
           ))}
           <div className="sm-group-hd" onClick={()=>setCatExp(v=>!v)}>
             <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>線型燈系列</span>
             <span className={`sm-group-arrow ${catExp?"open":""}`}>›</span>
           </div>
-          {catExp&&LINEAR_SERIES_LIST.filter(s=>allSeries.includes(s)).map(s=>(
+          {catExp&&LINEAR_SERIES_LIST.map(s=>(
             <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{s}
+              {!allSeries.includes(s)&&<span style={{fontSize:"8px",color:"var(--muted)",marginLeft:4}}>（即將上架）</span>}
             </div>
           ))}
           <div className="sm-divider"/>
