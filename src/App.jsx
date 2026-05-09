@@ -229,7 +229,7 @@ const G = `
   --bdr:#d8d0c4;--bdr2:#e8e2d8;--red:#9b3a3a;--green:#3a6b4a;
   --inv-green:#2d5a3d;--inv-green-light:#edf6f0;
 }
-body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;letter-spacing:.3px}
+body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;letter-spacing:.3px;font-size:14px}
 .auth-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--blk)}
 @media(max-width:768px){.auth-page{grid-template-columns:1fr}.auth-visual{display:none}}
 .auth-visual{background:linear-gradient(160deg,#1a1612 0%,#0e0d0c 100%);display:flex;flex-direction:column;padding:64px;border-right:0.5px solid #2a2520;position:relative;overflow:hidden}
@@ -369,8 +369,8 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .pcard-img img{max-height:150px;max-width:80%;object-fit:contain;transition:transform .5s ease}
 .pcard-body{padding:17px 19px 21px;flex:1;display:flex;flex-direction:column}
 .pcard-series{font-size:7px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
-.pcard-model{font-size:15px;font-family:'Cormorant Garamond',serif;font-weight:400;color:var(--blk);margin-bottom:5px}
-.pcard-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;flex:1}
+.pcard-model{font-size:16px;font-family:'Cormorant Garamond',serif;font-weight:400;color:var(--blk);margin-bottom:5px}
+.pcard-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;flex:1}
 .pcard-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
 .ptag{font-size:8px;padding:2px 7px;border:0.5px solid var(--bdr);color:var(--muted);letter-spacing:.5px}
 .ptag.stag{color:#3a6b4a;border-color:rgba(58,107,74,.4)}
@@ -394,14 +394,14 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .cdot.on{background:#fff}
 .drawer-body{padding:26px;flex:1}
 .drawer-model{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:5px;letter-spacing:.5px}
-.drawer-desc{font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px}
+.drawer-desc{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:16px}
 .inv-badge-drawer{display:inline-flex;align-items:center;gap:6px;background:#edf6f0;border:0.5px solid #3a6b4a;padding:5px 12px;margin-bottom:14px;font-size:9px;color:#2d5a3d;letter-spacing:2px;text-transform:uppercase}
 .inv-badge-dot{width:6px;height:6px;border-radius:50%;background:#3a6b4a;animation:pulse 2s infinite}
 .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
 .spec-item{border:0.5px solid var(--bdr2);padding:8px 11px}
 .spec-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.spec-val{font-size:11px;color:var(--blk)}
-.drawer-note{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.spec-val{font-size:13px;color:var(--blk)}
+.drawer-note{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px}
 .price-block{border-top:0.5px solid var(--bdr2);padding-top:16px;margin-bottom:16px}
 .pb-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
 .pb-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300}
@@ -425,8 +425,8 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .ci-img{width:48px;height:48px;background:#f0ebe2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ci-img img{max-width:40px;max-height:40px;object-fit:contain}
 .ci-info{flex:1;min-width:0}
-.ci-model{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:400}
-.ci-sub{font-size:9px;color:var(--muted);margin-top:1px}
+.ci-model{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:400}
+.ci-sub{font-size:11px;color:var(--muted);margin-top:1px}
 .ci-qty{display:flex;align-items:center;gap:6px;margin-top:6px}
 .qty-btn{width:20px;height:20px;border:0.5px solid var(--bdr);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--blk)}
 .qty-btn:hover{border-color:var(--gold)}
@@ -447,7 +447,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .btn-pdf{width:100%;padding:12px;background:var(--blk);border:none;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:background .2s}
 .btn-pdf:hover{background:var(--blk2)}
 .btn-pdf:disabled{opacity:.4;cursor:not-allowed}
-.sp-notice{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.sp-notice{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
 .samp-item{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:0.5px solid var(--bdr2)}
 .samp-item-img{width:38px;height:38px;background:#f0ebe2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .samp-item-img img{max-width:32px;max-height:32px;object-fit:contain}
@@ -463,7 +463,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .btn-gold:hover{background:var(--gold2)}
 .btn-gold:disabled{opacity:.4;cursor:not-allowed}
 .btn-ghost{width:100%;padding:10px;background:transparent;border:0.5px solid var(--bdr);color:var(--muted);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer}
-.inst-hint{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.inst-hint{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px}
 .ip-sec-title{font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;padding-bottom:7px;border-bottom:0.5px solid var(--bdr2)}
 .region-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:4px}
 .region-card{border:0.5px solid var(--bdr2);padding:9px;cursor:pointer;transition:all .2s;position:relative}
@@ -488,7 +488,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .tbl-wrap{border:0.5px solid var(--bdr2);overflow:auto;margin-bottom:18px}
 table{width:100%;border-collapse:collapse;min-width:500px}
 th{text-align:left;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding:9px 12px;border-bottom:0.5px solid var(--bdr2);background:#f4efe8;font-weight:400}
-td{padding:10px 12px;border-bottom:0.5px solid var(--bdr2);font-size:11px}
+td{padding:10px 12px;border-bottom:0.5px solid var(--bdr2);font-size:13px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f7f2eb}
 .rb{font-size:7px;padding:2px 7px;letter-spacing:2px;text-transform:uppercase;border:0.5px solid;display:inline-block}
@@ -521,7 +521,7 @@ tr:hover td{background:#f7f2eb}
 .modal-head{padding:20px 24px;border-bottom:0.5px solid var(--bdr2);display:flex;justify-content:space-between;align-items:center}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300}
 .modal-body{padding:22px}
-.hint-box{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.hint-box{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
 .install-tbl{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px}
 .install-tbl th{background:#f4efe8;padding:7px 10px;text-align:left;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:0.5px solid var(--bdr2);font-weight:400}
 .install-tbl td{padding:9px 10px;border-bottom:0.5px solid var(--bdr2);vertical-align:top}
@@ -562,12 +562,12 @@ tr:hover td{background:#f7f2eb}
 .inv-qty-num.avail{color:var(--inv-green)}
 .inv-qty-lbl{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
 .inv-card-footer{display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--bdr2);padding-top:10px}
-.inv-location{font-size:9px;color:var(--muted);letter-spacing:.5px}
+.inv-location{font-size:11px;color:var(--muted);letter-spacing:.5px}
 .inv-updated{font-size:9px;color:var(--muted)}
 .btn-inv-cart{padding:6px 14px;background:var(--inv-green);border:none;color:#fff;font-family:'Noto Sans TC',sans-serif;font-size:8px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:background .2s}
 .btn-inv-cart:hover{background:#2d5a3d}
 .btn-inv-cart:disabled{opacity:.4;cursor:not-allowed;background:var(--muted)}
-.inv-note{font-size:10px;color:var(--muted);background:#f4efe8;padding:6px 9px;border-left:2px solid var(--gold);line-height:1.6}
+.inv-note{font-size:12px;color:var(--muted);background:#f4efe8;padding:6px 9px;border-left:2px solid var(--gold);line-height:1.6}
 .inv-admin-tbl input[type=number]{width:70px;padding:4px 6px;border:0.5px solid var(--bdr);background:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:12px;text-align:center;outline:none}
 .inv-admin-tbl input[type=number]:focus{border-color:var(--gold)}
 .btn-save-inv{font-size:8px;padding:4px 10px;border:0.5px solid rgba(58,107,74,.5);background:transparent;color:var(--green);cursor:pointer;letter-spacing:1px;white-space:nowrap}
@@ -654,21 +654,37 @@ function getSuggestions(products, q) {
   const lq = q.toLowerCase();
   return [...new Set(products.flatMap(p=>[p.model,p.series,p.category,p.watt,p.cct,p.color].filter(v=>v&&v.toLowerCase().includes(lq))))].slice(0,6);
 }
-function calcInstall(regionId, groups) {
+function calcInstall(regionId, groups, linearGroups=[]) {
   if (!regionId) return null;
   const reg = INSTALL_REGIONS.find(r=>r.id===regionId);
   if (!reg) return null;
+  // 崁燈盞數
   const totalQty = groups.reduce((s,g)=>s+Number(g.qty||0),0);
+  // 線型燈米數
+  const totalMeters = linearGroups.reduce((s,g)=>s+Number(g.meters||0),0);
+  // 單位合計（1盞=1單位，1米=1單位）用於免車馬費門檻
+  const totalUnits = totalQty + totalMeters;
   let laborTotal=0, hasVHigh=false;
+  // 崁燈工資
   for (const g of groups) {
     const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId), qty=Number(g.qty||0);
     if (!cg) continue;
     if (cg.surcharge===null){hasVHigh=true;continue;}
     laborTotal += (INSTALL_BASE+cg.surcharge)*qty;
   }
-  laborTotal = Math.max(laborTotal, INSTALL_MIN);
-  const travelFee = reg.travel===null ? null : (reg.freeAt&&totalQty>=reg.freeAt) ? 0 : reg.travel;
-  return {totalQty,laborTotal,travelFee,hasVHigh,reg};
+  // 線型燈工資（各段依高度計算）
+  for (const g of linearGroups) {
+    const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId), meters=Number(g.meters||0);
+    if (!cg) continue;
+    if (cg.surcharge===null){hasVHigh=true;continue;}
+    // 線型燈基本費 INSTALL_LINEAR_M + 挑高加計（按比例）
+    const linearSurchargeRate = cg.surcharge > 0 ? (cg.surcharge / INSTALL_BASE) : 0;
+    const effectiveRate = INSTALL_LINEAR_M * (1 + linearSurchargeRate);
+    laborTotal += effectiveRate * meters;
+  }
+  laborTotal = Math.max(Math.round(laborTotal), INSTALL_MIN);
+  const travelFee = reg.travel===null ? null : (reg.freeAt&&totalUnits>=reg.freeAt) ? 0 : reg.travel;
+  return {totalQty,totalMeters,totalUnits,laborTotal,travelFee,hasVHigh,reg};
 }
 
 function Carousel({images}) {
@@ -871,18 +887,24 @@ ${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>
   URL.revokeObjectURL(url);
 }
 
-function generateInstallPDF({projectName, customer, instCalc, instRegion, instGroups, linearMeters, instNote}) {
+function generateInstallPDF({projectName, customer, instCalc, instRegion, instGroups, linearGroups=[], linearMeters, instNote}) {
   const today=new Date();
   const ds=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const qn=`INST${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
   const isLinear = instGroups[0]?.type==="linear";
-  const laborCost = isLinear ? Math.max(linearMeters*500,2000) : (instCalc?.laborTotal||0); // NT$500/米
+  const laborCost = instCalc?.laborTotal || 0;
   const travel = instCalc?.travelFee||0;
   const total = laborCost + travel;
   const regLabel = INSTALL_REGIONS.find(r=>r.id===instRegion)?.label||instRegion;
   const itemRows = isLinear
-    ? `<tr><td>1</td><td><b>線型燈安裝工資</b><br><span style="font-size:10px;color:#666">${linearMeters} 米 × NT$500/米（直線安裝）</span></td><td style="text-align:center">${linearMeters} 米</td><td style="text-align:right">NT$ 840</td><td style="text-align:right">NT$ ${laborCost.toLocaleString()}</td></tr>`
-    : instGroups.map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const surcharge=cg?.surcharge||0;const unit=340+surcharge;const sub=unit*Number(g.qty);return`<tr><td>${i+1}</td><td><b>崁燈安裝（${cg?.label||""}）</b></td><td style="text-align:center">${g.qty} 盞</td><td style="text-align:right">NT$ ${unit.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;}).join("");
+    ? (linearGroups.length>0 ? linearGroups : [{meters:linearMeters,ceilingId:"std"}]).map((g,i)=>{
+        const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+        if(!cg||cg.surcharge===null) return `<tr><td>${i+1}</td><td><b>線型燈安裝（${cg?.label||""}）</b></td><td style="text-align:center">${g.meters} 米</td><td style="text-align:right">另案報價</td><td style="text-align:right">另案報價</td></tr>`;
+        const rate=Math.round(INSTALL_LINEAR_M*(1+cg.surcharge/INSTALL_BASE));
+        const sub=rate*g.meters;
+        return `<tr><td>${i+1}</td><td><b>線型燈安裝（${cg.label}）</b><br><span style="font-size:10px;color:#666">${g.meters} 米 × NT$${rate}/米</span></td><td style="text-align:center">${g.meters} 米</td><td style="text-align:right">NT$ ${rate.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;
+      }).join("")
+    : instGroups.map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const surcharge=cg?.surcharge||0;const unit=INSTALL_BASE+surcharge;const sub=unit*Number(g.qty);return`<tr><td>${i+1}</td><td><b>崁燈安裝（${cg?.label||""}）</b></td><td style="text-align:center">${g.qty} 盞</td><td style="text-align:right">NT$ ${unit.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;}).join("");
   const travelRow = travel>0 ? `<tr><td>—</td><td><b>車馬費</b><br><span style="font-size:10px;color:#666">${regLabel}</span></td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${travel.toLocaleString()}</td><td style="text-align:right">NT$ ${travel.toLocaleString()}</td></tr>` : `<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達免收門檻）</td></tr>`;
   const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>安裝報價單 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.co-sub{font-size:10px;color:#555;margin-top:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:14px}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666;letter-spacing:1px}.mv{font-weight:500;margin-top:1px}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:11px}th{background:#111;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:5px 7px;border-bottom:1px solid #e8e8e8}.subtotal-row td{font-weight:600;color:#b8935a;background:#f9f5ee}.tot{display:flex;justify-content:flex-end;margin:12px 0}.tt{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid #eee;font-size:11px}.tr.bold{font-weight:700;font-size:14px;background:#0e0d0c;color:#fff;padding:10px 12px}.notes{border:1px solid #ccc;padding:10px 12px;margin-bottom:12px;font-size:10px;line-height:2;color:#444}.footer{margin-top:14px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;text-align:center}</style></head><body>
 <div class="hd"><div><div class="co-name">${COMPANY.name}</div><div class="co-sub">${COMPANY.eng}</div></div><div style="font-size:10px;color:#555;text-align:right">${COMPANY.email}</div></div>
@@ -951,6 +973,7 @@ function App() {
   const [instDone,   setInstDone]   = useState(false);
   const [linearMeters,  setLinearMeters]  = useState(1);
   const [quickRecessed, setQuickRecessed] = useState(10);
+  const [linearGroups,  setLinearGroups]  = useState([{meters:1,ceilingId:"std"}]);
   const [newProd,    setNewProd]    = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K/4000K",beam:"24°",voltage:"220V",cri:"Ra≥80",color:"白色",cutout:"",size:"",install:"崁入式",cert:"",shipping:"90",stdPrice:"",projPrice:"",video:"",desc:"",images:"",note:""});
   const [editInvItem,setEditInvItem]= useState(null);
   const [newInv,     setNewInv]     = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""});
@@ -980,6 +1003,11 @@ function App() {
   const isVip   = user?.role==="vip"||isAdmin;
 
   const cartCount  = cart.reduce((s,i)=>s+i.qty,0);
+  const cartLampQty = cart.reduce((s,i)=>s+i.qty,0); // 購物車燈具總盞數（安裝上限用）
+  const cartLinearMeters = cart.reduce((s,i)=>{ // 線型燈總米數（從購物車的鋁條燈計算）
+    if(i.product.category==="鋁條燈") return s + i.qty;
+    return s;
+  }, 0);
   const cartTotal  = cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
   const allChecked = Object.values(checks).every(Boolean);
   const allSeries  = [...new Set(products.map(p=>p.series))];
@@ -1049,7 +1077,7 @@ function App() {
 
   const filteredInv = invCat==="全部" ? inventory : inventory.filter(i=>i.category===invCat);
   const suggs = getSuggestions(products, searchQ);
-  const instCalc = calcInstall(instRegion, instGroups);
+  const instCalc = calcInstall(instRegion, instGroups, linearGroups);
   const hasStock = model => inventory.some(i=>i.model===model&&Number(i.availableQty)>0);
   const doSearch = q => { setSearchQ(q); if(q.trim()&&!searchHist.includes(q)) setSearchHist(h=>[q,...h].slice(0,8)); setSearchFocus(false); setPage("catalog"); };
 
@@ -1088,7 +1116,7 @@ function App() {
     setInstDone(true);
     toast$("安裝申請已送出");
     const reg=INSTALL_REGIONS.find(r=>r.id===instRegion);
-    const laborCost=isLinear?Math.max(linearMeters*INSTALL_LINEAR_M,INSTALL_MIN):instCalc.laborTotal;
+    const laborCost=isLinear?instCalc.laborTotal:instCalc.laborTotal;
     const total=instCalc.travelFee!==null?laborCost+(instCalc.travelFee||0):null;
     await sendNotifyEmail(
       `【安裝申請】${user.name}（${user.company||"訪客"}）`,
@@ -1104,7 +1132,7 @@ function App() {
     generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:null,isVip,discountRate,discountLabel});
     // 若有安裝需求，另外生成安裝報價單
     if(installChoice===true && instRegion && instCalc){
-      generateInstallPDF({projectName:projName,customer,instCalc,instRegion,instGroups,linearMeters,instNote});
+      generateInstallPDF({projectName:projName,customer,instCalc,instRegion,instGroups,linearGroups,linearMeters,instNote});
     }
     const baseSubtotal=cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
     const lampSubtotal=Math.round(baseSubtotal*discountRate);
@@ -2005,9 +2033,11 @@ function App() {
           ):(
             <>
               <div className="inst-hint">
-        最低出勤費 NT$2,000。<strong>崁燈 NT$200/盞</strong>；<strong>線型燈 NT$500/米</strong>（直線安裝）。<br/>
-        <span style={{color:"var(--red)"}}>請事先完成開孔，並將電線拉至各燈具預定位置。</span><br/>
-        線型燈須預留燈槽退縮空間，無法退縮將無法施工。不含多折角、弧形、戶外安裝。
+        <strong style={{color:"var(--blk)",display:"block",marginBottom:4}}>📐 安裝費用試算工具</strong>
+        此工具僅供費用試算參考，實際安裝請送出申請由業務確認。<br/>
+        崁燈 <strong>NT$200/盞</strong>（3m以下）；線型燈 <strong>NT$500/米</strong>（直線）；最低出勤 NT$2,000。<br/>
+        <span style={{color:"var(--red)"}}>⚠ 請事先完成開孔，並將電線拉至各燈具預定位置。</span><br/>
+        線型燈須預留退縮空間（≥5cm），無法退縮將記錄並無法施工。
       </div>
               {/* ✅ 設計公司提示 — Panel 內也顯示 */}
               <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
@@ -2029,39 +2059,65 @@ function App() {
               {(!instGroups[0]?.type||instGroups[0]?.type==="recessed")&&(
                 <div style={{marginBottom:18}}>
                   <div className="ip-sec-title">安裝數量 ＆ 天花高度</div>
-                  {instGroups.map((g,i)=>(
+                  {(()=>{const totalInstQty=instGroups.reduce((s,g)=>s+Number(g.qty||0),0);return cartLampQty>0&&totalInstQty>cartLampQty&&<div style={{fontSize:11,color:"var(--red)",marginBottom:6,padding:"5px 9px",background:"#fdf0f0",border:"0.5px solid var(--red)"}}>⚠ 安裝盞數（{totalInstQty}）超過購物車燈具數量（{cartLampQty}），請確認數量是否正確</div>;})()}
+                  {instGroups.map((g,i)=>{
+                    const totalSoFar=instGroups.slice(0,i).reduce((s,x)=>s+Number(x.qty||0),0);
+                    const maxForThis=cartLampQty>0?Math.max(1,cartLampQty-totalSoFar):999;
+                    return(
                     <div key={i} className="group-row">
                       <select className="gr-sel" value={g.ceilingId} onChange={e=>setInstGroups(gs=>gs.map((x,j)=>j===i?{...x,ceilingId:e.target.value}:x))}>
                         {CEILING_GROUPS.map(c=><option key={c.id} value={c.id}>{c.label}{c.surcharge===null?" — 另案報價":c.surcharge>0?` +NT$${c.surcharge}/盞`:""}</option>)}
                       </select>
-                      <input className="gr-qty" type="number" min="1" value={g.qty} onChange={e=>setInstGroups(gs=>gs.map((x,j)=>j===i?{...x,qty:e.target.value}:x))}/>
+                      <input className="gr-qty" type="number" min="1" max={cartLampQty>0?cartLampQty:999} value={g.qty}
+                        onChange={e=>setInstGroups(gs=>gs.map((x,j)=>j===i?{...x,qty:e.target.value}:x))}/>
                       <span style={{fontSize:10,color:"var(--muted)"}}>盞</span>
+                      {cartLampQty>0&&Number(g.qty)>maxForThis&&<span style={{fontSize:9,color:"var(--red)"}}>超出</span>}
                       {instGroups.length>1&&<button style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",display:"flex"}} onClick={()=>setInstGroups(gs=>gs.filter((_,j)=>j!==i))}><CloseIcon/></button>}
                     </div>
-                  ))}
-                  <button style={{padding:"6px 14px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"7px",letterSpacing:"2px",cursor:"pointer",textTransform:"uppercase"}} onClick={()=>setInstGroups(gs=>[...gs,{ceilingId:"std",qty:1,type:"recessed"}])}>新增不同高度</button>
+                  );})}
+                  {cartLampQty>0&&<div style={{fontSize:11,color:"var(--muted)",marginBottom:4}}>購物車燈具：{cartLampQty} 盞，已分配：{instGroups.reduce((s,g)=>s+Number(g.qty||0),0)} 盞</div>}
+                  <button style={{padding:"6px 14px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"7px",letterSpacing:"2px",cursor:"pointer",textTransform:"uppercase"}} onClick={()=>setInstGroups(gs=>[...gs,{ceilingId:"std",qty:1,type:"recessed"}])}>＋ 新增不同高度</button>
                 </div>
               )}
               {instGroups[0]?.type==="linear"&&(
                 <div style={{marginBottom:18}}>
-                  <div className="ip-sec-title">安裝長度（米）</div>
-                  <div className="group-row">
-                    <input className="gr-qty" type="number" min="1" style={{width:80}} value={linearMeters} onChange={e=>setLinearMeters(Math.max(1,Number(e.target.value)))}/>
-                    <span style={{fontSize:11,color:"var(--muted)"}}>米 × NT$500/米</span>
-                  </div>
+                  <div className="ip-sec-title">線型燈分段輸入（可新增不同高度）</div>
+                  {linearGroups.map((g,i)=>{
+                    const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+                    const unitRate=cg?.surcharge===null?null:Math.round(INSTALL_LINEAR_M*(1+(cg?.surcharge||0)/INSTALL_BASE));
+                    return(
+                    <div key={i} className="group-row" style={{flexWrap:"wrap",gap:6}}>
+                      <select className="gr-sel" style={{minWidth:180}} value={g.ceilingId} onChange={e=>setLinearGroups(gs=>gs.map((x,j)=>j===i?{...x,ceilingId:e.target.value}:x))}>
+                        {CEILING_GROUPS.map(c=><option key={c.id} value={c.id}>{c.label}{c.surcharge===null?" — 另案報價":c.surcharge>0?` (NT$${Math.round(INSTALL_LINEAR_M*(1+c.surcharge/INSTALL_BASE))}/米)`:` (NT$${INSTALL_LINEAR_M}/米)`}</option>)}
+                      </select>
+                      <input className="gr-qty" type="number" min="1" style={{width:70}} value={g.meters}
+                        onChange={e=>setLinearGroups(gs=>gs.map((x,j)=>j===i?{...x,meters:Math.max(1,Number(e.target.value))}:x))}/>
+                      <span style={{fontSize:11,color:"var(--muted)"}}>米</span>
+                      {unitRate&&<span style={{fontSize:10,color:"var(--gold)"}}>= NT$ {(unitRate*g.meters).toLocaleString()}</span>}
+                      {cg?.surcharge===null&&<span style={{fontSize:10,color:"var(--red)"}}>另案報價</span>}
+                      {linearGroups.length>1&&<button style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",display:"flex"}} onClick={()=>setLinearGroups(gs=>gs.filter((_,j)=>j!==i))}><CloseIcon/></button>}
+                    </div>
+                  );})}
+                  <button style={{padding:"6px 14px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"7px",letterSpacing:"2px",cursor:"pointer",textTransform:"uppercase",marginTop:4}} onClick={()=>setLinearGroups(gs=>[...gs,{meters:1,ceilingId:"std"}])}>＋ 新增不同高度段</button>
+                  {(()=>{const totalM=linearGroups.reduce((s,g)=>s+Number(g.meters||0),0);return totalM>0&&<div style={{fontSize:11,color:"var(--muted)",marginTop:8}}>線型燈合計：{totalM} 米</div>;})()}
                 </div>
               )}
               {instRegion&&<div className="calc-box">
                 {(()=>{
                   const reg=INSTALL_REGIONS.find(r=>r.id===instRegion);
                   const isLinear=instGroups[0]?.type==="linear";
-                  const laborCost=isLinear?Math.max(linearMeters*INSTALL_LINEAR_M,INSTALL_MIN):instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null; // INSTALL_LINEAR_M=500
+                  const totalLinearM=linearGroups.reduce((s,g)=>s+Number(g.meters||0),0);
+                  const laborCost=isLinear?instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null:instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null;
                   const travel=reg?.travel===null?null:(instCalc?.travelFee??reg?.travel??0);
                   const total=laborCost!==null&&travel!==null?laborCost+(travel||0):null;
                   return(<>
-                    {isLinear&&<><div className="calc-row"><span>線型燈工資（{linearMeters}m × NT$500）</span><span>NT$ {(linearMeters*INSTALL_LINEAR_M).toLocaleString()}</span></div>{linearMeters*INSTALL_LINEAR_M<INSTALL_MIN&&<div className="calc-warn">未達最低出勤費，以 NT$2,000 計收</div>}</>}
+                    {isLinear&&<>
+                      {linearGroups.map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const rate=cg?.surcharge===null?null:Math.round(INSTALL_LINEAR_M*(1+(cg?.surcharge||0)/INSTALL_BASE));return rate?<div key={i} className="calc-row"><span>{cg?.label} {g.meters}m × NT${rate}</span><span>NT$ {(rate*g.meters).toLocaleString()}</span></div>:<div key={i} className="calc-row" style={{color:"var(--red)"}}><span>{cg?.label} {g.meters}m</span><span>另案報價</span></div>;})}
+                      {instCalc&&instCalc.laborTotal<INSTALL_MIN&&<div className="calc-warn">未達最低出勤費，以 NT$2,000 計收</div>}
+                    </>}
                     {!isLinear&&instCalc&&<><div className="calc-row"><span>崁燈工資（{instCalc.totalQty} 盞 × NT$200）</span><span>NT$ {instCalc.laborTotal.toLocaleString()}</span></div>{instCalc.hasVHigh&&<div className="calc-warn">4.5m 以上不含安裝費，需另案報價</div>}</>}
                     <div className="calc-row"><span>車馬費</span><span>{reg?.travel===null?"另議":instCalc?.travelFee===0?<span style={{color:"var(--green)"}}>免收</span>:`NT$ ${(reg?.travel||0).toLocaleString()}`}</span></div>
+                    {instCalc&&<div className="calc-row" style={{fontSize:10,color:"var(--muted)",borderBottom:"none"}}><span>合計單位（崁燈 {instCalc.totalQty||0} 盞 + 線型 {instCalc.totalMeters||0} 米 = {instCalc.totalUnits||0} 單位）</span><span>{instCalc.reg?.freeAt?`門檻：${instCalc.reg.freeAt} 單位`:""}</span></div>}
                     {total!==null&&<div className="calc-row total"><span>預估合計</span><span>NT$ {total.toLocaleString()}</span></div>}
                     <div style={{fontSize:9,color:"#5a4a3a",marginTop:8,cursor:"pointer",textDecoration:"underline"}} onClick={()=>setContactModal(true)}>設計公司或合作專案可洽業務獲取專案優惠報價 →</div>
                   </>);
@@ -2072,6 +2128,10 @@ function App() {
           )}
         </div>
         {!instDone&&<div className="sp-foot">
+          {instCalc&&<div style={{fontSize:11,color:"var(--muted)",marginBottom:8,padding:"7px 10px",background:"#f4efe8",borderLeft:"2px solid var(--gold)"}}>
+            合計：{instCalc.totalQty||0} 盞 + {instCalc.totalMeters||0} 米 = {instCalc.totalUnits||0} 單位
+            {instCalc.reg?.freeAt&&<span style={{color:instCalc.totalUnits>=instCalc.reg.freeAt?"var(--green)":"var(--red)",marginLeft:8}}>{instCalc.totalUnits>=instCalc.reg.freeAt?"✓ 達免車馬費門檻":`差 ${instCalc.reg.freeAt-instCalc.totalUnits} 單位可免車馬費`}</span>}
+          </div>}
           {installChoice===true&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成選擇 · 下載整合報價單</button>}
           <button className="btn-gold" onClick={submitInst} disabled={!instRegion}>送出安裝申請（通知業務）</button>
           <button className="btn-ghost" onClick={()=>{setInstOpen(false);if(installChoice===true)doActualDownload();}}>跳過安裝 · 直接下載燈具報價單</button>
