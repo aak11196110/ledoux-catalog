@@ -6,7 +6,31 @@
 //  3. Email 通知：樣品申請、安裝申請、報價單下載、配燈服務申請
 //  4. 設計公司專案提示橫幅：出現在產品目錄、詢價單、安裝服務、電子型錄、詢價側邊欄、安裝估價 Panel
 // ═══════════════════════════════════════════
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Component } from "react";
+
+// ✅ ErrorBoundary：防止任何 JS 錯誤導致白屏，改為顯示錯誤訊息
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) { console.error("LEDOUX App Error:", error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#f7f4ef",flexDirection:"column",gap:16,padding:32}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,color:"#0e0d0c",letterSpacing:2}}>LEDOUX</div>
+          <div style={{fontSize:12,color:"#9b3a3a",letterSpacing:2,textTransform:"uppercase"}}>頁面發生錯誤</div>
+          <div style={{fontSize:11,color:"#8a8278",maxWidth:420,textAlign:"center",lineHeight:1.8}}>
+            {String(this.state.error?.message||"未知錯誤")}
+          </div>
+          <button onClick={()=>this.setState({hasError:false,error:null})} style={{padding:"10px 24px",background:"#0e0d0c",border:"none",color:"#f7f4ef",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"9px",letterSpacing:"4px",cursor:"pointer",textTransform:"uppercase",marginTop:8}}>
+            重新整理
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbzUt6rAkwrPbf0FsToBrkgq6Vq8hh70-QPQ_11yu9uVteFBYec7MZNzEuV6DfFvs_CezA/exec";
 const ADMIN_USERNAME = "xxx3903052";
@@ -674,19 +698,20 @@ function ProjBanner({onContact}) {
   );
 }
 
-function generatePDF({cart, projectName, customer, installCalc, isVip}) {
+function generatePDF({cart, projectName, customer, installCalc, isVip, discountRate=1, discountLabel=""}) {
   const today=new Date();
   const ds=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const qn=`Q${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
-  const priceLabel = isVip ? "專案價" : "建議牌價";
-  const lampSubtotal = cart.reduce((s,it)=>s+(isVip?it.product.projPrice:it.product.stdPrice)*it.qty,0);
+  const priceLabel = discountRate<1 ? `${discountLabel} 折扣價` : isVip ? "專案價" : "建議牌價";
+  const baseSubtotal = cart.reduce((s,it)=>s+(Number(isVip?it.product.projPrice:it.product.stdPrice)||0)*it.qty,0);
+  const lampSubtotal = Math.round(baseSubtotal * discountRate);
   const needShip = lampSubtotal<3000;
   const shipFee  = needShip?cart.reduce((s,it)=>s+(it.product.shipping||90)*it.qty,0):0;
   const instSubtotal = installCalc&&!installCalc.hasVHigh&&installCalc.travelFee!==null
     ? installCalc.laborTotal+(installCalc.travelFee||0) : 0;
   const total = roundPrice(lampSubtotal + shipFee + instSubtotal);
   const lampRows = cart.map((item,i)=>{
-    const p=isVip?item.product.projPrice:item.product.stdPrice;
+    const baseP=Number(isVip?item.product.projPrice:item.product.stdPrice)||0; const p=Math.round(baseP*discountRate);
     return `<tr><td>${i+1}</td><td><b>${item.product.model}</b><br><span style="font-size:10px;color:#666">${item.product.series}</span></td><td>${item.product.watt||""}</td><td>${item.product.beam||""}</td><td>${item.product.cct||""}</td><td>${item.product.voltage||""}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">NT$ ${p.toLocaleString()}</td><td style="text-align:right">NT$ ${(p*item.qty).toLocaleString()}</td></tr>`;
   }).join("");
   const instRows = instSubtotal>0 ? `
@@ -710,6 +735,35 @@ ${instSubtotal>0?`<div class="sec-hd">二、專業安裝服務</div><table><thea
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
   a.href=url; a.download=`報價單_${projectName}_${qn}.html`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function generateInstallPDF({projectName, customer, instCalc, instRegion, instGroups, linearMeters, instNote}) {
+  const today=new Date();
+  const ds=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
+  const qn=`INST${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
+  const isLinear = instGroups[0]?.type==="linear";
+  const laborCost = isLinear ? Math.max(linearMeters*840,2000) : (instCalc?.laborTotal||0);
+  const travel = instCalc?.travelFee||0;
+  const total = laborCost + travel;
+  const regLabel = INSTALL_REGIONS.find(r=>r.id===instRegion)?.label||instRegion;
+  const itemRows = isLinear
+    ? `<tr><td>1</td><td><b>線型燈安裝工資</b><br><span style="font-size:10px;color:#666">${linearMeters} 米 × NT$840/米</span></td><td style="text-align:center">${linearMeters} 米</td><td style="text-align:right">NT$ 840</td><td style="text-align:right">NT$ ${laborCost.toLocaleString()}</td></tr>`
+    : instGroups.map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const surcharge=cg?.surcharge||0;const unit=340+surcharge;const sub=unit*Number(g.qty);return`<tr><td>${i+1}</td><td><b>崁燈安裝（${cg?.label||""}）</b></td><td style="text-align:center">${g.qty} 盞</td><td style="text-align:right">NT$ ${unit.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;}).join("");
+  const travelRow = travel>0 ? `<tr><td>—</td><td><b>車馬費</b><br><span style="font-size:10px;color:#666">${regLabel}</span></td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${travel.toLocaleString()}</td><td style="text-align:right">NT$ ${travel.toLocaleString()}</td></tr>` : `<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達免收門檻）</td></tr>`;
+  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>安裝報價單 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.co-sub{font-size:10px;color:#555;margin-top:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:14px}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666;letter-spacing:1px}.mv{font-weight:500;margin-top:1px}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:11px}th{background:#111;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:5px 7px;border-bottom:1px solid #e8e8e8}.subtotal-row td{font-weight:600;color:#b8935a;background:#f9f5ee}.tot{display:flex;justify-content:flex-end;margin:12px 0}.tt{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid #eee;font-size:11px}.tr.bold{font-weight:700;font-size:14px;background:#0e0d0c;color:#fff;padding:10px 12px}.notes{border:1px solid #ccc;padding:10px 12px;margin-bottom:12px;font-size:10px;line-height:2;color:#444}.footer{margin-top:14px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;text-align:center}</style></head><body>
+<div class="hd"><div><div class="co-name">${COMPANY.name}</div><div class="co-sub">${COMPANY.eng}</div></div><div style="font-size:10px;color:#555;text-align:right">${COMPANY.email}</div></div>
+<div class="doc-title">安裝服務報價單</div>
+<div class="meta"><div class="mc"><div class="ml">報價單號</div><div class="mv">${qn}</div></div><div class="mc"><div class="ml">報價日期</div><div class="mv">${ds}</div></div><div class="mc"><div class="ml">客戶公司</div><div class="mv">${customer.company||"—"}</div></div><div class="mc"><div class="ml">聯絡人</div><div class="mv">${customer.name||"—"}</div></div><div class="mc"><div class="ml">案名</div><div class="mv">${projectName}</div></div><div class="mc"><div class="ml">施工區域</div><div class="mv">${regLabel}</div></div></div>
+<table><thead><tr><th>#</th><th>安裝項目</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>${itemRows}${travelRow}<tr class="subtotal-row"><td colspan="3" style="text-align:right">合計</td><td></td><td style="text-align:right">NT$ ${total.toLocaleString()}</td></tr></tbody></table>
+<div class="tot"><div class="tt"><div class="tr bold"><span>安裝費用合計</span><span>NT$ ${total.toLocaleString()}</span></div></div></div>
+<div class="notes"><b>安裝服務說明：</b><br>A. 請業主於安裝前完成開孔、拉好電線至預定位置。<br>B. 最低出勤費 NT$2,000，未達此標以最低費計收。<br>C. 4.5m 以上不含安裝費，需鷹架或高空作業車另案報價。<br>D. 本報價單有效期 30 天。<br>${instNote?`E. 備註：${instNote}<br>`:""}</div>
+<div class="footer">${COMPANY.name} · 安裝服務報價單 · 出發地：桃園市八德區</div>
+</body></html>`;
+  const blob=new Blob([html],{type:"text/html;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=`安裝報價單_${projectName}_${qn}.html`; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -767,6 +821,13 @@ export default function App() {
   const [guestModal, setGuestModal] = useState(false);
   const [guestInfo,  setGuestInfo]  = useState({company:"",contact:"",phone:""});
   const [guestErr,   setGuestErr]   = useState({});
+  // 折扣碼
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountRate, setDiscountRate] = useState(1); // 1=牌價, 0.6/0.7/0.8=折扣
+  const [discountLabel, setDiscountLabel] = useState("");
+  // 安裝詢問 Modal
+  const [installAskModal, setInstallAskModal] = useState(false);
+  const [installChoice,   setInstallChoice]   = useState(null); // null/true/false
   const [inlineEdit, setInlineEdit] = useState(null);
   const [inlineData, setInlineData] = useState({});
   const [designForm, setDesignForm] = useState({company:"",name:"",phone:"",project:""});
@@ -774,8 +835,13 @@ export default function App() {
   const [activeTags, setActiveTags] = useState([]);
   const blurRef = useRef(null);
 
+  // ✅ 必須在 cartTotal 前宣告，否則 "Cannot access isVip before initialization"
+  const isGuest = user?.role==="guest";
+  const isAdmin = user?.role==="admin";
+  const isVip   = user?.role==="vip"||isAdmin;
+
   const cartCount  = cart.reduce((s,i)=>s+i.qty,0);
-  const cartTotal  = cart.reduce((s,i)=>s+(isVip?i.product.projPrice:i.product.stdPrice)*i.qty,0);
+  const cartTotal  = cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
   const allChecked = Object.values(checks).every(Boolean);
   const allSeries  = [...new Set(products.map(p=>p.series))];
   const allCats    = [...new Set(products.map(p=>p.category))];
@@ -799,9 +865,25 @@ export default function App() {
   const syncUpsertInv = async it => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("upsertInventory",it); setSyncStatus("ok"); };
 
   const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
-  const isGuest = user?.role==="guest";
-  const isAdmin = user?.role==="admin";
-  const isVip   = user?.role==="vip"||isAdmin;
+
+  // 折扣碼驗證
+  const DISCOUNT_CODES = { "LED006":0.6, "LED007":0.7, "LED008":0.8 };
+  const applyDiscountCode = (code) => {
+    const trimmed = code.trim().toUpperCase();
+    const rate = DISCOUNT_CODES[trimmed];
+    if (rate) {
+      setDiscountRate(rate);
+      setDiscountLabel(`${trimmed} · ${Math.round(rate*10)}折`);
+      toast$(`✓ 專案折扣已套用：${Math.round(rate*10)}折`);
+    } else if (trimmed === "") {
+      setDiscountRate(1);
+      setDiscountLabel("");
+    } else {
+      setDiscountRate(1);
+      setDiscountLabel("");
+      toast$("此代碼無效，已套用標準牌價");
+    }
+  };
 
   const filtered = (() => {
     let ps = searchQ.trim() ? searchProducts(products, searchQ) : products;
@@ -879,22 +961,46 @@ export default function App() {
 
   // ✅ 修復：PDF 下載核心函式（訪客白屏問題根本修復）
   const doPdfDownload = (customer) => {
-    generatePDF({cart,projectName:projName,customer,installCalc:instRegion?instCalc:null,isVip});
-    const lampSubtotal=cart.reduce((s,i)=>s+(isVip?i.product.projPrice:i.product.stdPrice)*i.qty,0);
+    // 燈具報價單（含折扣）
+    generatePDF({cart,projectName:projName,customer,installCalc:null,isVip,discountRate,discountLabel});
+    // 若有安裝需求，另外生成安裝報價單
+    if(installChoice===true && instRegion && instCalc){
+      generateInstallPDF({projectName:projName,customer,instCalc,instRegion,instGroups,linearMeters,instNote});
+    }
+    const baseSubtotal=cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
+    const lampSubtotal=Math.round(baseSubtotal*discountRate);
     if(sheetUrl){
-      sheetPost("saveOrder",{id:"ORD"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:customer.name,company:customer.company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:lampSubtotal,tax:0,shipping:0,total:0,isVip:isVip?"是":"否"});
+      sheetPost("saveOrder",{id:"ORD"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:customer.name,company:customer.company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:lampSubtotal,tax:0,shipping:0,total:0,isVip:isVip?"是":"否",discount:discountLabel||"牌價"});
     }
     sendNotifyEmail(
       `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
-      `報價單已下載\n\n客戶：${customer.name}\n公司：${customer.company||"—"}\n案名：${projName}\n\n品項：\n${cart.map(i=>`${i.product.model} × ${i.qty}`).join("\n")}\n小計：NT$ ${lampSubtotal.toLocaleString()}\n時間：${new Date().toLocaleString("zh-TW")}`
+      `報價單已下載\n\n客戶：${customer.name}\n公司：${customer.company||"—"}\n案名：${projName}\n折扣：${discountLabel||"牌價"}\n\n品項：\n${cart.map(i=>`${i.product.model} × ${i.qty}`).join("\n")}\n小計：NT$ ${lampSubtotal.toLocaleString()}\n時間：${new Date().toLocaleString("zh-TW")}`
     );
     toast$("報價單已下載");
   };
 
-  // ✅ 修復：handleGenPDF 不再直接呼叫 generatePDF，改為流程控制
+  // ✅ handleGenPDF：確認後先問安裝，再下載
   const handleGenPDF = () => {
     if(!projName.trim()){toast$("請先填寫案名");return;}
     if(!allChecked){toast$("請先勾選確認所有注意事項");return;}
+    // 先跳出安裝詢問 Modal
+    setInstallChoice(null);
+    setInstallAskModal(true);
+  };
+
+  // 安裝 Modal 確認後：不需要安裝 → 直接下載；需要安裝 → 開安裝 Panel 再回來
+  const handleInstallAnswer = (needInstall) => {
+    setInstallAskModal(false);
+    setInstallChoice(needInstall);
+    if (needInstall) {
+      setInstOpen(true); // 開安裝 Panel 讓客戶填
+      toast$("請填寫安裝資訊，完成後再按「下載報價單」");
+    } else {
+      doActualDownload();
+    }
+  };
+
+  const doActualDownload = () => {
     if(isGuest){
       const errs={};
       if(!guestInfo.company.trim())errs.company="必填";
@@ -1090,6 +1196,31 @@ export default function App() {
           <button className="btn-signout" onClick={()=>{setUser(null);setPage("catalog");}}>登出</button>
         </div>
       </nav>
+
+      {/* 安裝詢問 Modal */}
+      {installAskModal&&<div className="modal-wrap" onClick={()=>setInstallAskModal(false)}>
+        <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:440}}>
+          <div className="modal-head">
+            <div className="modal-title">需要安裝服務嗎？</div>
+            <button className="close-btn" onClick={()=>setInstallAskModal(false)}><CloseIcon/></button>
+          </div>
+          <div className="modal-body">
+            <div className="hint-box" style={{marginBottom:20}}>
+              <strong style={{display:"block",marginBottom:5,color:"var(--blk)"}}>LEDOUX 專業安裝服務</strong>
+              崁燈 NT$340/盞 · 線型燈 NT$840/米 · 最低出勤費 NT$2,000<br/>
+              請事先完成開孔、拉好電線至預定位置。
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <button onClick={()=>handleInstallAnswer(true)} style={{padding:"18px 12px",background:"var(--blk)",border:"none",color:"var(--ivory)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"9px",letterSpacing:"3px",cursor:"pointer",textTransform:"uppercase",lineHeight:1.8}}>
+                需要安裝<br/><span style={{fontSize:"8px",color:"#9a8a7a",letterSpacing:"1px"}}>填寫安裝資訊</span>
+              </button>
+              <button onClick={()=>handleInstallAnswer(false)} style={{padding:"18px 12px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"9px",letterSpacing:"3px",cursor:"pointer",textTransform:"uppercase",lineHeight:1.8}}>
+                不需要<br/><span style={{fontSize:"8px",letterSpacing:"1px"}}>直接下載報價單</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>}
 
       {/* ✅ 訪客資料 Modal（修復版）*/}
       {guestModal&&<div className="modal-wrap" onClick={()=>setGuestModal(false)}>
@@ -1362,17 +1493,36 @@ export default function App() {
           {cart.length===0?<div className="empty">請至產品目錄加入品項</div>:<>
             <div className="tbl-wrap"><table>
               <thead><tr><th>型號</th><th>系列</th><th>瓦數</th><th>數量</th><th>{isVip?"專案價":"標準價"}</th><th>小計</th><th></th></tr></thead>
-              <tbody>{cart.map(item=>{const price=isVip?item.product.projPrice:item.product.stdPrice;return(<tr key={item.product.id}><td style={{fontWeight:400}}>{item.product.model}</td><td>{item.product.series}</td><td>{item.product.watt}</td><td><div style={{display:"flex",alignItems:"center",gap:6}}><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button></div></td><td style={{color:isVip?"var(--gold)":"inherit"}}>NT$ {price?.toLocaleString()}</td><td>NT$ {(price*item.qty).toLocaleString()}</td><td><button className="btn-del2" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></td></tr>);})}</tbody>
+              <tbody>{cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<tr key={item.product.id}><td style={{fontWeight:400}}>{item.product.model}</td><td>{item.product.series}</td><td>{item.product.watt}</td><td><div style={{display:"flex",alignItems:"center",gap:6}}><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button></div></td><td style={{color:isVip?"var(--gold)":"inherit"}}>{price>0?`NT$ ${price.toLocaleString()}`:"洽業務"}</td><td>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</td><td><button className="btn-del2" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></td></tr>);})}</tbody>
             </table></div>
             <div style={{maxWidth:460}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:14,paddingBottom:12,borderBottom:"0.5px solid var(--bdr2)"}}>
-                <span style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)"}}>小計</span>
-                <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22}}>NT$ {cartTotal.toLocaleString()}</span>
+              <div style={{marginBottom:14,paddingBottom:12,borderBottom:"0.5px solid var(--bdr2)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                  <span style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)"}}>燈具小計</span>
+                  <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,textDecoration:discountRate<1?"line-through":"none",color:discountRate<1?"var(--muted)":"var(--blk)"}}>NT$ {cartTotal.toLocaleString()}</span>
+                </div>
+                {discountRate<1&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginTop:4}}>
+                  <span style={{fontSize:"8px",letterSpacing:"2px",color:"var(--gold)"}}>{discountLabel}</span>
+                  <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:26,color:"var(--gold)"}}>NT$ {Math.round(cartTotal*discountRate).toLocaleString()}</span>
+                </div>}
               </div>
               {cartTotal<3000&&<div className="warn-ship">未滿 NT$3,000，運費由買方支付</div>}
               <div style={{marginBottom:12}}>
                 <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>案名 *</label>
                 <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/>
+              </div>
+              {/* 折扣碼（低調設計，不影響一般客戶）*/}
+              <div style={{marginBottom:14,display:"flex",gap:7,alignItems:"center"}}>
+                <input
+                  style={{flex:1,padding:"7px 10px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)",letterSpacing:1,transition:"border-color .2s"}}
+                  placeholder="— — —"
+                  value={discountCode}
+                  onChange={e=>setDiscountCode(e.target.value)}
+                  onBlur={()=>applyDiscountCode(discountCode)}
+                  onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)}
+                  maxLength={8}
+                />
+                {discountLabel&&<span style={{fontSize:"9px",color:"var(--gold)",letterSpacing:"2px",whiteSpace:"nowrap",border:"0.5px solid var(--gold)",padding:"3px 9px"}}>{discountLabel}</span>}
               </div>
               <div className="checklist">
                 <div className="cl-title">下載前請確認</div>
@@ -1577,12 +1727,16 @@ export default function App() {
           <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
             ✦ 設計公司享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setCartOpen(false);setPage("design");}}>點此聯繫業務</span>
           </div>
-          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=isVip?item.product.projPrice:item.product.stdPrice;return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div><div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>NT$ {(price*item.qty).toLocaleString()}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
+          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div><div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
         </div>
         {cart.length>0&&<div className="sp-foot">
           <div className="cart-total"><span className="cart-total-lbl">小計</span><span className="cart-total-val">NT$ {cartTotal.toLocaleString()}</span></div>
           {cartTotal<3000&&<div className="warn-ship">未滿 NT$3,000，運費由買方支付</div>}
           <div className="cp-project"><label>案名 *</label><input value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/></div>
+          <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:10}}>
+            <input style={{flex:1,padding:"6px 9px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)"}} placeholder="— — —" value={discountCode} onChange={e=>setDiscountCode(e.target.value)} onBlur={()=>applyDiscountCode(discountCode)} onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)} maxLength={8}/>
+            {discountLabel&&<span style={{fontSize:"8px",color:"var(--gold)",border:"0.5px solid var(--gold)",padding:"2px 7px",whiteSpace:"nowrap"}}>{discountLabel}</span>}
+          </div>
           <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 4 週起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
           <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"下載報價單":"請先勾選確認事項"}</button>
         </div>}
@@ -1680,11 +1834,24 @@ export default function App() {
             </>
           )}
         </div>
-        {!instDone&&<div className="sp-foot"><button className="btn-gold" onClick={submitInst} disabled={!instRegion}>送出安裝申請</button><button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button></div>}
+        {!instDone&&<div className="sp-foot">
+          {installChoice===true&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成選擇 · 下載整合報價單</button>}
+          <button className="btn-gold" onClick={submitInst} disabled={!instRegion}>送出安裝申請（通知業務）</button>
+          <button className="btn-ghost" onClick={()=>{setInstOpen(false);if(installChoice===true)doActualDownload();}}>跳過安裝 · 直接下載燈具報價單</button>
+        </div>}
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
     </div>
     </>
+  );
+}
+
+// ✅ ErrorBoundary 包住整個 App，防止任何錯誤白屏
+export default function SafeApp() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   );
 }
