@@ -897,24 +897,24 @@ ${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>
   </div>
 </div>
 
-\${installRows ? `
+${installRows ? `
 <div style="margin-top:14px;">
   <div style="font-size:11px;font-weight:700;letter-spacing:2px;background:#f4efe8;border-left:3px solid #b8935a;padding:6px 12px;margin-bottom:6px;">二、專業安裝服務</div>
   <table>
     <thead><tr>
       <th style="width:30px">No.</th><th class="left">安裝項目</th><th style="width:50px">數量</th><th style="width:70px">單價</th><th style="width:75px">小計</th>
     </tr></thead>
-    <tbody>\${installRows}</tbody>
+    <tbody>${installRows}</tbody>
   </table>
   <div class="totals" style="margin-top:6px;">
     <div class="totals-inner">
-      <div class="tot-row"><span>安裝費小計</span><span>NT$ \${installTotal.toLocaleString()}</span></div>
+      <div class="tot-row"><span>安裝費小計</span><span>NT$ ${installTotal.toLocaleString()}</span></div>
     </div>
   </div>
 </div>
 <div style="display:flex;justify-content:flex-end;margin:10px 0;">
   <div style="border:1px solid #ccc;min-width:260px;background:#0e0d0c;color:#fff;padding:12px 14px;font-size:15px;font-weight:700;display:flex;justify-content:space-between;">
-    <span>燈具＋安裝 總計（含稅）</span><span>NT$ \${grandTotal.toLocaleString()}</span>
+    <span>燈具＋安裝 總計（含稅）</span><span>NT$ ${grandTotal.toLocaleString()}</span>
   </div>
 </div>` : ""}
 <div class="notes">
@@ -1157,34 +1157,67 @@ function App() {
   const addToSamp  = p  => { setSampCart(c=>c.find(i=>i.id===p.id)?c:[...c,p]); toast$(`${p.model} 已加入樣品清單`); };
   const removeSamp = id => setSampCart(c=>c.filter(i=>i.id!==id));
 
-  // ✅ 樣品申請 + Email 通知
+  // ✅ 樣品申請：寫入 Google Sheets「樣品申請」工作表，Google 端自動寄信
   const submitSamp = async () => {
     if(!sampForm.name||!sampForm.phone){toast$("請填寫姓名和電話");return;}
-    const req={id:Date.now(),products:sampCart.map(p=>p.model),form:sampForm,date:new Date().toISOString().split("T")[0],status:"pending"};
-    setSampleReqs(x=>[...x,req]);
+    const req={
+      id: "SAMP"+Date.now(),
+      date: new Date().toISOString().split("T")[0],
+      contactName: sampForm.name,
+      company: sampForm.company||"",
+      phone: sampForm.phone,
+      address: sampForm.address||"",
+      items: sampCart.map(p=>p.model),
+      status: "待處理",
+      note: sampForm.note||""
+    };
+    setSampleReqs(x=>[...x,{...req,products:sampCart.map(p=>p.model),form:sampForm}]);
     setSampDone(true);
-    toast$("樣品申請已送出");
-    await sendNotifyEmail(
-      `【樣品申請】${sampForm.name}（${sampForm.company||"未填公司"}）`,
-      `新樣品申請\n\n聯絡人：${sampForm.name}\n公司：${sampForm.company||"—"}\n電話：${sampForm.phone}\n地址：${sampForm.address||"—"}\n\n申請品項：\n${sampCart.map(p=>p.model).join("\n")}\n\n時間：${req.date}`
-    );
+    toast$("樣品申請已送出，業務將盡快聯繫");
+    if(sheetUrl){ await sheetPost("saveSampleRequest", req); }
   };
 
-  // ✅ 安裝申請 + Email 通知
+  // ✅ 安裝申請：寫入 Google Sheets「安裝申請」工作表，Google 端自動寄信
   const submitInst = async () => {
-    if(!instCalc){toast$("請選擇安裝區域");return;}
-    const isLinear=installTypes.includes("linear");
-    const ord={id:Date.now(),date:new Date().toISOString().split("T")[0],customer:{name:user.name,company:user.company},region:instRegion,groups:instGroups,note:instNote,calc:instCalc,status:"pending"};
+    if(!instRegion){toast$("請選擇安裝區域");return;}
+    const hasR = installTypes.includes("recessed");
+    const hasL = installTypes.includes("linear");
+    if(!hasR && !hasL){toast$("請選擇安裝類型");return;}
+    const reg = INSTALL_REGIONS.find(r=>r.id===instRegion);
+    const totalLinearM = linearGroups.reduce((s,g)=>s+Number(g.meters||0),0);
+    const laborCost = instCalc?.laborTotal||0;
+    const travelFee = instCalc?.travelFee||0;
+    const grandTotal = laborCost + travelFee;
+    const ord = {
+      id: "INST"+Date.now(),
+      date: new Date().toISOString().split("T")[0],
+      customerName: isGuest ? (custName||guestInfo.contact||"訪客") : user.name,
+      company: isGuest ? (custCompany||guestInfo.company||"") : (user.company||""),
+      phone: isGuest ? (custPhone||guestInfo.phone||"") : "",
+      projectName: projName||"",
+      region: instRegion,
+      regionLabel: reg?.label||instRegion,
+      recessedGroups: hasR ? instGroups.filter(g=>Number(g.qty)>0).map(g=>{
+        const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+        return {ceilingId:g.ceilingId, ceilingLabel:cg?.label||g.ceilingId, qty:Number(g.qty)};
+      }) : [],
+      linearGroups: hasL ? linearGroups.filter(g=>Number(g.meters)>0).map(g=>{
+        const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+        return {ceilingId:g.ceilingId, ceilingLabel:cg?.label||g.ceilingId, meters:Number(g.meters)};
+      }) : [],
+      totalQty: hasR ? instGroups.reduce((s,g)=>s+Number(g.qty||0),0) : 0,
+      totalMeters: hasL ? totalLinearM : 0,
+      totalUnits: (hasR?instGroups.reduce((s,g)=>s+Number(g.qty||0),0):0) + (hasL?totalLinearM:0),
+      laborTotal: laborCost,
+      travelFee: travelFee,
+      grandTotal: grandTotal,
+      installNote: instNote||"",
+      status: "待確認"
+    };
     setInstallOrd(x=>[...x,ord]);
     setInstDone(true);
-    toast$("安裝申請已送出");
-    const reg=INSTALL_REGIONS.find(r=>r.id===instRegion);
-    const laborCost=isLinear?instCalc.laborTotal:instCalc.laborTotal;
-    const total=instCalc.travelFee!==null?laborCost+(instCalc.travelFee||0):null;
-    await sendNotifyEmail(
-      `【安裝申請】${user.name}（${user.company||"訪客"}）`,
-      `新安裝服務申請\n\n客戶：${user.name}\n公司：${user.company||"—"}\n區域：${reg?.label||instRegion}\n類型：${isLinear?"線型燈安裝":"崁燈安裝"}\n${isLinear?`長度：${linearMeters} 米`:`盞數：${instCalc.totalQty} 盞`}\n預估費用：${total!==null?"NT$ "+total.toLocaleString():"另議"}\n備註：${instNote||"—"}\n時間：${ord.date}`
-    );
+    toast$("安裝申請已送出，業務將盡快確認時間");
+    if(sheetUrl){ await sheetPost("saveInstallOrder", ord); }
   };
 
   const resetInst = () => { setInstRegion("");setInstGroups([{ceilingId:"std",qty:0}]);setLinearGroups([{meters:0,ceilingId:"std"}]);setInstallTypes([]);setInstNote("");setInstDone(false);setInstOpen(false); };
@@ -1268,7 +1301,7 @@ function App() {
   // ✅ 配燈服務申請 + Email 通知
   const submitDesignForm = async () => {
     if(!designForm.company||!designForm.name||!designForm.phone){toast$("請填寫必填欄位");return;}
-    if(sheetUrl){await sheetPost("saveOrder",{id:"DESIGN"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:designForm.name,company:designForm.company,projectName:designForm.project||"配燈服務申請",items:"照明設計配燈服務",subtotal:0,tax:0,shipping:0,total:0,isVip:"設計服務"});}
+    if(sheetUrl){await sheetPost("saveOrder",{id:"DESIGN"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:designForm.name,company:designForm.company,projectName:designForm.project||"配燈服務申請",items:"照明設計配燈服務",subtotal:0,tax:0,shipping:0,total:0,isVip:"設計服務",discount:"配燈服務"});}
     setDesignDone(true);
     toast$("申請已送出，專員將盡快聯繫");
     await sendNotifyEmail(
