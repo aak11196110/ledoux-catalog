@@ -35,7 +35,9 @@ class ErrorBoundary extends Component {
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbzUt6rAkwrPbf0FsToBrkgq6Vq8hh70-QPQ_11yu9uVteFBYec7MZNzEuV6DfFvs_CezA/exec";
 const ADMIN_USERNAME = "xxx3903052";
 const ADMIN_PASSWORD = "zzz3909086";
-const NOTIFY_EMAIL = "kim@ledouxlight.com.tw";
+const NOTIFY_EMAIL   = "kim@ledouxlight.com.tw";
+const CONTACT_PHONE  = "0965-502-319";
+const CONTACT_EMAIL  = "kim@ledouxlight.com.tw";
 
 // ══════════════════════════════════════════
 //  【電子型錄設定】
@@ -56,10 +58,10 @@ const DEFAULT_CATALOGS = [
     tags: ["崁燈", "射燈", "磁吸系統", "軌道燈", "吸頂燈", "HEPBURN", "BLADE", "METIS"],
     pageCount: "56",
     fileSize: "18 MB",
-    previewUrl: "https://drive.google.com/file/d/YOUR_FILE_ID_1/view?usp=sharing",
-    downloadUrl: "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_1",
+    previewUrl: "https://drive.google.com/file/d/1GOxgsC_mX_3H5jaq6JMID0L-3cJxgzZD/view?usp=drive_link",
+    downloadUrl: "https://drive.google.com/uc?export=download&id=1GOxgsC_mX_3H5jaq6JMID0L-3cJxgzZD",
     updatedAt: "2025-04",
-    available: false,
+    available: true,
   },
   {
     id: "cat002",
@@ -72,10 +74,10 @@ const DEFAULT_CATALOGS = [
     tags: ["鋁條燈", "鋁擠燈", "矽膠軟條燈", "戶外防水", "洗牆燈", "IP65/IP67"],
     pageCount: "32",
     fileSize: "12 MB",
-    previewUrl: "https://drive.google.com/file/d/YOUR_FILE_ID_2/view?usp=sharing",
-    downloadUrl: "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_2",
+    previewUrl: "https://drive.google.com/file/d/1N6Eh4U6uhCMALkCp1L_uM70d3CaPE6k4/view?usp=drive_link",
+    downloadUrl: "https://drive.google.com/uc?export=download&id=1N6Eh4U6uhCMALkCp1L_uM70d3CaPE6k4",
     updatedAt: "2025-04",
-    available: false,
+    available: true,
   },
 ];
 
@@ -124,9 +126,9 @@ const INIT_MEMBERS = [
   { id:1, username:"xxx3903052", password:"zzz3909086", name:"管理員", position:"管理者", company:"Ledoux Taiwan", phone:"", email:"", taxId:"", role:"admin", status:"approved", approvedAt:"2026-04-18" },
 ];
 
-const INSTALL_BASE     = 340;
+const INSTALL_BASE     = 200; // 崁燈安裝 NT$200/盞
 const INSTALL_MIN      = 2000;
-const INSTALL_LINEAR_M = 840;
+const INSTALL_LINEAR_M = 500; // 線型燈安裝 NT$500/米
 
 const INSTALL_REGIONS = [
   { id:"core",     label:"桃園核心區",         areas:"八德、桃園、中壢、大溪、鶯歌",           km:"0–10 km",     travel:600,  freeAt:15  },
@@ -142,7 +144,7 @@ const INSTALL_REGIONS = [
 
 const CEILING_GROUPS = [
   { id:"std",   label:"3.0m 以下（標準）",       surcharge:0,    note:"含定位、安裝與功能測試" },
-  { id:"high",  label:"3.1m – 4.5m（挑高）",    surcharge:150,  note:"視現場難度，需 A 型梯" },
+  { id:"high",  label:"3.1m – 4.5m（挑高）",    surcharge:80,   note:"視現場難度，需 A 型梯（+NT$80/盞）" },
   { id:"vhigh", label:"4.5m 以上（不含安裝費）", surcharge:null, note:"需鷹架或高空作業車，安裝費另案報價" },
 ];
 
@@ -690,51 +692,182 @@ function ProjBanner({onContact}) {
   return (
     <div className="proj-banner">
       ✦ 設計公司、建築師事務所、合作專案客戶享有<strong>專案折扣價</strong>，
-      {onContact
-        ? <><span className="proj-banner-link" onClick={onContact}>點此聯繫業務專員</span>另行報價。</>
-        : <>請聯繫業務專員另行報價，聯絡信箱：<a href={`mailto:${COMPANY.email}`} style={{color:"var(--gold)"}}>{COMPANY.email}</a></>
-      }
+      <span className="proj-banner-link" onClick={onContact} style={{cursor:"pointer",textDecoration:"underline",marginLeft:3}}>
+        點此聯繫業務專員
+      </span>
+      另行報價。
     </div>
   );
 }
 
 function generatePDF({cart, projectName, customer, installCalc, isVip, discountRate=1, discountLabel=""}) {
-  const today=new Date();
-  const ds=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
-  const qn=`Q${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
-  const priceLabel = discountRate<1 ? `${discountLabel} 折扣價` : isVip ? "專案價" : "建議牌價";
-  const baseSubtotal = cart.reduce((s,it)=>s+(Number(isVip?it.product.projPrice:it.product.stdPrice)||0)*it.qty,0);
-  const lampSubtotal = Math.round(baseSubtotal * discountRate);
-  const needShip = lampSubtotal<3000;
-  const shipFee  = needShip?cart.reduce((s,it)=>s+(it.product.shipping||90)*it.qty,0):0;
-  const instSubtotal = installCalc&&!installCalc.hasVHigh&&installCalc.travelFee!==null
-    ? installCalc.laborTotal+(installCalc.travelFee||0) : 0;
-  const total = roundPrice(lampSubtotal + shipFee + instSubtotal);
-  const lampRows = cart.map((item,i)=>{
-    const baseP=Number(isVip?item.product.projPrice:item.product.stdPrice)||0; const p=Math.round(baseP*discountRate);
-    return `<tr><td>${i+1}</td><td><b>${item.product.model}</b><br><span style="font-size:10px;color:#666">${item.product.series}</span></td><td>${item.product.watt||""}</td><td>${item.product.beam||""}</td><td>${item.product.cct||""}</td><td>${item.product.voltage||""}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">NT$ ${p.toLocaleString()}</td><td style="text-align:right">NT$ ${(p*item.qty).toLocaleString()}</td></tr>`;
+  const today = new Date();
+  const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
+  const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`;
+  const discSuffix = discountRate < 1 ? String(Math.round(discountRate*10)).padStart(3,"0") : String(Math.floor(Math.random()*900)+100);
+  const qn = `C${dateStr}-${discSuffix}`;
+  const priceLabel = discountRate < 1 ? `${discountLabel}折扣價` : isVip ? "專案價" : "建議牌價";
+
+  const rows = cart.map((item, i) => {
+    const p = item.product;
+    const baseP = Number(isVip ? p.projPrice : p.stdPrice) || 0;
+    const unitPrice = Math.round(baseP * discountRate);
+    const subtotal = unitPrice * item.qty;
+    const desc = [p.watt, p.beam, p.cct, p.voltage, p.cri, p.color, p.cutout ? `開孔${p.cutout}` : ""].filter(Boolean).join(" / ");
+    const imgHtml = p.images && p.images[0]
+      ? `<img src="${p.images[0]}" style="max-width:70px;max-height:55px;object-fit:contain;" onerror="this.style.display='none'">`
+      : `<div style="width:70px;height:55px;background:#f0ebe2;display:flex;align-items:center;justify-content:center;font-size:9px;color:#ccc;">NO IMG</div>`;
+    return `<tr>
+      <td style="text-align:center;padding:8px 5px;">${i+1}</td>
+      <td style="text-align:center;padding:5px;">${imgHtml}</td>
+      <td style="padding:8px 6px;font-weight:500;">${p.model}</td>
+      <td style="padding:8px 6px;font-size:10px;color:#555;">${desc}</td>
+      <td style="text-align:center;padding:8px 5px;">${item.qty}</td>
+      <td style="text-align:center;padding:8px 5px;">盞</td>
+      <td style="text-align:right;padding:8px 8px;">${unitPrice > 0 ? unitPrice.toLocaleString() : "洽業務"}</td>
+      <td style="text-align:right;padding:8px 8px;font-weight:500;">${subtotal > 0 ? subtotal.toLocaleString() : "—"}</td>
+      <td style="padding:8px 5px;font-size:10px;color:#555;">${p.note||""}</td>
+    </tr>`;
   }).join("");
-  const instRows = instSubtotal>0 ? `
-    <tr><td>1</td><td><b>燈具安裝工資</b><br><span style="font-size:10px;color:#666">${installCalc.totalQty} 盞 × NT$ ${INSTALL_BASE.toLocaleString()}</span></td><td style="text-align:center">${installCalc.totalQty}</td><td style="text-align:right">NT$ ${INSTALL_BASE.toLocaleString()}</td><td style="text-align:right">NT$ ${installCalc.laborTotal.toLocaleString()}</td></tr>
-    ${installCalc.travelFee>0?`<tr><td>2</td><td><b>車馬費</b><br><span style="font-size:10px;color:#666">${installCalc.reg.label}</span></td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${installCalc.travelFee.toLocaleString()}</td><td style="text-align:right">NT$ ${installCalc.travelFee.toLocaleString()}</td></tr>`:""}
-  ` : "";
-  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>報價單 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.co-sub{font-size:10px;color:#555;margin-top:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:14px}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666;letter-spacing:1px}.mv{font-weight:500;margin-top:1px}.sec-hd{background:#f5f5f5;border-left:3px solid #111;padding:6px 10px;font-size:11px;font-weight:700;margin:14px 0 6px;letter-spacing:1px}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:11px}th{background:#111;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:5px 7px;border-bottom:1px solid #e8e8e8;vertical-align:top}tr:nth-child(even) td{background:#fafafa}.subtotal-row{background:#f9f5ee!important}.subtotal-row td{font-weight:600;color:#b8935a}.tot{display:flex;justify-content:flex-end;margin:12px 0}.tt{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid #eee;font-size:11px}.tr.bold{font-weight:700;font-size:14px;background:#0e0d0c;color:#fff;padding:10px 12px}.price-note{background:#fdf8ee;border:1px solid #d4a96a;border-left:3px solid #b8935a;padding:10px 14px;margin-bottom:14px;font-size:10px;line-height:1.8;color:#6a5a3a}.notes{border:1px solid #ccc;padding:10px 12px;margin-bottom:12px;font-size:10px;line-height:2;color:#444}.sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:20px}.sb{border-top:1px solid #ccc;padding-top:6px;font-size:10px;color:#666}.footer{margin-top:14px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;text-align:center}</style></head><body>
-<div class="hd"><div><div class="co-name">${COMPANY.name}</div><div class="co-sub">${COMPANY.eng}</div></div><div style="font-size:10px;color:#555;text-align:right">${COMPANY.email}</div></div>
+
+  const untaxed = cart.reduce((s, item) => {
+    const p = item.product;
+    const baseP = Number(isVip ? p.projPrice : p.stdPrice) || 0;
+    return s + Math.round(baseP * discountRate) * item.qty;
+  }, 0);
+  const tax = Math.round(untaxed * 0.05);
+  const total = untaxed + tax;
+
+  const discRow = discountRate < 1
+    ? `<tr style="background:#fdf8ee;"><td colspan="3" style="text-align:right;padding:5px 12px;font-size:10px;color:#b8935a;">${discountLabel} 折扣已套用</td></tr>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>報價單 ${qn}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:24px 32px;background:#fff}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0e0d0c;padding-bottom:14px;margin-bottom:14px}
+  .logo-area .logo-main{font-family:Georgia,serif;font-size:26px;font-weight:700;letter-spacing:3px;color:#0e0d0c}
+  .logo-area .logo-sub{font-size:9px;letter-spacing:4px;color:#6a5a4a;margin-top:2px}
+  .co-info{font-size:10px;color:#555;line-height:1.8;text-align:right}
+  .co-info strong{color:#0e0d0c;font-size:12px;display:block;letter-spacing:1px}
+  .doc-title{text-align:center;font-size:18px;font-weight:700;letter-spacing:6px;margin:10px 0 14px;color:#0e0d0c}
+  .meta-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}
+  .meta-cell{padding:6px 10px;border-bottom:1px solid #ddd;font-size:11px}
+  .meta-cell:nth-child(odd){border-right:1px solid #ddd}
+  .meta-lbl{font-size:9px;color:#888;letter-spacing:1px;margin-bottom:1px}
+  .meta-val{font-weight:500;color:#111}
+  .price-note{background:#fdf8ee;border:1px solid #d4a96a;border-left:3px solid #b8935a;padding:8px 12px;margin-bottom:12px;font-size:10px;color:#7a5a2a;line-height:1.7}
+  table{width:100%;border-collapse:collapse;margin-bottom:10px}
+  thead th{background:#0e0d0c;color:#fff;padding:7px 6px;font-size:9px;letter-spacing:1px;font-weight:500;text-align:center}
+  thead th.left{text-align:left}
+  tbody td{border-bottom:1px solid #eee;vertical-align:middle}
+  tbody tr:nth-child(even) td{background:#fafafa}
+  .totals{display:flex;justify-content:flex-end;margin:10px 0}
+  .totals-inner{border:1px solid #ccc;min-width:260px}
+  .tot-row{display:flex;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #eee;font-size:11px}
+  .tot-row.final{background:#0e0d0c;color:#fff;font-size:14px;font-weight:700;padding:10px 14px;border-bottom:none}
+  .tot-row.tax-row{color:#b8935a}
+  .notes{border:1px solid #ccc;padding:10px 12px;margin-bottom:14px;font-size:10px;line-height:2;color:#555}
+  .sign-area{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:16px}
+  .sign-box{border-top:1px solid #ccc;padding-top:6px;font-size:10px;color:#888;min-height:40px}
+  .footer{margin-top:14px;border-top:0.5px solid #ccc;padding-top:8px;font-size:9px;color:#aaa;text-align:center;letter-spacing:1px}
+  .qr-hint{font-size:8px;color:#ccc;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <div class="logo-main">Ledoux 諾科照明</div>
+    <div class="logo-sub">LEDOUX LIGHTING CO;LTD</div>
+  </div>
+  <div class="co-info">
+    <strong>${COMPANY.name}</strong>
+    桃園市八德區建德路88號<br>
+    TEL: (03)368-7525 &nbsp;|&nbsp; FAX: (03)368-7552<br>
+    ${COMPANY.email}
+  </div>
+</div>
+
 <div class="doc-title">報　價　單</div>
-<div class="meta"><div class="mc"><div class="ml">報價單號</div><div class="mv">${qn}</div></div><div class="mc"><div class="ml">報價日期</div><div class="mv">${ds}</div></div><div class="mc"><div class="ml">客戶公司</div><div class="mv">${customer.company||"—"}</div></div><div class="mc"><div class="ml">聯絡人</div><div class="mv">${customer.name||"—"}</div></div><div class="mc"><div class="ml">案名</div><div class="mv">${projectName}</div></div><div class="mc"><div class="ml">有效期限</div><div class="mv">${ds} 起 30 天</div></div></div>
-<div class="price-note">⚠ 本表所列價格均為<strong>${priceLabel}</strong>，特定設計公司或專案採購，請聯繫業務獲取<strong>專屬折扣報價</strong>。</div>
-<div class="sec-hd">一、燈具產品清單</div>
-<table><thead><tr><th>#</th><th>型號／系列</th><th>瓦數</th><th>角度</th><th>色溫</th><th>電壓</th><th>數量</th><th>${priceLabel}</th><th>小計</th></tr></thead><tbody>${lampRows}<tr class="subtotal-row"><td colspan="7" style="text-align:right">燈具小計</td><td></td><td style="text-align:right">NT$ ${lampSubtotal.toLocaleString()}</td></tr>${needShip?`<tr><td colspan="7" style="text-align:right;color:#999">運費</td><td></td><td style="text-align:right">NT$ ${shipFee.toLocaleString()}</td></tr>`:""}</tbody></table>
-${instSubtotal>0?`<div class="sec-hd">二、專業安裝服務</div><table><thead><tr><th>#</th><th>項目</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>${instRows}<tr class="subtotal-row"><td colspan="3" style="text-align:right">安裝小計</td><td></td><td style="text-align:right">NT$ ${instSubtotal.toLocaleString()}</td></tr></tbody></table>`:""}
-<div class="tot"><div class="tt"><div class="tr bold"><span>合計總價（已取整）</span><span>NT$ ${total.toLocaleString()}</span></div></div></div>
-<div class="notes"><b>備　註：</b><br>A. 單筆未滿 NT$3,000，運費由買方自付。<br>B. 庫存不足時，生產交期約 4 週起。<br>C. 保固：室內 3 年、戶外 2 年（人為損壞不在保固範圍）。<br>D. 安裝最低出勤費 NT$2,000，4.5m 以上需鷹架，費用另計。<br>E. 有效期限 30 天，請於期限內回簽確認。</div>
-<div class="sign"><div class="sb">業務代表簽章</div><div class="sb">客戶確認簽章</div><div class="sb">日期</div></div>
-<div class="footer">${COMPANY.name} · 本報價單所列均為${priceLabel}，如需專案折扣請洽業務</div>
-</body></html>`;
-  const blob=new Blob([html],{type:"text/html;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download=`報價單_${projectName}_${qn}.html`; a.click();
+
+<div class="meta-grid">
+  <div class="meta-cell"><div class="meta-lbl">客戶名稱</div><div class="meta-val">${customer.company || "—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">單據日期</div><div class="meta-val">${ds}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">案件名稱</div><div class="meta-val">${projectName}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">報價單號</div><div class="meta-val">${qn}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">聯繫人</div><div class="meta-val">${customer.name || "—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">幣別</div><div class="meta-val">NTD</div></div>
+  <div class="meta-cell"><div class="meta-lbl">客戶電話</div><div class="meta-val">${customer.phone || "—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">負責業務</div><div class="meta-val">池宇山</div></div>
+  <div class="meta-cell"><div class="meta-lbl">客戶地址</div><div class="meta-val">${customer.address || "—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">E-mail</div><div class="meta-val">${COMPANY.email}</div></div>
+</div>
+
+${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>${discountLabel}</strong> 專屬折扣，報價僅供本次專案使用，請勿對外流通。</div>` : ""}
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:30px">No.</th>
+      <th style="width:80px">產品圖片</th>
+      <th style="width:90px" class="left">產品型號</th>
+      <th class="left">產品描述</th>
+      <th style="width:40px">數量</th>
+      <th style="width:35px">單位</th>
+      <th style="width:70px">單價</th>
+      <th style="width:75px">金額</th>
+      <th style="width:90px" class="left">備註</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${rows}
+  </tbody>
+</table>
+
+<div class="totals">
+  <div class="totals-inner">
+    ${discRow}
+    <div class="tot-row"><span>金額（未稅）</span><span>NT$ ${untaxed.toLocaleString()}</span></div>
+    <div class="tot-row tax-row"><span>稅金（5%）</span><span>NT$ ${tax.toLocaleString()}</span></div>
+    <div class="tot-row final"><span>總金額（含稅）</span><span>NT$ ${total.toLocaleString()}</span></div>
+  </div>
+</div>
+
+<div class="notes">
+  <strong>備　註：</strong><br>
+  A. 本報價單有效期限30天，請於期限內回簽訂單。<br>
+  B. 謹請確認以上單價及數量，如無誤，煩將訂購報價單回傳【Fax:03-368 7552】。<br>
+  C. 燈具保固期限：室內保固3年、戶外保固2年。<br>
+  D. 交期如遇天災或事變等不可抗力，未能依時履約交貨，得展延交期。<br>
+  E. 單筆未滿 NT$3,000，運費由買方自付；庫存不足時生產交期約4週起。
+</div>
+
+<div class="sign-area">
+  <div class="sign-box">經辦：</div>
+  <div class="sign-box">客戶確認：</div>
+  <div class="sign-box">日期：</div>
+</div>
+
+<div class="footer">
+  ${COMPANY.name} &nbsp;·&nbsp; ${COMPANY.eng} &nbsp;·&nbsp; 報價單號：${qn}
+  <div class="qr-hint">本報價單由系統自動產生，如有疑問請聯繫業務</div>
+</div>
+
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type: "text/html;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `報價單_${projectName}_${qn}.html`;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -743,12 +876,12 @@ function generateInstallPDF({projectName, customer, instCalc, instRegion, instGr
   const ds=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const qn=`INST${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
   const isLinear = instGroups[0]?.type==="linear";
-  const laborCost = isLinear ? Math.max(linearMeters*840,2000) : (instCalc?.laborTotal||0);
+  const laborCost = isLinear ? Math.max(linearMeters*500,2000) : (instCalc?.laborTotal||0); // NT$500/米
   const travel = instCalc?.travelFee||0;
   const total = laborCost + travel;
   const regLabel = INSTALL_REGIONS.find(r=>r.id===instRegion)?.label||instRegion;
   const itemRows = isLinear
-    ? `<tr><td>1</td><td><b>線型燈安裝工資</b><br><span style="font-size:10px;color:#666">${linearMeters} 米 × NT$840/米</span></td><td style="text-align:center">${linearMeters} 米</td><td style="text-align:right">NT$ 840</td><td style="text-align:right">NT$ ${laborCost.toLocaleString()}</td></tr>`
+    ? `<tr><td>1</td><td><b>線型燈安裝工資</b><br><span style="font-size:10px;color:#666">${linearMeters} 米 × NT$500/米（直線安裝）</span></td><td style="text-align:center">${linearMeters} 米</td><td style="text-align:right">NT$ 840</td><td style="text-align:right">NT$ ${laborCost.toLocaleString()}</td></tr>`
     : instGroups.map((g,i)=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);const surcharge=cg?.surcharge||0;const unit=340+surcharge;const sub=unit*Number(g.qty);return`<tr><td>${i+1}</td><td><b>崁燈安裝（${cg?.label||""}）</b></td><td style="text-align:center">${g.qty} 盞</td><td style="text-align:right">NT$ ${unit.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;}).join("");
   const travelRow = travel>0 ? `<tr><td>—</td><td><b>車馬費</b><br><span style="font-size:10px;color:#666">${regLabel}</span></td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${travel.toLocaleString()}</td><td style="text-align:right">NT$ ${travel.toLocaleString()}</td></tr>` : `<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達免收門檻）</td></tr>`;
   const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>安裝報價單 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.co-sub{font-size:10px;color:#555;margin-top:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:14px}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666;letter-spacing:1px}.mv{font-weight:500;margin-top:1px}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:11px}th{background:#111;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:5px 7px;border-bottom:1px solid #e8e8e8}.subtotal-row td{font-weight:600;color:#b8935a;background:#f9f5ee}.tot{display:flex;justify-content:flex-end;margin:12px 0}.tt{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid #eee;font-size:11px}.tr.bold{font-weight:700;font-size:14px;background:#0e0d0c;color:#fff;padding:10px 12px}.notes{border:1px solid #ccc;padding:10px 12px;margin-bottom:12px;font-size:10px;line-height:2;color:#444}.footer{margin-top:14px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;text-align:center}</style></head><body>
@@ -802,6 +935,10 @@ export default function App() {
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
   const [projName,   setProjName]   = useState("");
+  const [custName,   setCustName]   = useState("");
+  const [custCompany,setCustCompany]= useState("");
+  const [custPhone,  setCustPhone]  = useState("");
+  const [custAddress,setCustAddress]= useState("");
   const [checks,     setChecks]     = useState({c1:false,c2:false,c3:false,c4:false});
   const [toast,      setToast]      = useState("");
   const [loginF,     setLoginF]     = useState({username:"",password:""});
@@ -812,7 +949,8 @@ export default function App() {
   const [instGroups, setInstGroups] = useState([{ceilingId:"std",qty:1,type:"recessed"}]);
   const [instNote,   setInstNote]   = useState("");
   const [instDone,   setInstDone]   = useState(false);
-  const [linearMeters, setLinearMeters] = useState(1);
+  const [linearMeters,  setLinearMeters]  = useState(1);
+  const [quickRecessed, setQuickRecessed] = useState(10);
   const [newProd,    setNewProd]    = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K/4000K",beam:"24°",voltage:"220V",cri:"Ra≥80",color:"白色",cutout:"",size:"",install:"崁入式",cert:"",shipping:"90",stdPrice:"",projPrice:"",video:"",desc:"",images:"",note:""});
   const [editInvItem,setEditInvItem]= useState(null);
   const [newInv,     setNewInv]     = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""});
@@ -831,7 +969,8 @@ export default function App() {
   const [inlineEdit, setInlineEdit] = useState(null);
   const [inlineData, setInlineData] = useState({});
   const [designForm, setDesignForm] = useState({company:"",name:"",phone:"",project:""});
-  const [designDone, setDesignDone] = useState(false);
+  const [designDone,    setDesignDone]    = useState(false);
+  const [contactModal,  setContactModal]  = useState(false);
   const [activeTags, setActiveTags] = useState([]);
   const blurRef = useRef(null);
 
@@ -962,7 +1101,7 @@ export default function App() {
   // ✅ 修復：PDF 下載核心函式（訪客白屏問題根本修復）
   const doPdfDownload = (customer) => {
     // 燈具報價單（含折扣）
-    generatePDF({cart,projectName:projName,customer,installCalc:null,isVip,discountRate,discountLabel});
+    generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:null,isVip,discountRate,discountLabel});
     // 若有安裝需求，另外生成安裝報價單
     if(installChoice===true && instRegion && instCalc){
       generateInstallPDF({projectName:projName,customer,instCalc,instRegion,instGroups,linearMeters,instNote});
@@ -988,7 +1127,29 @@ export default function App() {
     setInstallAskModal(true);
   };
 
-  // 安裝 Modal 確認後：不需要安裝 → 直接下載；需要安裝 → 開安裝 Panel 再回來
+    const doActualDownload = () => {
+    // 優先使用詢價單填寫的客戶資料，其次用登入資料
+    const company = custCompany.trim() || (isGuest ? "" : user.company) || "";
+    const name    = custName.trim()    || (isGuest ? "" : user.name)    || "";
+    const phone   = custPhone.trim()   || "";
+    const address = custAddress.trim() || "";
+    if(isGuest && (!company || !name)){
+      const errs={};
+      if(!guestInfo.company.trim()&&!company)errs.company="必填";
+      if(!guestInfo.contact.trim()&&!name)errs.contact="必填";
+      if(!guestInfo.phone.trim()&&!phone)errs.phone="必填";
+      if(Object.keys(errs).length>0){setGuestErr(errs);setGuestModal(true);return;}
+    }
+    doPdfDownload({
+      company: company || guestInfo.company,
+      name:    name    || guestInfo.contact,
+      phone:   phone   || guestInfo.phone,
+      address: address,
+      position: isGuest ? "" : (user.position||"")
+    });
+  };
+
+// 安裝 Modal 確認後：不需要安裝 → 直接下載；需要安裝 → 開安裝 Panel 再回來
   const handleInstallAnswer = (needInstall) => {
     setInstallAskModal(false);
     setInstallChoice(needInstall);
@@ -999,20 +1160,6 @@ export default function App() {
       doActualDownload();
     }
   };
-
-  const doActualDownload = () => {
-    if(isGuest){
-      const errs={};
-      if(!guestInfo.company.trim())errs.company="必填";
-      if(!guestInfo.contact.trim())errs.contact="必填";
-      if(!guestInfo.phone.trim())errs.phone="必填";
-      if(Object.keys(errs).length>0){setGuestErr(errs);setGuestModal(true);return;}
-      doPdfDownload({company:guestInfo.company,name:guestInfo.contact,position:"",phone:guestInfo.phone});
-    } else {
-      doPdfDownload({company:user.company,name:user.name,position:user.position||""});
-    }
-  };
-
   const handleGuestConfirm = () => {
     const errs={};
     if(!guestInfo.company.trim())errs.company="必填";
@@ -1193,9 +1340,44 @@ export default function App() {
           </button>
           <div className="tn-user-info"><div className="tn-uname">{user.name}</div><div className="tn-ucomp">{user.company}</div></div>
           <span className={`tn-badge ${user.role==="admin"?"tb-admin":user.role==="vip"?"tb-vip":"tb-std"}`}>{roleLabel(user.role)}</span>
+          <button className="btn-signout" onClick={()=>setContactModal(true)} style={{borderColor:"rgba(184,147,90,.3)",color:"var(--gold)"}}>聯繫業務</button>
           <button className="btn-signout" onClick={()=>{setUser(null);setPage("catalog");}}>登出</button>
         </div>
       </nav>
+
+      {/* 業務聯絡資訊 Modal */}
+      {contactModal&&<div className="modal-wrap" onClick={()=>setContactModal(false)}>
+        <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:400}}>
+          <div className="modal-head">
+            <div className="modal-title">聯繫業務專員</div>
+            <button className="close-btn" onClick={()=>setContactModal(false)}><CloseIcon/></button>
+          </div>
+          <div className="modal-body">
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:8,borderBottom:"0.5px solid var(--bdr2)"}}>直接聯繫</div>
+              <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                <a href={`tel:${CONTACT_PHONE}`} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",border:"0.5px solid var(--bdr2)",background:"#f9f5ef",textDecoration:"none",color:"var(--blk)",transition:"all .2s"}}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gold)" strokeWidth="0.8" strokeLinecap="round"><path d="M3.5 3.5c0 0 1 0 2 2s1 3 1 3l-1.5 1.5s1 3 3 5 5 3 5 3l1.5-1.5s2 0 3 1 2 2 2 2-1 3-3 3C8 22 -4 10 -4 4c0-2 3-3 3-3l4.5 3z"/></svg>
+                  <div>
+                    <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:3}}>電話 / LINE</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,letterSpacing:1}}>{CONTACT_PHONE}</div>
+                  </div>
+                </a>
+                <a href={`mailto:${CONTACT_EMAIL}`} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",border:"0.5px solid var(--bdr2)",background:"#f9f5ef",textDecoration:"none",color:"var(--blk)"}}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gold)" strokeWidth="0.8" strokeLinecap="round"><rect x="2" y="4" width="14" height="10" rx="1"/><path d="M2 5l7 5 7-5"/></svg>
+                  <div>
+                    <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:3}}>Email</div>
+                    <div style={{fontSize:13,letterSpacing:.5}}>{CONTACT_EMAIL}</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div style={{background:"#f4efe8",borderLeft:"2px solid var(--gold)",padding:"10px 14px",fontSize:11,color:"var(--muted)",lineHeight:1.8}}>
+              設計公司、建築師事務所、長期合作專案客戶，歡迎聯繫業務洽談<strong style={{color:"var(--gold)"}}>專屬折扣報價</strong>。
+            </div>
+          </div>
+        </div>
+      </div>}
 
       {/* 安裝詢問 Modal */}
       {installAskModal&&<div className="modal-wrap" onClick={()=>setInstallAskModal(false)}>
@@ -1257,7 +1439,7 @@ export default function App() {
             <div className="cat-hero-sub">Ledoux Lighting Taiwan · 2025</div>
             <div className="cat-hero-desc">下載或線上瀏覽完整產品手冊，涵蓋全系列燈具的技術規格、安裝說明與應用情境，是您選燈配燈的最佳參考資料。</div>
           </div>
-          <ProjBanner onContact={()=>setPage("design")}/>
+          <ProjBanner onContact={()=>setContactModal(true)}/>
           <div className="cat-grid">
             {catalogs.map(c=>(
               <div key={c.id} className="cat-card">
@@ -1300,7 +1482,7 @@ export default function App() {
               <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:300,marginBottom:4}}>需要實體型錄？</div>
               <div style={{fontSize:11,color:"var(--muted)",lineHeight:1.7}}>如需紙本型錄或有選燈配燈需求，歡迎聯繫業務專員。</div>
             </div>
-            <button className="btn-primary" style={{width:"auto",padding:"11px 28px"}} onClick={()=>setPage("design")}>聯繫業務</button>
+            <button className="btn-primary" style={{width:"auto",padding:"11px 28px"}} onClick={()=>setContactModal(true)}>聯繫業務</button>
           </div>
         </>}
 
@@ -1358,7 +1540,7 @@ export default function App() {
             </div>
           </div>
           {/* ✅ 設計公司橫幅 */}
-          <ProjBanner onContact={()=>setPage("design")}/>
+          <ProjBanner onContact={()=>setContactModal(true)}/>
           {!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats].map(c=><button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>{setCat(c);setActiveTags([]);}}>{c}</button>)}</div>}
           <div className="filter-area">
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
@@ -1489,7 +1671,7 @@ export default function App() {
         {page==="inquiry"&&<>
           <div className="phead"><div><div className="ptitle">詢價單</div><div className="psub">填寫案名後下載報價單</div></div></div>
           {/* ✅ 設計公司橫幅 */}
-          <ProjBanner onContact={()=>setPage("design")}/>
+          <ProjBanner onContact={()=>setContactModal(true)}/>
           {cart.length===0?<div className="empty">請至產品目錄加入品項</div>:<>
             <div className="tbl-wrap"><table>
               <thead><tr><th>型號</th><th>系列</th><th>瓦數</th><th>數量</th><th>{isVip?"專案價":"標準價"}</th><th>小計</th><th></th></tr></thead>
@@ -1507,9 +1689,27 @@ export default function App() {
                 </div>}
               </div>
               {cartTotal<3000&&<div className="warn-ship">未滿 NT$3,000，運費由買方支付</div>}
-              <div style={{marginBottom:12}}>
-                <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>案名 *</label>
-                <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+                <div style={{gridColumn:"1/-1"}}>
+                  <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>案名 *</label>
+                  <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>公司名稱</label>
+                  <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={custCompany} onChange={e=>setCustCompany(e.target.value)} placeholder="客戶公司"/>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>聯繫人</label>
+                  <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={custName} onChange={e=>setCustName(e.target.value)} placeholder="姓名"/>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>電話</label>
+                  <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={custPhone} onChange={e=>setCustPhone(e.target.value)} placeholder="0912-345-678"/>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6}}>地址</label>
+                  <input style={{width:"100%",padding:"9px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none"}} value={custAddress} onChange={e=>setCustAddress(e.target.value)} placeholder="選填"/>
+                </div>
               </div>
               {/* 折扣碼（低調設計，不影響一般客戶）*/}
               <div style={{marginBottom:14,display:"flex",gap:7,alignItems:"center"}}>
@@ -1544,47 +1744,83 @@ export default function App() {
         {page==="install"&&<>
           <div className="phead"><div><div className="ptitle">安裝服務</div><div className="psub">原廠技術安裝 · 崁燈 ＆ 線型間接照明</div></div><button className="btn-add2" onClick={()=>setInstOpen(true)}>立即估算費用</button></div>
           {/* ✅ 設計公司橫幅 */}
-          <ProjBanner onContact={()=>setPage("design")}/>
+          <ProjBanner onContact={()=>setContactModal(true)}/>
           <div className="hint-box" style={{marginBottom:20}}>
             <strong style={{color:"var(--blk)",display:"block",marginBottom:5}}>重要服務前置條件</strong>
             請業主於安裝前<strong>完成開孔、拉好電線至天花板預定位置</strong>。本服務提供燈具精準定位、安裝固定與功能測試，不含開孔、線路抽換、木作修補或補漆作業。出發地：桃園市八德區。
           </div>
+          {/* 重要前置條件 */}
+          <div style={{background:"#fdf8ee",border:"0.5px solid var(--gold)",borderLeft:"3px solid var(--gold)",padding:"12px 16px",marginBottom:20,fontSize:12,lineHeight:1.9,color:"var(--blk)"}}>
+            <strong style={{display:"block",marginBottom:5,letterSpacing:1}}>⚠ 安裝前必要條件（崁燈 ＆ 線型燈皆適用）</strong>
+            <span style={{color:"var(--red)"}}>請業主務必於安裝前完成開孔，並將電線拉至天花板各燈具預定位置。</span><br/>
+            本服務包含：燈具精準定位 · 安裝固定 · 功能測試。<br/>
+            <strong>不含：</strong>開孔、線路抽換、木作修補、補漆、戶外燈安裝、特殊造型燈槽。<br/>
+            特殊安裝需求（戶外、弧形、多層次造型等），請另與業務聯繫評估。
+          </div>
+
           <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:7,borderBottom:"0.5px solid var(--bdr2)"}}>一、崁燈安裝服務</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:24}}>
-            {[["最低出勤費","NT$ 2,000","單次出勤工資未達此標，以 NT$2,000 計收"],["標準安裝（3m 以下）","NT$ 340 / 盞","含定位、安裝固定與功能測試"],["挑高施工（3.1–4.5m）","+NT$ 100–200 / 盞","視現場難度評估，需 A 型梯輔助"],["4.5m 以上","不含安裝費","需鷹架或高空作業車，費用另案報價"]].map(([t,v,d])=>(
-              <div key={t} style={{background:"var(--ivory)",padding:"18px 20px"}}>
-                <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:5}}>{t}</div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:t.includes("4.5m")?"var(--red)":"var(--blk)",marginBottom:4}}>{v}</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:16}}>
+            {[["最低出勤費","NT$ 2,000","單次出勤未達此標，以 NT$2,000 計收"],["標準安裝（3m 以下）","NT$ 200 / 盞","含定位、安裝固定與功能測試"],["挑高施工（3.1–4.5m）","+NT$ 80 / 盞","需 A 型梯輔助，視現場評估"],["4.5m 以上","不含安裝費","需鷹架或高空作業車，另案報價"]].map(([t,v,d])=>(
+              <div key={t} style={{background:"var(--ivory)",padding:"16px 18px"}}>
+                <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:4}}>{t}</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:t.includes("4.5m")?"var(--red)":"var(--blk)",marginBottom:3}}>{v}</div>
                 <div style={{fontSize:10,color:"var(--muted)"}}>{d}</div>
               </div>
             ))}
           </div>
+
           <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:7,borderBottom:"0.5px solid var(--bdr2)"}}>二、線型燈 ／ 間接照明安裝服務</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:24}}>
-            {[["最低出勤費","NT$ 2,000","單次出勤工資未達此標，以 NT$2,000 計收"],["線型燈安裝","NT$ 840 / 米","含鋁條燈、鋁擠燈、軟條燈卡接固定"],["複雜造型加計","依現場評估","多折角、弧形、多層次造型另行報價"]].map(([t,v,d])=>(
-              <div key={t} style={{background:"var(--ivory)",padding:"18px 20px"}}>
-                <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:5}}>{t}</div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:"var(--blk)",marginBottom:4}}>{v}</div>
+          <div style={{background:"#fdf5e8",border:"0.5px solid var(--gold)",borderLeft:"3px solid var(--gold)",padding:"10px 14px",marginBottom:12,fontSize:11,lineHeight:1.8,color:"#7a5a2a"}}>
+            ⚠ <strong>線型燈特別注意：</strong>現場須預留燈槽退縮空間（建議 ≥ 5cm），若無法退縮，現場將記錄並無法施工。多折角、弧形、多層次造型<strong>不在本服務範圍</strong>，如有需求請另行聯繫業務評估報價。
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:24}}>
+            {[["最低出勤費","NT$ 2,000","單次出勤未達此標，以 NT$2,000 計收"],["線型燈安裝","NT$ 500 / 米","鋁條燈、鋁擠燈、軟條燈卡接固定（直線）"],["複雜造型","不在服務範圍","多折角、弧形、多層次，請另行聯繫業務"]].map(([t,v,d])=>(
+              <div key={t} style={{background:"var(--ivory)",padding:"16px 18px"}}>
+                <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:4}}>{t}</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:t.includes("複雜")?"var(--red)":"var(--blk)",marginBottom:3}}>{v}</div>
                 <div style={{fontSize:10,color:"var(--muted)"}}>{d}</div>
               </div>
             ))}
           </div>
-          <div style={{border:"0.5px solid var(--bdr2)",padding:"20px 22px",marginBottom:24,background:"#f9f5ef"}}>
-            <div style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12}}>線型燈快速估算</div>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-              <label style={{fontSize:12,color:"var(--muted)",whiteSpace:"nowrap"}}>安裝長度</label>
-              <input type="number" min="1" max="500" value={linearMeters} onChange={e=>setLinearMeters(Math.max(1,Number(e.target.value)))} style={{width:80,padding:"7px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:14,textAlign:"center",outline:"none"}}/>
-              <span style={{fontSize:12,color:"var(--muted)"}}>米</span>
+          {/* 快速估算：崁燈 + 線型燈 並排 */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24}}>
+            {/* 崁燈快速估算 */}
+            <div style={{border:"0.5px solid var(--bdr2)",padding:"18px 20px",background:"#f9f5ef"}}>
+              <div style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:10}}>崁燈快速估算</div>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                <label style={{fontSize:11,color:"var(--muted)",whiteSpace:"nowrap"}}>盞數</label>
+                <input type="number" min="1" max="999" value={quickRecessed} onChange={e=>setQuickRecessed(Math.max(1,Number(e.target.value)))} style={{width:70,padding:"6px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:14,textAlign:"center",outline:"none"}}/>
+                <span style={{fontSize:11,color:"var(--muted)"}}>盞</span>
+              </div>
+              <div style={{background:"var(--blk)",color:"var(--ivory)",padding:"12px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:5,paddingBottom:5,borderBottom:"0.5px solid #2a2520"}}>
+                  <span>{quickRecessed} 盞 × NT$200</span><span>NT$ {(quickRecessed*200).toLocaleString()}</span>
+                </div>
+                {quickRecessed*200<INSTALL_MIN&&<div style={{fontSize:9,color:"#c45a5a",marginBottom:4}}>未達最低出勤費，以 NT${INSTALL_MIN.toLocaleString()} 計收</div>}
+                <div style={{display:"flex",justifyContent:"space-between",color:"var(--gold)",fontSize:13,paddingTop:3}}>
+                  <span>預估費用</span><span>NT$ {Math.max(quickRecessed*200,INSTALL_MIN).toLocaleString()}</span>
+                </div>
+                <div style={{fontSize:8,color:"#5a4a3a",marginTop:6}}>※ 不含車馬費</div>
+              </div>
             </div>
-            <div style={{background:"var(--blk)",color:"var(--ivory)",padding:"14px 16px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:6,paddingBottom:6,borderBottom:"0.5px solid #2a2520"}}>
-                <span>線型燈安裝（{linearMeters} 米 × NT$840）</span><span>NT$ {(linearMeters*840).toLocaleString()}</span>
+            {/* 線型燈快速估算 */}
+            <div style={{border:"0.5px solid var(--bdr2)",padding:"18px 20px",background:"#f9f5ef"}}>
+              <div style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:10}}>線型燈快速估算</div>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                <label style={{fontSize:11,color:"var(--muted)",whiteSpace:"nowrap"}}>米數</label>
+                <input type="number" min="1" max="500" value={linearMeters} onChange={e=>setLinearMeters(Math.max(1,Number(e.target.value)))} style={{width:70,padding:"6px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:14,textAlign:"center",outline:"none"}}/>
+                <span style={{fontSize:11,color:"var(--muted)"}}>米</span>
               </div>
-              {linearMeters*840<INSTALL_MIN&&<div style={{fontSize:10,color:"#c45a5a",marginBottom:6}}>未達最低出勤費，以 NT${INSTALL_MIN.toLocaleString()} 計收</div>}
-              <div style={{display:"flex",justifyContent:"space-between",color:"var(--gold)",fontSize:14,paddingTop:4}}>
-                <span>預估安裝費</span><span>NT$ {Math.max(linearMeters*840,INSTALL_MIN).toLocaleString()}</span>
+              <div style={{background:"var(--blk)",color:"var(--ivory)",padding:"12px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:5,paddingBottom:5,borderBottom:"0.5px solid #2a2520"}}>
+                  <span>{linearMeters} 米 × NT$500</span><span>NT$ {(linearMeters*500).toLocaleString()}</span>
+                </div>
+                {linearMeters*500<INSTALL_MIN&&<div style={{fontSize:9,color:"#c45a5a",marginBottom:4}}>未達最低出勤費，以 NT${INSTALL_MIN.toLocaleString()} 計收</div>}
+                <div style={{display:"flex",justifyContent:"space-between",color:"var(--gold)",fontSize:13,paddingTop:3}}>
+                  <span>預估費用</span><span>NT$ {Math.max(linearMeters*500,INSTALL_MIN).toLocaleString()}</span>
+                </div>
+                <div style={{fontSize:8,color:"#5a4a3a",marginTop:6}}>※ 不含車馬費 · 直線安裝</div>
               </div>
-              <div style={{fontSize:9,color:"#5a4a3a",marginTop:8}}>※ 不含車馬費，請點「立即估算」選擇施工區域</div>
             </div>
           </div>
           <div style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:7,borderBottom:"0.5px solid var(--bdr2)"}}>全台分區車馬費一覽</div>
@@ -1725,7 +1961,7 @@ export default function App() {
         <div className="sp-head"><div className="sp-title">詢價單</div><button className="close-btn" onClick={()=>setCartOpen(false)}><CloseIcon/></button></div>
         <div className="sp-body">
           <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
-            ✦ 設計公司享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setCartOpen(false);setPage("design");}}>點此聯繫業務</span>
+            ✦ 設計公司享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setCartOpen(false);setContactModal(true);}}>點此聯繫業務</span>
           </div>
           {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div><div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
         </div>
@@ -1771,10 +2007,14 @@ export default function App() {
             </div>
           ):(
             <>
-              <div className="inst-hint">最低出勤費 NT$2,000。崁燈 NT$340/盞；線型燈 NT$840/米。<br/><strong>請事先完成開孔、拉好電線至預定位置。</strong></div>
+              <div className="inst-hint">
+        最低出勤費 NT$2,000。<strong>崁燈 NT$200/盞</strong>；<strong>線型燈 NT$500/米</strong>（直線安裝）。<br/>
+        <span style={{color:"var(--red)"}}>請事先完成開孔，並將電線拉至各燈具預定位置。</span><br/>
+        線型燈須預留燈槽退縮空間，無法退縮將無法施工。不含多折角、弧形、戶外安裝。
+      </div>
               {/* ✅ 設計公司提示 — Panel 內也顯示 */}
               <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
-                ✦ 設計公司或合作專案享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setInstOpen(false);setPage("design");}}>點此聯繫業務</span>
+                ✦ 設計公司或合作專案享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setInstOpen(false);setContactModal(true);}}>點此聯繫業務</span>
               </div>
               <div style={{marginBottom:16}}>
                 <div className="ip-sec-title">安裝類型</div>
@@ -1818,15 +2058,15 @@ export default function App() {
                 {(()=>{
                   const reg=INSTALL_REGIONS.find(r=>r.id===instRegion);
                   const isLinear=instGroups[0]?.type==="linear";
-                  const laborCost=isLinear?Math.max(linearMeters*INSTALL_LINEAR_M,INSTALL_MIN):instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null;
+                  const laborCost=isLinear?Math.max(linearMeters*INSTALL_LINEAR_M,INSTALL_MIN):instCalc?instCalc.hasVHigh?null:instCalc.laborTotal:null; // INSTALL_LINEAR_M=500
                   const travel=reg?.travel===null?null:(instCalc?.travelFee??reg?.travel??0);
                   const total=laborCost!==null&&travel!==null?laborCost+(travel||0):null;
                   return(<>
-                    {isLinear&&<><div className="calc-row"><span>線型燈工資（{linearMeters}m × NT$840）</span><span>NT$ {(linearMeters*840).toLocaleString()}</span></div>{linearMeters*840<INSTALL_MIN&&<div className="calc-warn">未達最低出勤費，以 NT$2,000 計收</div>}</>}
-                    {!isLinear&&instCalc&&<><div className="calc-row"><span>崁燈工資（{instCalc.totalQty} 盞）</span><span>NT$ {instCalc.laborTotal.toLocaleString()}</span></div>{instCalc.hasVHigh&&<div className="calc-warn">4.5m 以上不含安裝費，需另案報價</div>}</>}
+                    {isLinear&&<><div className="calc-row"><span>線型燈工資（{linearMeters}m × NT$500）</span><span>NT$ {(linearMeters*INSTALL_LINEAR_M).toLocaleString()}</span></div>{linearMeters*INSTALL_LINEAR_M<INSTALL_MIN&&<div className="calc-warn">未達最低出勤費，以 NT$2,000 計收</div>}</>}
+                    {!isLinear&&instCalc&&<><div className="calc-row"><span>崁燈工資（{instCalc.totalQty} 盞 × NT$200）</span><span>NT$ {instCalc.laborTotal.toLocaleString()}</span></div>{instCalc.hasVHigh&&<div className="calc-warn">4.5m 以上不含安裝費，需另案報價</div>}</>}
                     <div className="calc-row"><span>車馬費</span><span>{reg?.travel===null?"另議":instCalc?.travelFee===0?<span style={{color:"var(--green)"}}>免收</span>:`NT$ ${(reg?.travel||0).toLocaleString()}`}</span></div>
                     {total!==null&&<div className="calc-row total"><span>預估合計</span><span>NT$ {total.toLocaleString()}</span></div>}
-                    <div style={{fontSize:9,color:"#5a4a3a",marginTop:8}}>設計公司或合作專案可洽業務獲取專案優惠報價</div>
+                    <div style={{fontSize:9,color:"#5a4a3a",marginTop:8,cursor:"pointer",textDecoration:"underline"}} onClick={()=>setContactModal(true)}>設計公司或合作專案可洽業務獲取專案優惠報價 →</div>
                   </>);
                 })()}
               </div>}
