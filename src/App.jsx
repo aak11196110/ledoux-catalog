@@ -150,6 +150,20 @@ const CEILING_GROUPS = [
 
 const TRAVEL_STAY = { kmThreshold:150, lampThreshold:80, stayPerNight:2000, mealPerDay:500 };
 
+// 商照燈系列（含中文名）
+const COMMERCIAL_SERIES = [
+  "DC48V 磁吸軌道","EOS 奧斯","SLOT 希洛特","COSY 寇斯","YODA 優打",
+  "YOMAX 優麥斯","HEPBURN 赫本","METIS 墨提斯","MINI 珠寶","BLADE 帕雷德",
+  "LINEAR 麗娜","POLA 泊拉","WALL LIGHT 壁燈","STEP LIGHT 地腳燈",
+  "CABINET LINEAR LIGHT 高端線條燈","LED STRIP LIGHT 低壓燈帶",
+  "OUTDOOR LIGHT 戶外燈具","VELA","商照燈－特殊款／其他"
+];
+// 線型燈系列
+const LINEAR_SERIES_LIST = [
+  "鋁擠洗牆燈","鋁條燈","燈帶","軟條燈","線型燈－特殊款／其他"
+];
+const ALL_SERIES_LIST = [...COMMERCIAL_SERIES, ...LINEAR_SERIES_LIST];
+
 const SYNONYMS = {
   "坎灯":"崁燈","坎燈":"崁燈","崁灯":"崁燈","嵌灯":"崁燈","嵌燈":"崁燈",
   "轨道灯":"軌道燈","导轨灯":"軌道燈","磁吸灯":"磁吸系統","磁吸燈":"磁吸系統",
@@ -165,53 +179,53 @@ const HOT_KEYWORDS = ["崁燈","軌道燈","磁吸系統","鋁條燈","戶外燈
 const COMPANY = { name:"台灣諾科照明有限公司", eng:"Ledoux Lighting Taiwan Co., Ltd.", email:"info@ledouxlight.com" };
 
 const INIT_PRODUCTS = [
-  { id:1,  model:"HB.D110",     series:"HEPBURN",      category:"崁燈",    watt:"10W",    lumen:"680lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H114mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:980,  projPrice:790,  video:"", desc:"HEPBURN 系列經典崁燈，LUMINUS 光源，680lm，可選蜂窩網、布紋玻璃配件。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D110-White-300x300.png"], note:"可選配件：蜂窩網、布紋玻璃、條紋玻璃" },
-  { id:2,  model:"HB.D115",     series:"HEPBURN",      category:"崁燈",    watt:"15W",    lumen:"1000lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H114mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:1180, projPrice:960,  video:"", desc:"HEPBURN 15W，1000lm，優雅比例與高效能光源完美結合。", images:[], note:"可選配件：蜂窩網" },
-  { id:3,  model:"HB.D120",     series:"HEPBURN",      category:"崁燈",    watt:"20W",    lumen:"1732lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:1380, projPrice:1120, video:"", desc:"HEPBURN 20W，1732lm 高光通，適合精品店與藝廊重點照明。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D120-White-300x300.png"], note:"可選配件：蜂窩網、布紋玻璃" },
-  { id:4,  model:"HB.D130",     series:"HEPBURN",      category:"崁燈",    watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:100, stdPrice:1580, projPrice:1280, video:"", desc:"HEPBURN 旗艦 30W，2200lm，高挑空間與精品陳列首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D130-240x300.jpg"], note:"" },
-  { id:5,  model:"HB.D120-N",   series:"HEPBURN",      category:"崁燈",    watt:"20W",    lumen:"1732lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø98mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:1380, projPrice:1120, video:"", desc:"HEPBURN-N 20W，全系列最暢銷款，商業空間標準配置。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D120-White-300x300.png"], note:"" },
-  { id:6,  model:"HB.D130-N",   series:"HEPBURN",      category:"崁燈",    watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø98mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:100, stdPrice:1580, projPrice:1280, video:"", desc:"HEPBURN-N 30W，博物館與精品店最大功率款。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D130-240x300.jpg"], note:"" },
-  { id:7,  model:"HB.D430",     series:"HEPBURN",      category:"崁燈",    watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色/金色", cutout:"Ø70mm",  size:"Ø75×H114mm",  install:"崁入式",   cert:"CE/3C", shipping:120, stdPrice:2880, projPrice:2350, video:"", desc:"HEPBURN 小口徑旗艦 30W，最小開孔最大輸出。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D430-240x300.jpg"], note:"可選金色前框" },
-  { id:8,  model:"HB.T130S",    series:"HEPBURN",      category:"軌道燈",  watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色/金色", cutout:"—",      size:"Ø63×H160mm",  install:"三線軌道式",cert:"CE/3C", shipping:120, stdPrice:2480, projPrice:2020, video:"", desc:"HEPBURN 軌道旗艦，30W 2200lm，三線導軌，優雅外型強大性能。", images:["https://www.ledouxlight.com/wp-content/uploads/2023/01/Led-Track-Light-HB.T130S-300x300.png"], note:"可選蜂窩網、布紋玻璃" },
-  { id:9,  model:"NDB0306-C",   series:"BLADE",        category:"崁燈",    watt:"6W",     lumen:"480lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"Ø75mm",  size:"Ø85×H30mm",   install:"崁入式",   cert:"CE",    shipping:75,  stdPrice:780,  projPrice:630,  video:"", desc:"BLADE 超薄系列 6W，燈身僅 30mm，天花板隱形光源首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-NDB0306-C-240x300.jpg"], note:"" },
-  { id:10, model:"NDB0309-C",   series:"BLADE",        category:"崁燈",    watt:"9W",     lumen:"720lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"Ø85mm",  size:"Ø95×H30mm",   install:"崁入式",   cert:"CE",    shipping:75,  stdPrice:920,  projPrice:750,  video:"", desc:"BLADE 9W，淨高受限空間的完美解決方案。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-NDB0309-C-240x300.jpg"], note:"" },
-  { id:11, model:"DFB0206-C",   series:"METIS",        category:"崁燈",    watt:"6W",     lumen:"540lm",   cct:"3000K/4000K",             beam:"40°",             voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø75mm",  size:"Ø85×H75mm",   install:"崁入式",   cert:"CE",    shipping:75,  stdPrice:1100, projPrice:890,  video:"", desc:"METIS 系列純鋁鍛造散熱，廣角 40° 均勻照明，長壽命商業設計。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Ceiling-Light-DFB0206-C-300x300.png"], note:"" },
-  { id:12, model:"DFB0225-C",   series:"METIS",        category:"崁燈",    watt:"25W",    lumen:"2250lm",  cct:"3000K/4000K",             beam:"40°",             voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø175mm", size:"Ø190×H120mm", install:"崁入式",   cert:"CE",    shipping:100, stdPrice:2680, projPrice:2180, video:"", desc:"METIS 25W 大功率，2250lm 廣角，展示空間最佳選擇。", images:["https://www.ledouxlight.com/wp-content/uploads/2023/01/Led-Recessed-Ceiling-Light-DFB0225-C-1.png"], note:"" },
-  { id:13, model:"TSU0506-C",   series:"EOS",          category:"軌道燈",  watt:"6W",     lumen:"480lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø60×H140mm",  install:"軌道式",   cert:"CE",    shipping:75,  stdPrice:980,  projPrice:800,  video:"", desc:"EOS 系列入門款 6W，纖薄機身整合散熱模組，輕巧適用各場合。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/LED-Track-Light-TSU0506-C-240x300.jpg"], note:"" },
-  { id:14, model:"TSU0515-C",   series:"EOS",          category:"軌道燈",  watt:"15W",    lumen:"1350lm",  cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø70×H180mm",  install:"軌道式",   cert:"CE",    shipping:90,  stdPrice:1380, projPrice:1120, video:"", desc:"EOS 15W，1350lm，精準投射，服飾與珠寶陳列專用。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/Led-Track-Light-TSU0515-White-240x300.jpg"], note:"" },
-  { id:15, model:"TSU0823-C",   series:"EOS",          category:"軌道燈",  watt:"23W",    lumen:"2070lm",  cct:"3000K/4000K",             beam:"36°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø80×H200mm",  install:"軌道式",   cert:"CE",    shipping:90,  stdPrice:1880, projPrice:1530, video:"", desc:"EOS 23W 大角度版，2070lm，空間氛圍渲染首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2023/01/EOS-LED-Track-Light-TSU0823-C-1.png"], note:"" },
+  { id:1,  model:"HB.D110",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"10W",    lumen:"680lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H114mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:980,  projPrice:790,  video:"", desc:"HEPBURN 系列經典崁燈，LUMINUS 光源，680lm，可選蜂窩網、布紋玻璃配件。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D110-White-300x300.png"], note:"可選配件：蜂窩網、布紋玻璃、條紋玻璃" },
+  { id:2,  model:"HB.D115",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"15W",    lumen:"1000lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H114mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:1180, projPrice:960,  video:"", desc:"HEPBURN 15W，1000lm，優雅比例與高效能光源完美結合。", images:[], note:"可選配件：蜂窩網" },
+  { id:3,  model:"HB.D120",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    lumen:"1732lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:1380, projPrice:1120, video:"", desc:"HEPBURN 20W，1732lm 高光通，適合精品店與藝廊重點照明。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D120-White-300x300.png"], note:"可選配件：蜂窩網、布紋玻璃" },
+  { id:4,  model:"HB.D130",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:100, stdPrice:1580, projPrice:1280, video:"", desc:"HEPBURN 旗艦 30W，2200lm，高挑空間與精品陳列首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D130-240x300.jpg"], note:"" },
+  { id:5,  model:"HB.D120-N",   series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    lumen:"1732lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø98mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:1380, projPrice:1120, video:"", desc:"HEPBURN-N 20W，全系列最暢銷款，商業空間標準配置。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D120-White-300x300.png"], note:"" },
+  { id:6,  model:"HB.D130-N",   series:"HEPBURN 赫本",      category:"崁燈",    watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø98mm",  size:"Ø102×H132mm", install:"崁入式",   cert:"CE/3C", shipping:100, stdPrice:1580, projPrice:1280, video:"", desc:"HEPBURN-N 30W，博物館與精品店最大功率款。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D130-240x300.jpg"], note:"" },
+  { id:7,  model:"HB.D430",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色/金色", cutout:"Ø70mm",  size:"Ø75×H114mm",  install:"崁入式",   cert:"CE/3C", shipping:120, stdPrice:2880, projPrice:2350, video:"", desc:"HEPBURN 小口徑旗艦 30W，最小開孔最大輸出。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D430-240x300.jpg"], note:"可選金色前框" },
+  { id:8,  model:"HB.T130S",    series:"HEPBURN 赫本",      category:"軌道燈",  watt:"30W",    lumen:"2200lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色/金色", cutout:"—",      size:"Ø63×H160mm",  install:"三線軌道式",cert:"CE/3C", shipping:120, stdPrice:2480, projPrice:2020, video:"", desc:"HEPBURN 軌道旗艦，30W 2200lm，三線導軌，優雅外型強大性能。", images:["https://www.ledouxlight.com/wp-content/uploads/2023/01/Led-Track-Light-HB.T130S-300x300.png"], note:"可選蜂窩網、布紋玻璃" },
+  { id:9,  model:"NDB0306-C",   series:"BLADE 帕雷德",        category:"崁燈",    watt:"6W",     lumen:"480lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"Ø75mm",  size:"Ø85×H30mm",   install:"崁入式",   cert:"CE",    shipping:75,  stdPrice:780,  projPrice:630,  video:"", desc:"BLADE 超薄系列 6W，燈身僅 30mm，天花板隱形光源首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-NDB0306-C-240x300.jpg"], note:"" },
+  { id:10, model:"NDB0309-C",   series:"BLADE 帕雷德",        category:"崁燈",    watt:"9W",     lumen:"720lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"Ø85mm",  size:"Ø95×H30mm",   install:"崁入式",   cert:"CE",    shipping:75,  stdPrice:920,  projPrice:750,  video:"", desc:"BLADE 9W，淨高受限空間的完美解決方案。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-NDB0309-C-240x300.jpg"], note:"" },
+  { id:11, model:"DFB0206-C",   series:"METIS 墨提斯",        category:"崁燈",    watt:"6W",     lumen:"540lm",   cct:"3000K/4000K",             beam:"40°",             voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø75mm",  size:"Ø85×H75mm",   install:"崁入式",   cert:"CE",    shipping:75,  stdPrice:1100, projPrice:890,  video:"", desc:"METIS 系列純鋁鍛造散熱，廣角 40° 均勻照明，長壽命商業設計。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Ceiling-Light-DFB0206-C-300x300.png"], note:"" },
+  { id:12, model:"DFB0225-C",   series:"METIS 墨提斯",        category:"崁燈",    watt:"25W",    lumen:"2250lm",  cct:"3000K/4000K",             beam:"40°",             voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø175mm", size:"Ø190×H120mm", install:"崁入式",   cert:"CE",    shipping:100, stdPrice:2680, projPrice:2180, video:"", desc:"METIS 25W 大功率，2250lm 廣角，展示空間最佳選擇。", images:["https://www.ledouxlight.com/wp-content/uploads/2023/01/Led-Recessed-Ceiling-Light-DFB0225-C-1.png"], note:"" },
+  { id:13, model:"TSU0506-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"6W",     lumen:"480lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø60×H140mm",  install:"軌道式",   cert:"CE",    shipping:75,  stdPrice:980,  projPrice:800,  video:"", desc:"EOS 系列入門款 6W，纖薄機身整合散熱模組，輕巧適用各場合。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/LED-Track-Light-TSU0506-C-240x300.jpg"], note:"" },
+  { id:14, model:"TSU0515-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"15W",    lumen:"1350lm",  cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø70×H180mm",  install:"軌道式",   cert:"CE",    shipping:90,  stdPrice:1380, projPrice:1120, video:"", desc:"EOS 15W，1350lm，精準投射，服飾與珠寶陳列專用。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/Led-Track-Light-TSU0515-White-240x300.jpg"], note:"" },
+  { id:15, model:"TSU0823-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"23W",    lumen:"2070lm",  cct:"3000K/4000K",             beam:"36°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø80×H200mm",  install:"軌道式",   cert:"CE",    shipping:90,  stdPrice:1880, projPrice:1530, video:"", desc:"EOS 23W 大角度版，2070lm，空間氛圍渲染首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2023/01/EOS-LED-Track-Light-TSU0823-C-1.png"], note:"" },
   { id:16, model:"TSU0206-1",   series:"THEIA",        category:"軌道燈",  watt:"6W",     lumen:"480lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø55×H130mm",  install:"軌道式",   cert:"CE",    shipping:75,  stdPrice:980,  projPrice:800,  video:"", desc:"THEIA 系列 6W，180° 可調仰角，靈活定向照明解決方案。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/TSU0206-1-241x300.png"], note:"" },
   { id:17, model:"TSU0212-1",   series:"THEIA",        category:"軌道燈",  watt:"12W",    lumen:"1080lm",  cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø65×H160mm",  install:"軌道式",   cert:"CE",    shipping:90,  stdPrice:1280, projPrice:1040, video:"", desc:"THEIA 12W，1080lm，精品零售空間標準配置。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/TSU0212-1-241x300.png"], note:"" },
-  { id:18, model:"CSU0515-C",   series:"EOS",          category:"吸頂燈",  watt:"15W",    lumen:"1350lm",  cct:"3000K/4000K",             beam:"36°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø120×H80mm",  install:"吸頂式",   cert:"CE",    shipping:90,  stdPrice:1580, projPrice:1290, video:"", desc:"EOS 吸頂款，無需開孔，1350lm 廣角照明。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/Surface-Mount-CSU0510-C-240x300.jpg"], note:"" },
+  { id:18, model:"CSU0515-C",   series:"EOS 奧斯",          category:"吸頂燈",  watt:"15W",    lumen:"1350lm",  cct:"3000K/4000K",             beam:"36°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø120×H80mm",  install:"吸頂式",   cert:"CE",    shipping:90,  stdPrice:1580, projPrice:1290, video:"", desc:"EOS 吸頂款，無需開孔，1350lm 廣角照明。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/Surface-Mount-CSU0510-C-240x300.jpg"], note:"" },
   { id:19, model:"CSA0206-1",   series:"THEIA",        category:"吸頂燈",  watt:"6W",     lumen:"480lm",   cct:"3000K/4000K",             beam:"24°",             voltage:"220V",   cri:"Ra≥80", color:"白色/黑色",     cutout:"—",      size:"Ø70×H90mm",   install:"吸頂式",   cert:"CE",    shipping:75,  stdPrice:1080, projPrice:880,  video:"", desc:"THEIA 吸頂 6W，住宅走廊首選。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/CSA0206-1-241x300.png"], note:"" },
-  { id:20, model:"DC.TS0110-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"10W",    lumen:"921lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥95", color:"砂白/砂黑/金色", cutout:"—",      size:"Ø40×H100mm",  install:"磁吸嵌入", cert:"CE",    shipping:100, stdPrice:2380, projPrice:1940, video:"", desc:"48V 磁吸旗艦 10W，Honourtek 921lm，Ra≥95，無工具快速安裝。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0110-C-241x300.jpg"], note:"" },
-  { id:21, model:"DC.TS0120-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"20W",    lumen:"1734lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥90", color:"砂白/砂黑/金色", cutout:"—",      size:"Ø63×H120mm",  install:"磁吸嵌入", cert:"CE",    shipping:100, stdPrice:2980, projPrice:2430, video:"", desc:"20W 高輸出磁吸，1734lm，藝廊與精品空間專用。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0120-C-241x300.jpg"], note:"" },
-  { id:22, model:"DC.TS0130-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"30W",    lumen:"2251lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥90", color:"砂白/砂黑/金色", cutout:"—",      size:"Ø63×H160mm",  install:"磁吸嵌入", cert:"CE",    shipping:120, stdPrice:3580, projPrice:2920, video:"", desc:"30W 旗艦磁吸，2251lm 極致輸出。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0130-C-241x300.jpg"], note:"" },
-  { id:23, model:"DC.TS0206-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"6W",     lumen:"420lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥95", color:"砂白/砂黑",     cutout:"—",      size:"Ø35×H55mm",   install:"磁吸嵌入", cert:"CE",    shipping:90,  stdPrice:1980, projPrice:1620, video:"", desc:"入門磁吸 6W，Ra≥95，420lm，系統彈性配置理想起點。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0206-C--241x300.jpg"], note:"" },
-  { id:24, model:"BSB0504-C",   series:"OUTDOOR",      category:"戶外燈",  watt:"4W",     lumen:"210lm",   cct:"2700K/3000K/3500K/4000K", beam:"12°/20°/30°/40°", voltage:"DC 24V", cri:"Ra≥90", color:"黑色",          cutout:"Ø45mm",  size:"Ø50×H92.7mm", install:"插地式",   cert:"IP67",  shipping:90,  stdPrice:1680, projPrice:1360, video:"", desc:"316L 不鏽鋼插地燈 4W，Bridgelux 210lm，景觀步道首選。", images:[], note:"DC24V 供電。" },
-  { id:25, model:"BSB0508-C",   series:"OUTDOOR",      category:"戶外燈",  watt:"8W",     lumen:"508lm",   cct:"2700K/3000K/3500K/4000K", beam:"12°/20°/30°/40°", voltage:"DC 24V", cri:"Ra≥90", color:"黑色",          cutout:"Ø68mm",  size:"Ø75×H123mm",  install:"插地式",   cert:"IP67",  shipping:100, stdPrice:2180, projPrice:1780, video:"", desc:"316L 不鏽鋼大功率插地燈 8W，Bridgelux 508lm，適合商業廣場景觀。", images:[], note:"DC24V 供電。" },
-  { id:26, model:"ALA0011-A",   series:"LED STRIP",    category:"鋁條燈",  watt:"4.8W/m", lumen:"110lm/W", cct:"2700K/3000K/4000K/6500K", beam:"120°",            voltage:"DC 24V", cri:"Ra≥98", color:"透明",          cutout:"—",      size:"W8×H2mm/m",   install:"卡槽嵌入", cert:"IP20",  shipping:75,  stdPrice:480,  projPrice:380,  video:"", desc:"高顯色 Ra≥98 鋁條燈，色容差 <3，精緻櫃體照明首選。", images:[], note:"⚠ 單條建議最長 2m；串聯最長 5.5m。需搭配 DC 24V 恒壓電源。" },
-  { id:27, model:"ALA0011-P",   series:"LED STRIP",    category:"鋁條燈",  watt:"4.8W/m", lumen:"110lm/W", cct:"2700K/3000K/4000K/6500K", beam:"120°",            voltage:"DC 24V", cri:"Ra≥98", color:"透明",          cutout:"—",      size:"W10×H4.5mm/m",install:"卡槽嵌入", cert:"IP67",  shipping:75,  stdPrice:580,  projPrice:460,  video:"", desc:"防水 IP67 版，實心矽膠擠出不翻轉，耐久性極強，適合潮濕環境。", images:[], note:"⚠ 單條建議最長 2m；串聯最長 5.5m。" },
-  { id:28, model:"YODA 系列",   series:"YODA",         category:"崁燈",    watt:"—",      lumen:"—",       cct:"—",                       beam:"—",               voltage:"—",      cri:"—",     color:"—",             cutout:"—",      size:"—",           install:"—",        cert:"—",     shipping:90,  stdPrice:0,    projPrice:0,    video:"", desc:"YODA 系列即將上市。此為系列佔位產品，管理員請至「產品管理」新增正式品項。", images:[], note:"新系列開發中，敬請期待。" },
+  { id:20, model:"DC.TS0110-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"10W",    lumen:"921lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥95", color:"砂白/砂黑/金色", cutout:"—",      size:"Ø40×H100mm",  install:"磁吸嵌入", cert:"CE",    shipping:100, stdPrice:2380, projPrice:1940, video:"", desc:"48V 磁吸旗艦 10W，Honourtek 921lm，Ra≥95，無工具快速安裝。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0110-C-241x300.jpg"], note:"" },
+  { id:21, model:"DC.TS0120-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"20W",    lumen:"1734lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥90", color:"砂白/砂黑/金色", cutout:"—",      size:"Ø63×H120mm",  install:"磁吸嵌入", cert:"CE",    shipping:100, stdPrice:2980, projPrice:2430, video:"", desc:"20W 高輸出磁吸，1734lm，藝廊與精品空間專用。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0120-C-241x300.jpg"], note:"" },
+  { id:22, model:"DC.TS0130-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"30W",    lumen:"2251lm",  cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥90", color:"砂白/砂黑/金色", cutout:"—",      size:"Ø63×H160mm",  install:"磁吸嵌入", cert:"CE",    shipping:120, stdPrice:3580, projPrice:2920, video:"", desc:"30W 旗艦磁吸，2251lm 極致輸出。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0130-C-241x300.jpg"], note:"" },
+  { id:23, model:"DC.TS0206-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"6W",     lumen:"420lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/25°/36°",     voltage:"48V DC", cri:"Ra≥95", color:"砂白/砂黑",     cutout:"—",      size:"Ø35×H55mm",   install:"磁吸嵌入", cert:"CE",    shipping:90,  stdPrice:1980, projPrice:1620, video:"", desc:"入門磁吸 6W，Ra≥95，420lm，系統彈性配置理想起點。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/05/48V-Led-Track-Light-DC.TS0206-C--241x300.jpg"], note:"" },
+  { id:24, model:"BSB0504-C",   series:"OUTDOOR LIGHT 戶外燈具",      category:"戶外燈",  watt:"4W",     lumen:"210lm",   cct:"2700K/3000K/3500K/4000K", beam:"12°/20°/30°/40°", voltage:"DC 24V", cri:"Ra≥90", color:"黑色",          cutout:"Ø45mm",  size:"Ø50×H92.7mm", install:"插地式",   cert:"IP67",  shipping:90,  stdPrice:1680, projPrice:1360, video:"", desc:"316L 不鏽鋼插地燈 4W，Bridgelux 210lm，景觀步道首選。", images:[], note:"DC24V 供電。" },
+  { id:25, model:"BSB0508-C",   series:"OUTDOOR LIGHT 戶外燈具",      category:"戶外燈",  watt:"8W",     lumen:"508lm",   cct:"2700K/3000K/3500K/4000K", beam:"12°/20°/30°/40°", voltage:"DC 24V", cri:"Ra≥90", color:"黑色",          cutout:"Ø68mm",  size:"Ø75×H123mm",  install:"插地式",   cert:"IP67",  shipping:100, stdPrice:2180, projPrice:1780, video:"", desc:"316L 不鏽鋼大功率插地燈 8W，Bridgelux 508lm，適合商業廣場景觀。", images:[], note:"DC24V 供電。" },
+  { id:26, model:"ALA0011-A",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", lumen:"110lm/W", cct:"2700K/3000K/4000K/6500K", beam:"120°",            voltage:"DC 24V", cri:"Ra≥98", color:"透明",          cutout:"—",      size:"W8×H2mm/m",   install:"卡槽嵌入", cert:"IP20",  shipping:75,  stdPrice:480,  projPrice:380,  video:"", desc:"高顯色 Ra≥98 鋁條燈，色容差 <3，精緻櫃體照明首選。", images:[], note:"⚠ 單條建議最長 2m；串聯最長 5.5m。需搭配 DC 24V 恒壓電源。" },
+  { id:27, model:"ALA0011-P",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", lumen:"110lm/W", cct:"2700K/3000K/4000K/6500K", beam:"120°",            voltage:"DC 24V", cri:"Ra≥98", color:"透明",          cutout:"—",      size:"W10×H4.5mm/m",install:"卡槽嵌入", cert:"IP67",  shipping:75,  stdPrice:580,  projPrice:460,  video:"", desc:"防水 IP67 版，實心矽膠擠出不翻轉，耐久性極強，適合潮濕環境。", images:[], note:"⚠ 單條建議最長 2m；串聯最長 5.5m。" },
+  { id:28, model:"YODA 系列",   series:"YODA 優打",         category:"崁燈",    watt:"—",      lumen:"—",       cct:"—",                       beam:"—",               voltage:"—",      cri:"—",     color:"—",             cutout:"—",      size:"—",           install:"—",        cert:"—",     shipping:90,  stdPrice:0,    projPrice:0,    video:"", desc:"YODA 系列即將上市。此為系列佔位產品，管理員請至「產品管理」新增正式品項。", images:[], note:"新系列開發中，敬請期待。" },
 ];
 
 const INIT_INVENTORY = [
-  { id:"inv001", model:"HB.D110",     series:"HEPBURN",      category:"崁燈",    watt:"10W",    cct:"3000K",             color:"白色",      totalQty:24,  reservedQty:4,  availableQty:20,  location:"桃園倉 A-01", updatedAt:"2026-04-25", note:"" },
-  { id:"inv002", model:"HB.D120",     series:"HEPBURN",      category:"崁燈",    watt:"20W",    cct:"3000K",             color:"白色",      totalQty:18,  reservedQty:2,  availableQty:16,  location:"桃園倉 A-02", updatedAt:"2026-04-25", note:"暢銷款" },
-  { id:"inv003", model:"HB.D120",     series:"HEPBURN",      category:"崁燈",    watt:"20W",    cct:"3000K",             color:"黑色",      totalQty:12,  reservedQty:0,  availableQty:12,  location:"桃園倉 A-03", updatedAt:"2026-04-25", note:"" },
-  { id:"inv004", model:"HB.D130",     series:"HEPBURN",      category:"崁燈",    watt:"30W",    cct:"3000K",             color:"白色",      totalQty:8,   reservedQty:3,  availableQty:5,   location:"桃園倉 A-04", updatedAt:"2026-04-25", note:"庫存偏低" },
-  { id:"inv005", model:"HB.T130S",    series:"HEPBURN",      category:"軌道燈",  watt:"30W",    cct:"3000K",             color:"黑色",      totalQty:10,  reservedQty:0,  availableQty:10,  location:"桃園倉 B-01", updatedAt:"2026-04-25", note:"" },
-  { id:"inv006", model:"NDB0306-C",   series:"BLADE",        category:"崁燈",    watt:"6W",     cct:"3000K/4000K",       color:"白色/黑色", totalQty:36,  reservedQty:6,  availableQty:30,  location:"桃園倉 A-05", updatedAt:"2026-04-26", note:"雙色皆有庫存" },
-  { id:"inv007", model:"NDB0309-C",   series:"BLADE",        category:"崁燈",    watt:"9W",     cct:"3000K/4000K",       color:"白色/黑色", totalQty:24,  reservedQty:4,  availableQty:20,  location:"桃園倉 A-06", updatedAt:"2026-04-26", note:"" },
-  { id:"inv008", model:"DFB0206-C",   series:"METIS",        category:"崁燈",    watt:"6W",     cct:"3000K",             color:"白色",      totalQty:20,  reservedQty:0,  availableQty:20,  location:"桃園倉 A-07", updatedAt:"2026-04-24", note:"" },
-  { id:"inv009", model:"TSU0506-C",   series:"EOS",          category:"軌道燈",  watt:"6W",     cct:"3000K",             color:"白色/黑色", totalQty:16,  reservedQty:0,  availableQty:16,  location:"桃園倉 B-02", updatedAt:"2026-04-24", note:"" },
-  { id:"inv010", model:"TSU0515-C",   series:"EOS",          category:"軌道燈",  watt:"15W",    cct:"3000K",             color:"白色",      totalQty:14,  reservedQty:2,  availableQty:12,  location:"桃園倉 B-03", updatedAt:"2026-04-26", note:"" },
-  { id:"inv011", model:"DC.TS0110-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"10W",    cct:"3000K/4000K",       color:"砂白/砂黑", totalQty:20,  reservedQty:5,  availableQty:15,  location:"桃園倉 C-01", updatedAt:"2026-04-25", note:"高需求款" },
-  { id:"inv012", model:"DC.TS0120-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"20W",    cct:"3000K",             color:"砂白",      totalQty:12,  reservedQty:2,  availableQty:10,  location:"桃園倉 C-02", updatedAt:"2026-04-25", note:"" },
-  { id:"inv013", model:"DC.TS0206-C", series:"48V MAGNETIC", category:"磁吸系統",watt:"6W",     cct:"2700K/3000K/4000K", color:"砂白/砂黑", totalQty:0,   reservedQty:0,  availableQty:0,   location:"—",           updatedAt:"2026-04-20", note:"補貨中，預計 5 月初到貨" },
-  { id:"inv014", model:"ALA0011-A",   series:"LED STRIP",    category:"鋁條燈",  watt:"4.8W/m", cct:"3000K",             color:"透明",      totalQty:200, reservedQty:30, availableQty:170, location:"桃園倉 D-01", updatedAt:"2026-04-27", note:"計量單位：公尺" },
-  { id:"inv015", model:"ALA0011-P",   series:"LED STRIP",    category:"鋁條燈",  watt:"4.8W/m", cct:"3000K",             color:"透明",      totalQty:120, reservedQty:10, availableQty:110, location:"桃園倉 D-02", updatedAt:"2026-04-27", note:"防水版，計量單位：公尺" },
-  { id:"inv016", model:"HB.D120-N",   series:"HEPBURN",      category:"崁燈",    watt:"20W",    cct:"3000K/4000K",       color:"白色/黑色", totalQty:30,  reservedQty:8,  availableQty:22,  location:"桃園倉 A-08", updatedAt:"2026-04-27", note:"全系列暢銷款" },
+  { id:"inv001", model:"HB.D110",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"10W",    cct:"3000K",             color:"白色",      totalQty:24,  reservedQty:4,  availableQty:20,  location:"桃園倉 A-01", updatedAt:"2026-04-25", note:"" },
+  { id:"inv002", model:"HB.D120",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    cct:"3000K",             color:"白色",      totalQty:18,  reservedQty:2,  availableQty:16,  location:"桃園倉 A-02", updatedAt:"2026-04-25", note:"暢銷款" },
+  { id:"inv003", model:"HB.D120",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    cct:"3000K",             color:"黑色",      totalQty:12,  reservedQty:0,  availableQty:12,  location:"桃園倉 A-03", updatedAt:"2026-04-25", note:"" },
+  { id:"inv004", model:"HB.D130",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"30W",    cct:"3000K",             color:"白色",      totalQty:8,   reservedQty:3,  availableQty:5,   location:"桃園倉 A-04", updatedAt:"2026-04-25", note:"庫存偏低" },
+  { id:"inv005", model:"HB.T130S",    series:"HEPBURN 赫本",      category:"軌道燈",  watt:"30W",    cct:"3000K",             color:"黑色",      totalQty:10,  reservedQty:0,  availableQty:10,  location:"桃園倉 B-01", updatedAt:"2026-04-25", note:"" },
+  { id:"inv006", model:"NDB0306-C",   series:"BLADE 帕雷德",        category:"崁燈",    watt:"6W",     cct:"3000K/4000K",       color:"白色/黑色", totalQty:36,  reservedQty:6,  availableQty:30,  location:"桃園倉 A-05", updatedAt:"2026-04-26", note:"雙色皆有庫存" },
+  { id:"inv007", model:"NDB0309-C",   series:"BLADE 帕雷德",        category:"崁燈",    watt:"9W",     cct:"3000K/4000K",       color:"白色/黑色", totalQty:24,  reservedQty:4,  availableQty:20,  location:"桃園倉 A-06", updatedAt:"2026-04-26", note:"" },
+  { id:"inv008", model:"DFB0206-C",   series:"METIS 墨提斯",        category:"崁燈",    watt:"6W",     cct:"3000K",             color:"白色",      totalQty:20,  reservedQty:0,  availableQty:20,  location:"桃園倉 A-07", updatedAt:"2026-04-24", note:"" },
+  { id:"inv009", model:"TSU0506-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"6W",     cct:"3000K",             color:"白色/黑色", totalQty:16,  reservedQty:0,  availableQty:16,  location:"桃園倉 B-02", updatedAt:"2026-04-24", note:"" },
+  { id:"inv010", model:"TSU0515-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"15W",    cct:"3000K",             color:"白色",      totalQty:14,  reservedQty:2,  availableQty:12,  location:"桃園倉 B-03", updatedAt:"2026-04-26", note:"" },
+  { id:"inv011", model:"DC.TS0110-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"10W",    cct:"3000K/4000K",       color:"砂白/砂黑", totalQty:20,  reservedQty:5,  availableQty:15,  location:"桃園倉 C-01", updatedAt:"2026-04-25", note:"高需求款" },
+  { id:"inv012", model:"DC.TS0120-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"20W",    cct:"3000K",             color:"砂白",      totalQty:12,  reservedQty:2,  availableQty:10,  location:"桃園倉 C-02", updatedAt:"2026-04-25", note:"" },
+  { id:"inv013", model:"DC.TS0206-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"6W",     cct:"2700K/3000K/4000K", color:"砂白/砂黑", totalQty:0,   reservedQty:0,  availableQty:0,   location:"—",           updatedAt:"2026-04-20", note:"補貨中，預計 5 月初到貨" },
+  { id:"inv014", model:"ALA0011-A",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", cct:"3000K",             color:"透明",      totalQty:200, reservedQty:30, availableQty:170, location:"桃園倉 D-01", updatedAt:"2026-04-27", note:"計量單位：公尺" },
+  { id:"inv015", model:"ALA0011-P",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", cct:"3000K",             color:"透明",      totalQty:120, reservedQty:10, availableQty:110, location:"桃園倉 D-02", updatedAt:"2026-04-27", note:"防水版，計量單位：公尺" },
+  { id:"inv016", model:"HB.D120-N",   series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    cct:"3000K/4000K",       color:"白色/黑色", totalQty:30,  reservedQty:8,  availableQty:22,  location:"桃園倉 A-08", updatedAt:"2026-04-27", note:"全系列暢銷款" },
 ];
 
 // ─────────────────────────────────────────────
@@ -923,7 +937,7 @@ ${installRows ? `
   B. 謹請確認以上單價及數量，如無誤，煩將訂購報價單回傳【Fax:03-368 7552】。<br>
   C. 燈具保固期限：室內保固3年、戶外保固2年。<br>
   D. 交期如遇天災或事變等不可抗力，未能依時履約交貨，得展延交期。<br>
-  E. 單筆未滿 NT$3,000，運費由買方自付；庫存不足時生產交期約4週起。
+  E. 單筆未滿 NT$3,000，運費由買方自付；庫存不足時生產交期約1個月起。
 </div>
 
 <div class="sign-area">
@@ -987,6 +1001,55 @@ function generateInstallPDF({projectName, customer, instCalc, instRegion, instGr
 // ═══════════════════════════════════════════
 //  主元件
 // ═══════════════════════════════════════════
+
+// 安裝費用試算 PDF（獨立版）
+function _generateInstallOnlyPDF({projectName, customer, instCalc, instRegion, instGroups, linearGroups, installTypes, instNote}) {
+  const today = new Date();
+  const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
+  const qn = `INST-EST-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
+  const regLabel = INSTALL_REGIONS.find(r=>r.id===instRegion)?.label || instRegion;
+  const hasR = (installTypes||[]).includes("recessed");
+  const hasL = (installTypes||[]).includes("linear");
+  let rows = "", laborTotal = 0;
+  if(hasR){
+    (instGroups||[]).filter(g=>Number(g.qty)>0).forEach((g,i)=>{
+      const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+      if(!cg||cg.surcharge===null)return;
+      const unit=INSTALL_BASE+cg.surcharge, sub=unit*Number(g.qty);
+      laborTotal+=sub;
+      rows+=`<tr><td>${i+1}</td><td><b>崁燈安裝（${cg.label}）</b></td><td style="text-align:center">${g.qty} 盞</td><td style="text-align:right">NT$ ${unit.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;
+    });
+  }
+  if(hasL){
+    (linearGroups||[]).filter(g=>Number(g.meters)>0).forEach((g,i)=>{
+      const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);
+      if(!cg||cg.surcharge===null)return;
+      const rate=Math.round(INSTALL_LINEAR_M*(1+cg.surcharge/INSTALL_BASE)),sub=rate*Number(g.meters);
+      laborTotal+=sub;
+      rows+=`<tr><td>L${i+1}</td><td><b>線型燈安裝（${cg.label}）</b><br><span style="font-size:10px;color:#666">${g.meters}米 × NT$${rate}/米</span></td><td style="text-align:center">${g.meters} 米</td><td style="text-align:right">NT$ ${rate.toLocaleString()}</td><td style="text-align:right">NT$ ${sub.toLocaleString()}</td></tr>`;
+    });
+  }
+  laborTotal=Math.max(laborTotal,INSTALL_MIN);
+  const travelFee=instCalc?.travelFee||0, grandTotal=laborTotal+travelFee;
+  if(travelFee>0){rows+=`<tr><td>—</td><td><b>車馬費</b>（${regLabel}）</td><td style="text-align:center">1</td><td style="text-align:right">NT$ ${travelFee.toLocaleString()}</td><td style="text-align:right">NT$ ${travelFee.toLocaleString()}</td></tr>`;}
+  else{rows+=`<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達門檻）</td></tr>`;}
+  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>安裝費用試算 ${qn}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans TC",sans-serif;font-size:12px;color:#111;padding:28px 36px}.hd{display:flex;justify-content:space-between;margin-bottom:18px;border-bottom:2px solid #111;padding-bottom:12px}.co-name{font-size:18px;font-weight:700;letter-spacing:2px}.doc-title{text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;margin-bottom:6px}.doc-note{text-align:center;font-size:10px;color:#9b3a3a;margin-bottom:14px;padding:6px;border:1px solid #e8d0d0;background:#fdf0f0}.meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;margin-bottom:14px}.mc{padding:7px 10px;border-bottom:1px solid #ccc;font-size:11px}.mc:nth-child(odd){border-right:1px solid #ccc}.ml{font-size:9px;color:#666}.mv{font-weight:500;margin-top:1px}table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:11px}th{background:#111;color:#fff;padding:5px 7px;text-align:left;font-size:9px}td{padding:5px 7px;border-bottom:1px solid #eee}.totals{display:flex;justify-content:flex-end;margin:10px 0}.totals-inner{border:1px solid #ccc;min-width:240px}.tr{display:flex;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #eee;font-size:11px}.tr.final{background:#0e0d0c;color:#fff;font-size:14px;font-weight:700;padding:10px 14px;border-bottom:none}.notes{border:1px solid #ccc;padding:10px;margin-bottom:10px;font-size:10px;line-height:2;color:#555}.footer{margin-top:10px;border-top:0.5px solid #ccc;padding-top:8px;font-size:9px;color:#aaa;text-align:center}</style></head><body>
+<div class="hd"><div><div class="co-name">${COMPANY.name}</div><div style="font-size:9px;color:#555;margin-top:2px">${COMPANY.eng}</div></div><div style="font-size:10px;color:#555;text-align:right">${COMPANY.email}</div></div>
+<div class="doc-title">安裝費用試算表</div>
+<div class="doc-note">⚠ 本試算僅供費用參考，實際費用以現場評估為準，業務將與您確認詳情</div>
+<div class="meta"><div class="mc"><div class="ml">試算編號</div><div class="mv">${qn}</div></div><div class="mc"><div class="ml">試算日期</div><div class="mv">${ds}</div></div><div class="mc"><div class="ml">服務區域</div><div class="mv">${regLabel}</div></div><div class="mc"><div class="ml">案名</div><div class="mv">${projectName||"—"}</div></div></div>
+<table><thead><tr><th>#</th><th>安裝項目</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>${rows}<tr style="background:#f9f5ee"><td colspan="3" style="text-align:right;font-weight:600">工資小計</td><td></td><td style="text-align:right;font-weight:600">NT$ ${laborTotal.toLocaleString()}</td></tr></tbody></table>
+<div class="totals"><div class="totals-inner"><div class="tr final"><span>預估安裝費用合計</span><span>NT$ ${grandTotal.toLocaleString()}</span></div></div></div>
+<div class="notes"><b>安裝服務說明：</b><br>A. 本試算為參考報價，實際以現場評估為準。<br>B. 請業主於安裝前完成開孔，並將電線拉至各燈具預定位置。<br>C. 最低出勤費 NT$2,000，未達此標以最低費計收。<br>D. 線型燈須預留燈槽退縮空間（建議 ≥ 10cm），若無法退縮將無法施工。<br>E. 不含多折角、弧形、戶外安裝，特殊需求請另行聯繫業務。${instNote?`<br>F. 備註：${instNote}`:""}</div>
+<div class="footer">${COMPANY.name} · 安裝費用試算表 · ${qn}</div>
+</body></html>`;
+  const blob=new Blob([html],{type:"text/html;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=`安裝試算_${qn}.html`; a.click();
+  URL.revokeObjectURL(url);
+}
+
 function App() {
   const [syncStatus, setSyncStatus] = useState("off");
   const [sheetUrl,   setSheetUrl]   = useState(SHEET_URL);
@@ -1222,6 +1285,57 @@ function App() {
 
   const resetInst = () => { setInstRegion("");setInstGroups([{ceilingId:"std",qty:0}]);setLinearGroups([{meters:0,ceilingId:"std"}]);setInstallTypes([]);setInstNote("");setInstDone(false);setInstOpen(false); };
 
+  // 生成獨立安裝費用試算 PDF（不含燈具，只有安裝費）
+  const generateInstallOnlyPDF = () => {
+    if(!instRegion){toast$("請先選擇安裝區域");return;}
+    const customer = {
+      name: custName || (isGuest?"訪客":user.name),
+      company: custCompany || (isGuest?"":user.company)||"",
+      phone: custPhone || ""
+    };
+    _generateInstallOnlyPDF({
+      projectName: projName||"安裝費用試算",
+      customer,
+      instCalc,
+      instRegion,
+      instGroups,
+      linearGroups,
+      linearMeters,
+      installTypes,
+      instNote,
+      INSTALL_REGIONS,
+      CEILING_GROUPS,
+      INSTALL_BASE,
+      INSTALL_LINEAR_M,
+      INSTALL_MIN,
+      COMPANY
+    });
+    // 通知業務
+    if(sheetUrl){
+      sheetPost("saveInstallOrder", {
+        id: "INST-EST-"+Date.now(),
+        date: new Date().toISOString().split("T")[0],
+        customerName: customer.name,
+        company: customer.company,
+        phone: customer.phone,
+        projectName: projName||"安裝費用試算",
+        region: instRegion,
+        regionLabel: instCalc?.reg?.label||instRegion,
+        recessedGroups: installTypes.includes("recessed")?instGroups.filter(g=>Number(g.qty)>0).map(g=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);return{ceilingId:g.ceilingId,ceilingLabel:cg?.label||g.ceilingId,qty:Number(g.qty)};}): [],
+        linearGroups: installTypes.includes("linear")?linearGroups.filter(g=>Number(g.meters)>0).map(g=>{const cg=CEILING_GROUPS.find(c=>c.id===g.ceilingId);return{ceilingId:g.ceilingId,ceilingLabel:cg?.label||g.ceilingId,meters:Number(g.meters)};}): [],
+        totalQty: instCalc?.totalQty||0,
+        totalMeters: instCalc?.totalMeters||0,
+        totalUnits: instCalc?.totalUnits||0,
+        laborTotal: instCalc?.laborTotal||0,
+        travelFee: instCalc?.travelFee||0,
+        grandTotal: (instCalc?.laborTotal||0)+(instCalc?.travelFee||0),
+        installNote: instNote||"（安裝費用試算）",
+        status: "試算"
+      });
+    }
+    toast$("安裝費用試算 PDF 已生成，業務已收到通知");
+  };
+
   // ✅ 修復：PDF 下載核心函式（訪客白屏問題根本修復）
   const doPdfDownload = (customer) => {
     // 整合報價單：燈具（含折扣）+ 安裝費（若有）合為一份 PDF
@@ -1388,10 +1502,19 @@ function App() {
           </div>
           <div className="sm-divider"/>
           <div className="sm-group-hd" onClick={()=>setSeriesExp(v=>!v)}>
-            <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>依系列</span>
+            <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>商照燈系列</span>
             <span className={`sm-group-arrow ${seriesExp?"open":""}`}>›</span>
           </div>
-          {seriesExp&&allSeries.map(s=>(
+          {seriesExp&&COMMERCIAL_SERIES.filter(s=>allSeries.includes(s)).map(s=>(
+            <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
+              <span className="sm-dot"/>{s}
+            </div>
+          ))}
+          <div className="sm-group-hd" onClick={()=>setCatExp(v=>!v)}>
+            <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>線型燈系列</span>
+            <span className={`sm-group-arrow ${catExp?"open":""}`}>›</span>
+          </div>
+          {catExp&&LINEAR_SERIES_LIST.filter(s=>allSeries.includes(s)).map(s=>(
             <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{s}
             </div>
@@ -1717,10 +1840,10 @@ function App() {
         {/* ══ 台灣現貨庫存 ══ */}
         {page==="inventory"&&<>
           <div className="inv-hero">
-            <div className="inv-hero-badge"><span className="inv-hero-bdot"/>當日出貨 · 隔日到貨</div>
+            <div className="inv-hero-badge"><span className="inv-hero-bdot"/>1–3 工作天出貨 · 快速到貨</div>
             <div className="inv-hero-title">桃園倉儲 · 即時供應</div>
             <div className="inv-hero-sub">Taiwan Stock · Ready to Ship</div>
-            <div className="inv-hero-desc">台灣現貨直送，<strong>下單後當日備貨出倉</strong>，台灣本島全境<strong>最快隔日即可到貨</strong>。</div>
+            <div className="inv-hero-desc">台灣現貨直送，<strong>下單後預計 1–3 個工作天內出貨</strong>（不含國定假日及特殊假日），台灣本島全境<strong>快速安排到貨</strong>。</div>
           </div>
           <div className="inv-stats">
             <div className="inv-stat"><div className="inv-stat-num">{invTotal.toLocaleString()}</div><div className="inv-stat-lbl">總庫存</div></div>
@@ -1844,7 +1967,7 @@ function App() {
               </div>
               <div className="checklist">
                 <div className="cl-title">下載前請確認</div>
-                {[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 4 週起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}
+                {[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}
               </div>
               <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"下載報價單":"請先勾選確認事項"}</button>
             </div>
@@ -1889,7 +2012,7 @@ function App() {
 
           <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:7,borderBottom:"0.5px solid var(--bdr2)"}}>二、線型燈 ／ 間接照明安裝服務</div>
           <div style={{background:"#fdf5e8",border:"0.5px solid var(--gold)",borderLeft:"3px solid var(--gold)",padding:"10px 14px",marginBottom:12,fontSize:11,lineHeight:1.8,color:"#7a5a2a"}}>
-            ⚠ <strong>線型燈特別注意：</strong>現場須預留燈槽退縮空間（建議 ≥ 5cm），若無法退縮，現場將記錄並無法施工。多折角、弧形、多層次造型<strong>不在本服務範圍</strong>，如有需求請另行聯繫業務評估報價。
+            ⚠ <strong>線型燈特別注意：</strong>現場須預留燈槽退縮空間（建議 ≥ 10cm），若無法退縮，現場將記錄並無法施工。多折角、弧形、多層次造型<strong>不在本服務範圍</strong>，如有需求請另行聯繫業務評估報價。
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:24}}>
             {[["最低出勤費","NT$ 2,000","單次出勤未達此標，以 NT$2,000 計收"],["線型燈安裝","NT$ 500 / 米","鋁條燈、鋁擠燈、軟條燈卡接固定（直線）"],["複雜造型","不在服務範圍","多折角、弧形、多層次，請另行聯繫業務"]].map(([t,v,d])=>(
@@ -2056,7 +2179,7 @@ function App() {
           <Carousel images={selProd.images}/>
           <div className="drawer-body">
             <div className="drawer-model">{selProd.model}</div>
-            {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 當日出貨 · 隔日到貨</div>}
+            {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
             <div className="spec-grid">
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
@@ -2091,7 +2214,7 @@ function App() {
             <input style={{flex:1,padding:"6px 9px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)"}} placeholder="— — —" value={discountCode} onChange={e=>setDiscountCode(e.target.value)} onBlur={()=>applyDiscountCode(discountCode)} onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)} maxLength={8}/>
             {discountLabel&&<span style={{fontSize:"8px",color:"var(--gold)",border:"0.5px solid var(--gold)",padding:"2px 7px",whiteSpace:"nowrap"}}>{discountLabel}</span>}
           </div>
-          <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 4 週起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
+          <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
           <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"下載報價單":"請先勾選確認事項"}</button>
         </div>}
       </div>
@@ -2224,13 +2347,20 @@ function App() {
           )}
         </div>
         {!instDone&&<div className="sp-foot">
-          {instCalc&&<div style={{fontSize:11,color:"var(--muted)",marginBottom:8,padding:"7px 10px",background:"#f4efe8",borderLeft:"2px solid var(--gold)"}}>
+          <div style={{fontSize:10,color:"var(--muted)",marginBottom:10,padding:"8px 12px",background:"#f4efe8",borderLeft:"2px solid var(--gold)",lineHeight:1.7}}>
+            📐 <strong style={{color:"var(--blk)"}}>安裝費用試算表</strong><br/>
+            此為費用試算，僅供參考。實際費用以現場評估為準。<br/>
+            生成 PDF 後業務將收到通知並與您確認詳情。
+          </div>
+          {instCalc&&instRegion&&<div style={{fontSize:11,color:"var(--muted)",marginBottom:8,padding:"7px 10px",background:"#f4efe8",borderLeft:"2px solid var(--gold)"}}>
             合計：{instCalc.totalQty||0} 盞 + {instCalc.totalMeters||0} 米 = {instCalc.totalUnits||0} 單位
             {instCalc.reg?.freeAt&&<span style={{color:instCalc.totalUnits>=instCalc.reg.freeAt?"var(--green)":"var(--red)",marginLeft:8}}>{instCalc.totalUnits>=instCalc.reg.freeAt?"✓ 達免車馬費門檻":`差 ${instCalc.reg.freeAt-instCalc.totalUnits} 單位可免車馬費`}</span>}
           </div>}
-          {installChoice===true&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成選擇 · 下載整合報價單</button>}
-          <button className="btn-gold" onClick={submitInst} disabled={!instRegion}>送出安裝申請（通知業務）</button>
-          <button className="btn-ghost" onClick={()=>{setInstOpen(false);if(installChoice===true)doActualDownload();}}>跳過安裝 · 直接下載燈具報價單</button>
+          {installChoice===true&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成 · 下載燈具＋安裝整合報價單</button>}
+          <button className="btn-gold" disabled={!instRegion} onClick={()=>{
+            if(!instRegion){toast$("請先選擇安裝區域");return;}
+            generateInstallOnlyPDF();
+          }}>📄 生成安裝費用試算 PDF</button>
         </div>}
       </div>
 
