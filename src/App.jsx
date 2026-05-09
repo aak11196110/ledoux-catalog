@@ -1347,38 +1347,35 @@ export default function App() {
 
       {/* 業務聯絡資訊 Modal */}
       {contactModal&&<div className="modal-wrap" onClick={()=>setContactModal(false)}>
-        <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:400}}>
+        <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:380}}>
           <div className="modal-head">
             <div className="modal-title">聯繫業務專員</div>
             <button className="close-btn" onClick={()=>setContactModal(false)}><CloseIcon/></button>
           </div>
           <div className="modal-body">
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:8,borderBottom:"0.5px solid var(--bdr2)"}}>直接聯繫</div>
-              <div style={{display:"flex",flexDirection:"column",gap:14}}>
-                <a href={`tel:${CONTACT_PHONE}`} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",border:"0.5px solid var(--bdr2)",background:"#f9f5ef",textDecoration:"none",color:"var(--blk)",transition:"all .2s"}}>
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gold)" strokeWidth="0.8" strokeLinecap="round"><path d="M3.5 3.5c0 0 1 0 2 2s1 3 1 3l-1.5 1.5s1 3 3 5 5 3 5 3l1.5-1.5s2 0 3 1 2 2 2 2-1 3-3 3C8 22 -4 10 -4 4c0-2 3-3 3-3l4.5 3z"/></svg>
-                  <div>
-                    <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:3}}>電話 / LINE</div>
-                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,letterSpacing:1}}>{CONTACT_PHONE}</div>
-                  </div>
-                </a>
-                <a href={`mailto:${CONTACT_EMAIL}`} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",border:"0.5px solid var(--bdr2)",background:"#f9f5ef",textDecoration:"none",color:"var(--blk)"}}>
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gold)" strokeWidth="0.8" strokeLinecap="round"><rect x="2" y="4" width="14" height="10" rx="1"/><path d="M2 5l7 5 7-5"/></svg>
-                  <div>
-                    <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:3}}>Email</div>
-                    <div style={{fontSize:13,letterSpacing:.5}}>{CONTACT_EMAIL}</div>
-                  </div>
-                </a>
-              </div>
+            <div style={{marginBottom:18}}>
+              <div style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:14,paddingBottom:8,borderBottom:"0.5px solid var(--bdr2)"}}>直接聯繫</div>
+              <a href={"tel:"+CONTACT_PHONE} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",border:"0.5px solid var(--bdr2)",background:"#f9f5ef",textDecoration:"none",color:"var(--blk)",marginBottom:10,borderLeft:"3px solid var(--gold)"}}>
+                <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:"var(--gold)",minWidth:18}}>☎</span>
+                <div>
+                  <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:3}}>電話 ／ LINE</div>
+                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,letterSpacing:1}}>{CONTACT_PHONE}</div>
+                </div>
+              </a>
+              <a href={"mailto:"+CONTACT_EMAIL} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",border:"0.5px solid var(--bdr2)",background:"#f9f5ef",textDecoration:"none",color:"var(--blk)",borderLeft:"3px solid var(--gold)"}}>
+                <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"var(--gold)",minWidth:18}}>✉</span>
+                <div>
+                  <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:3}}>Email</div>
+                  <div style={{fontSize:13,letterSpacing:.5}}>{CONTACT_EMAIL}</div>
+                </div>
+              </a>
             </div>
             <div style={{background:"#f4efe8",borderLeft:"2px solid var(--gold)",padding:"10px 14px",fontSize:11,color:"var(--muted)",lineHeight:1.8}}>
-              設計公司、建築師事務所、長期合作專案客戶，歡迎聯繫業務洽談<strong style={{color:"var(--gold)"}}>專屬折扣報價</strong>。
+              設計公司、建築師事務所、合作專案客戶，歡迎聯繫業務洽談<strong style={{color:"var(--gold)"}}>專屬折扣報價</strong>。
             </div>
           </div>
         </div>
       </div>}
-
       {/* 安裝詢問 Modal */}
       {installAskModal&&<div className="modal-wrap" onClick={()=>setInstallAskModal(false)}>
         <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:440}}>
