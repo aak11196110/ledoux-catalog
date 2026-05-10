@@ -535,6 +535,7 @@ tr:hover td{background:#f7f2eb}
 .modal-head{padding:20px 24px;border-bottom:0.5px solid var(--bdr2);display:flex;justify-content:space-between;align-items:center}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300}
 .modal-body{padding:22px}
+@keyframes lightPulse{0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
 .hint-box{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
 .install-tbl{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px}
 .install-tbl th{background:#f4efe8;padding:7px 10px;text-align:left;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:0.5px solid var(--bdr2);font-weight:400}
@@ -740,7 +741,7 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
 
   const rows = cart.map((item, i) => {
     const p = item.product;
-    const baseP = Number(isVip ? p.projPrice : p.stdPrice) || 0;
+    const baseP = Number(p.stdPrice) || 0;
     const unitPrice = Math.round(baseP * discountRate);
     const subtotal = unitPrice * item.qty;
     const desc = [p.watt, p.beam, p.cct, p.voltage, p.cri, p.color, p.cutout ? `開孔${p.cutout}` : ""].filter(Boolean).join(" / ");
@@ -762,7 +763,7 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
 
   const untaxed = cart.reduce((s, item) => {
     const p = item.product;
-    const baseP = Number(isVip ? p.projPrice : p.stdPrice) || 0;
+    const baseP = Number(p.stdPrice) || 0;
     return s + Math.round(baseP * discountRate) * item.qty;
   }, 0);
   // 安裝費計算
@@ -1050,6 +1051,198 @@ function _generateInstallOnlyPDF({projectName, customer, instCalc, instRegion, i
   URL.revokeObjectURL(url);
 }
 
+
+// ══════════════════════════════════════════
+//  互動展示間元件
+// ══════════════════════════════════════════
+function ShowroomPage({ scene, setScene, hoveredLight, setHoveredLight, setPage, setSeriesF }) {
+
+  // 室內燈具熱點
+  const INDOOR_LIGHTS = [
+    { id:"track2",   x:22,  y:18, name:"二線軌道燈",    series:"EOS 奧斯",        model:"LX-TRK-2",   glow:"rgba(255,220,120,0.7)" },
+    { id:"pendant",  x:20,  y:32, name:"吊燈",          series:"HEPBURN 赫本",    model:"LX-PDN-5",   glow:"rgba(255,200,100,0.6)" },
+    { id:"linear",   x:32,  y:38, name:"間接線型燈",    series:"LINEAR 麗娜",     model:"LX-LIN-3",   glow:"rgba(200,180,255,0.5)" },
+    { id:"downlight1",x:48, y:30, name:"崁燈",          series:"HEPBURN 赫本",   model:"LX-DWN-4",   glow:"rgba(255,230,150,0.8)" },
+    { id:"downlight2",x:47, y:45, name:"崁燈",          series:"BLADE 帕雷德",   model:"LX-DWN-4",   glow:"rgba(255,230,150,0.8)" },
+    { id:"cil",      x:58,  y:38, name:"吸頂燈",        series:"EOS 奧斯",        model:"LX-CIL-6",   glow:"rgba(255,240,180,0.6)" },
+    { id:"mag",      x:68,  y:22, name:"磁吸軌道燈",    series:"DC48V 磁吸軌道", model:"LX-MAG-1",   glow:"rgba(180,220,255,0.7)" },
+    { id:"wall",     x:78,  y:52, name:"浴室洗牆燈",    series:"WALL LIGHT 壁燈",model:"LX-WSH-1",   glow:"rgba(255,210,130,0.6)" },
+    { id:"outdoor1", x:88,  y:30, name:"陽台投射燈",    series:"OUTDOOR LIGHT 戶外燈具",model:"LX-101",glow:"rgba(255,180,80,0.8)"  },
+    { id:"outdoor2", x:88,  y:60, name:"落地投射燈",    series:"OUTDOOR LIGHT 戶外燈具",model:"LX-GND-1",glow:"rgba(255,160,60,0.7)"},
+  ];
+
+  // 戶外燈具熱點
+  const OUTDOOR_LIGHTS = [
+    { id:"o-wall",   x:18,  y:32, name:"陽台投射燈",    series:"OUTDOOR LIGHT 戶外燈具",model:"LX-101",    glow:"rgba(255,180,80,0.9)"  },
+    { id:"o-wash",   x:30,  y:28, name:"洗牆燈",        series:"WALL LIGHT 壁燈", model:"LX-WSH-102",glow:"rgba(200,210,255,0.7)"  },
+    { id:"o-mag",    x:48,  y:18, name:"磁吸軌道燈",    series:"DC48V 磁吸軌道", model:"LX-MAG-103",glow:"rgba(180,220,255,0.7)"  },
+    { id:"o-cil",    x:65,  y:15, name:"吸頂燈",        series:"EOS 奧斯",        model:"LX-CIL-107",glow:"rgba(255,240,180,0.6)"  },
+    { id:"o-trk",    x:80,  y:15, name:"二線軌道燈",    series:"EOS 奧斯",        model:"LX-TRK-104",glow:"rgba(255,220,120,0.7)"  },
+    { id:"o-dwn",    x:48,  y:38, name:"崁燈",          series:"HEPBURN 赫本",   model:"LX-DWN-105",glow:"rgba(255,230,150,0.8)"  },
+    { id:"o-pdn",    x:62,  y:35, name:"吊燈",          series:"HEPBURN 赫本",   model:"LX-PDN-106",glow:"rgba(255,200,100,0.6)"  },
+    { id:"o-gnd",    x:55,  y:62, name:"落地投射燈",    series:"OUTDOOR LIGHT 戶外燈具",model:"LX-GND-108",glow:"rgba(255,140,40,0.9)"},
+    { id:"o-wash2",  x:90,  y:25, name:"浴室洗牆燈",    series:"WALL LIGHT 壁燈", model:"LX-WSH-109",glow:"rgba(200,210,255,0.6)"  },
+  ];
+
+  const lights = scene === "indoor" ? INDOOR_LIGHTS : OUTDOOR_LIGHTS;
+  const hLight = lights.find(l => l.id === hoveredLight);
+
+  // 室內背景：高級商業空間
+  // 真實渲染圖背景
+  const indoorBg = "https://ledoux-catalog.vercel.app/indoor.jpg.webp";
+  const outdoorBg = "https://ledoux-catalog.vercel.app/outdoor.jpg.webp";
+
+
+  const bgUrl = scene === "indoor" ? indoorBg : outdoorBg;
+
+  return (
+    <div style={{position:"relative",width:"100%",height:"100vh",overflow:"hidden",background:"#0a0e18"}}>
+      {/* 場景切換按鈕 */}
+      <div style={{position:"absolute",top:16,left:"50%",transform:"translateX(-50%)",zIndex:10,display:"flex",gap:8,background:"rgba(0,0,0,0.5)",borderRadius:40,padding:"4px"}}>
+        {[["indoor","🏠 室內展示"],["outdoor","🌙 戶外天台"]].map(([sc,lb])=>(
+          <button key={sc} onClick={()=>setScene(sc)} style={{
+            padding:"8px 20px",border:"none",borderRadius:36,cursor:"pointer",
+            fontSize:13,fontFamily:"'Noto Sans TC',sans-serif",letterSpacing:"1px",
+            transition:"all .3s",
+            background: scene===sc ? "var(--gold)" : "transparent",
+            color: scene===sc ? "#111" : "rgba(255,255,255,0.6)",
+            fontWeight: scene===sc ? 700 : 400
+          }}>{lb}</button>
+        ))}
+      </div>
+
+      {/* 背景 SVG */}
+      <div style={{position:"absolute",inset:0,backgroundImage:`url("${bgUrl}")`,backgroundSize:"cover",backgroundPosition:"center"}}/>
+
+      {/* 燈具熱點 */}
+      {lights.map(light=>{
+        const isHov = hoveredLight === light.id;
+        return (
+          <div key={light.id}
+            onMouseEnter={()=>setHoveredLight(light.id)}
+            onMouseLeave={()=>setHoveredLight(null)}
+            onClick={()=>{ setSeriesF(light.series); setPage("catalog"); }}
+            style={{
+              position:"absolute",
+              left:`${light.x}%`, top:`${light.y}%`,
+              transform:"translate(-50%,-50%)",
+              cursor:"pointer",
+              zIndex:5
+            }}>
+            {/* 外圈光暈（大，模擬照亮環境） */}
+            {isHov&&<div style={{
+              position:"absolute",
+              width:200, height:200,
+              borderRadius:"50%",
+              background:`radial-gradient(circle, ${light.glow} 0%, transparent 70%)`,
+              top:"50%", left:"50%",
+              transform:"translate(-50%,-50%)",
+              pointerEvents:"none",
+              animation:"lightPulse 1.5s ease-in-out infinite"
+            }}/>}
+            {/* 中圈光暈 */}
+            <div style={{
+              position:"absolute",
+              width: isHov ? 100 : 16,
+              height: isHov ? 100 : 16,
+              borderRadius:"50%",
+              background: light.glow,
+              top:"50%", left:"50%",
+              transform:"translate(-50%,-50%)",
+              transition:"all .5s ease",
+              filter: isHov ? "blur(12px)" : "blur(4px)",
+              opacity: isHov ? 0.9 : 0.25
+            }}/>
+            {/* 熱點圓點 */}
+            <div style={{
+              width: isHov ? 18 : 8,
+              height: isHov ? 18 : 8,
+              borderRadius:"50%",
+              background: isHov ? "#ffffff" : "rgba(255,255,255,0.35)",
+              border: `2px solid ${isHov ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.25)"}`,
+              position:"relative", zIndex:1,
+              transition:"all .3s",
+              boxShadow: isHov ? `0 0 30px 8px ${light.glow}, 0 0 8px 2px rgba(255,255,255,0.6)` : "0 0 6px rgba(255,255,255,0.2)"
+            }}/>
+            {/* 地板投影（燈亮時） */}
+            {isHov&&<div style={{
+              position:"absolute",
+              width:120, height:40,
+              borderRadius:"50%",
+              background:`radial-gradient(ellipse, ${light.glow} 0%, transparent 70%)`,
+              top:"120%", left:"50%",
+              transform:"translateX(-50%)",
+              filter:"blur(8px)",
+              opacity:0.5,
+              pointerEvents:"none"
+            }}/>}
+            {/* 燈具名稱標籤 */}
+            {isHov&&(
+              <div style={{
+                position:"absolute",
+                bottom:"calc(100% + 10px)",
+                left:"50%",
+                transform:"translateX(-50%)",
+                background:"rgba(10,12,20,0.92)",
+                border:"0.5px solid rgba(184,147,90,0.5)",
+                borderRadius:8,
+                padding:"8px 14px",
+                minWidth:140,
+                whiteSpace:"nowrap",
+                textAlign:"center"
+              }}>
+                <div style={{fontSize:14,fontWeight:600,color:"#fff",letterSpacing:"1px"}}>{light.name}</div>
+                <div style={{fontSize:11,color:"var(--gold)",marginTop:2,letterSpacing:"2px"}}>{light.model}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.5)",marginTop:3}}>{light.series}</div>
+                <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",marginTop:4}}>點擊查看系列</div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* 右下角品牌浮水印 */}
+      <div style={{position:"absolute",bottom:20,right:24,zIndex:5,opacity:0.4}}>
+        <div style={{fontSize:11,letterSpacing:"4px",color:"rgba(255,255,255,0.6)"}}>LEDOUX LIGHTING</div>
+      </div>
+
+      {/* 進入產品目錄按鈕 */}
+      <div style={{position:"absolute",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:10,display:"flex",gap:12}}>
+        <button onClick={()=>setPage("catalog")} style={{
+          padding:"12px 32px",background:"var(--gold)",border:"none",borderRadius:4,
+          color:"#111",fontSize:13,fontWeight:700,letterSpacing:"2px",cursor:"pointer",
+          fontFamily:"'Noto Sans TC',sans-serif"
+        }}>瀏覽產品目錄</button>
+        <button onClick={()=>setPage("inventory")} style={{
+          padding:"12px 24px",background:"transparent",border:"1px solid rgba(255,255,255,0.3)",
+          borderRadius:4,color:"rgba(255,255,255,0.8)",fontSize:13,letterSpacing:"2px",cursor:"pointer",
+          fontFamily:"'Noto Sans TC',sans-serif"
+        }}>台灣現貨庫存</button>
+      </div>
+
+      {/* 左下角燈具索引 */}
+      <div style={{
+        position:"absolute",bottom:70,left:24,zIndex:5,
+        background:"rgba(0,0,0,0.6)",border:"0.5px solid rgba(255,255,255,0.1)",
+        borderRadius:8,padding:"12px 16px",maxWidth:220
+      }}>
+        <div style={{fontSize:9,letterSpacing:"3px",color:"rgba(255,255,255,0.4)",marginBottom:8}}>
+          {scene==="indoor"?"INDOOR SHOWROOM":"OUTDOOR TERRACE"}
+        </div>
+        {lights.slice(0,5).map((l,i)=>(
+          <div key={l.id} onClick={()=>{setSeriesF(l.series);setPage("catalog");}}
+            style={{fontSize:11,color:"rgba(255,255,255,0.6)",padding:"3px 0",cursor:"pointer",
+              borderBottom:"0.5px solid rgba(255,255,255,0.05)",display:"flex",gap:8,alignItems:"center"}}
+            onMouseEnter={()=>setHoveredLight(l.id)} onMouseLeave={()=>setHoveredLight(null)}>
+            <span style={{color:"var(--gold)",minWidth:14}}>{i+1}</span>
+            <span>{l.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [syncStatus, setSyncStatus] = useState("off");
   const [sheetUrl,   setSheetUrl]   = useState(SHEET_URL);
@@ -1063,7 +1256,9 @@ function App() {
   const [installOrd, setInstallOrd] = useState([]);
   const [catalogs,   setCatalogs]   = useState(DEFAULT_CATALOGS);
   const [user,       setUser]       = useState(null);
-  const [page,       setPage]       = useState("catalog");
+  const [page,       setPage]       = useState("showroom");
+  const [showroomScene, setShowroomScene] = useState("indoor"); // indoor | outdoor
+  const [hoveredLight,  setHoveredLight]  = useState(null);
   const [cat,        setCat]        = useState("全部");
   const [seriesF,    setSeriesF]    = useState(null);
   const [invCat,     setInvCat]     = useState("全部");
@@ -1341,14 +1536,14 @@ function App() {
     // 整合報價單：燈具（含折扣）+ 安裝費（若有）合為一份 PDF
     const installData = (installChoice===true && instRegion && instCalc) ? {instCalc,instRegion,instGroups,linearGroups,linearMeters,instNote,installTypes} : null;
     generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel});
-    const baseSubtotal=cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
+    const baseSubtotal=cart.reduce((s,i)=>s+(Number(i.product.stdPrice)||0)*i.qty,0);
     const lampSubtotal=Math.round(baseSubtotal*discountRate);
     if(sheetUrl){
       sheetPost("saveOrder",{id:"ORD"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:customer.name,company:customer.company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:lampSubtotal,tax:0,shipping:0,total:0,isVip:isVip?"是":"否",discount:discountLabel||"牌價"});
     }
     sendNotifyEmail(
       `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
-      `━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round((isVip?Number(p.projPrice):Number(p.stdPrice))*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${Math.round(lampSubtotal*0.05).toLocaleString()}\n含稅總計：NT$ ${Math.round(lampSubtotal*1.05).toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`
+      `━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${Math.round(lampSubtotal*0.05).toLocaleString()}\n含稅總計：NT$ ${Math.round(lampSubtotal*1.05).toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`
     );
     toast$("報價單已下載");
   };
@@ -1442,6 +1637,25 @@ function App() {
   const invTotal = inventory.reduce((s,i)=>s+Number(i.totalQty),0);
   const invAvail = inventory.reduce((s,i)=>s+Number(i.availableQty),0);
 
+  // ── Showroom Page ──
+  if(page==="showroom" && user) return (
+    <><style>{G}</style>
+    <div className="app">
+      {menuOpen&&<div className="sidemenu-overlay" onClick={()=>setMenuOpen(false)}/>}
+      <div className={`sidemenu ${menuOpen?"open":""}`}>
+        <div className="sm-head"><div className="sm-logo">LEDOUX</div><button className="sm-close-btn" onClick={()=>setMenuOpen(false)}>✕</button></div>
+        <div className="sm-nav">
+          <div className="sm-item on"><span>互動展示間</span></div>
+          <div className="sm-item" onClick={()=>{setPage("catalog");setMenuOpen(false);}}><span>產品目錄</span></div>
+          <div className="sm-item" onClick={()=>{setPage("inventory");setMenuOpen(false);}}><span>現貨庫存</span></div>
+        </div>
+      </div>
+      <button className="menu-btn" onClick={()=>setMenuOpen(true)} style={{position:"fixed",top:16,left:16,zIndex:200,background:"rgba(0,0,0,0.5)",border:"0.5px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",padding:"8px 12px",cursor:"pointer",fontSize:16}}>☰</button>
+      <ShowroomPage scene={showroomScene} setScene={setShowroomScene} hoveredLight={hoveredLight} setHoveredLight={setHoveredLight} setPage={setPage} setSeriesF={setSeriesF}/>
+    </div>
+    </>
+  );
+
   if(!user) return(
     <><style>{G}</style>
     <div className="auth-page">
@@ -1488,7 +1702,7 @@ function App() {
         </div>
         <div className="sm-nav">
           <div className="sm-sec">主選單</div>
-          {[{id:"catalog",label:"產品目錄"},{id:"inquiry",label:"詢價單",badge:cartCount},{id:"sample",label:"借樣品",badge:sampCart.length},{id:"install",label:"安裝服務"},{id:"design",label:"照明設計服務"}].map(n=>(
+          {[{id:"showroom",label:"互動展示間"},{id:"catalog",label:"產品目錄"},{id:"inquiry",label:"詢價單",badge:cartCount},{id:"sample",label:"借樣品",badge:sampCart.length},{id:"install",label:"安裝服務"},{id:"design",label:"照明設計服務"}].map(n=>(
             <div key={n.id} className={`sm-item ${page===n.id?"on":""}`} onClick={()=>{setPage(n.id);setMenuOpen(false);}}>
               <span>{n.label}</span>{n.badge>0&&<span className="sm-badge">{n.badge}</span>}
             </div>
@@ -1773,7 +1987,7 @@ function App() {
           <div className="phead">
             <div>
               <div className="ptitle">{seriesF?seriesF:searchQ?"搜索結果":"產品目錄"}</div>
-              <div className="psub">{searchQ?`${searchQ} — ${filtered.length} 件`:isVip?"顯示標準價與專案價":"顯示標準售價"}</div>
+              <div className="psub">{searchQ?`${searchQ} — ${filtered.length} 件`:isVip?"顯示標準牌價":"顯示標準售價"}</div>
             </div>
             <div style={{display:"flex",gap:12,alignItems:"center"}}>
               {(seriesF||searchQ||activeTags.length>0)&&<button className="btn-cancel-sm" onClick={clearTags}>清除篩選</button>}
