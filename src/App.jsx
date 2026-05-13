@@ -131,15 +131,15 @@ const INSTALL_MIN      = 2000;
 const INSTALL_LINEAR_M = 500; // 線型燈安裝 NT$500/米
 
 const INSTALL_REGIONS = [
-  { id:"core",     label:"桃園核心區",         areas:"八德、桃園、中壢、大溪、鶯歌",           km:"0–10 km",     travel:600,  freeAt:15  },
-  { id:"outer",    label:"桃園外環區",         areas:"大園、觀音、新屋、龜山、蘆竹",           km:"11–25 km",    travel:1000, freeAt:25  },
-  { id:"north",    label:"北台近郊區",         areas:"雙北全區、新竹縣市",                     km:"26–55 km",    travel:1800, freeAt:45  },
-  { id:"yilan",    label:"宜蘭專區",           areas:"宜蘭縣全區（交通特殊性）",              km:"不論距離",    travel:2500, freeAt:60  },
-  { id:"centralA", label:"中台灣 A 區",        areas:"苗栗、頭份、竹南、北台山區",             km:"56–90 km",    travel:2800, freeAt:80  },
-  { id:"centralB", label:"中台灣 B 區",        areas:"台中、彰化、南投市區",                   km:"91–150 km",   travel:3800, freeAt:120 },
-  { id:"southA",   label:"南台灣 A 區",        areas:"雲林、嘉義地區",                         km:"151–220 km",  travel:5000, freeAt:null},
-  { id:"southB",   label:"南台灣 B 區 ／ 花東",areas:"台南、高雄、屏東、花蓮、台東",           km:"221 km 以上", travel:6500, freeAt:null},
-  { id:"remote",   label:"離島 ／ 偏遠山區",  areas:"金門、馬祖、澎湖、南投深山",             km:"專案評估",    travel:null, freeAt:null},
+  { id:"core",     label:"桃園核心區",         areas:"八德、桃園、中壢、大溪、鶯歌",           km:"0–10 km",     travel:600,  freeAt:15,  areaNote:"桃園市八德、桃園、中壢、大溪、鶯歌等核心鄉鎮市區"  },
+  { id:"outer",    label:"桃園外環區",          areas:"大園、觀音、新屋、龜山、蘆竹",           km:"11–25 km",    travel:1000, freeAt:25,  areaNote:"桃園市大園、觀音、新屋、龜山、蘆竹等外圍行政區"    },
+  { id:"north",    label:"北台近郊區",          areas:"雙北全區、新竹縣市",                     km:"26–55 km",    travel:1800, freeAt:45,  areaNote:"新北市全區、台北市全區、新竹縣市（含竹北）"         },
+  { id:"yilan",    label:"宜蘭專區",            areas:"宜蘭縣全區（交通特殊性）",              km:"不論距離",    travel:2500, freeAt:60,  areaNote:"宜蘭縣全境（礁溪、羅東、宜蘭市、蘇澳等），翻越雪山隧道計費" },
+  { id:"centralA", label:"中台灣 A 區",         areas:"苗栗、頭份、竹南、北台山區",             km:"56–90 km",    travel:2800, freeAt:80,  areaNote:"苗栗縣全區、頭份市、竹南、三義等中台灣北段"         },
+  { id:"centralB", label:"中台灣 B 區",         areas:"台中、彰化、南投市區",                   km:"91–150 km",   travel:3800, freeAt:120, areaNote:"台中市全區、彰化縣全區、南投縣市區（不含山地）"      },
+  { id:"southA",   label:"南台灣 A 區",         areas:"雲林、嘉義地區",                         km:"151–220 km",  travel:5000, freeAt:null, areaNote:"雲林縣全區、嘉義縣市全區"                          },
+  { id:"southB",   label:"南台灣 B 區 ／ 花東",  areas:"台南、高雄、屏東、花蓮、台東",           km:"221 km 以上", travel:6500, freeAt:null, areaNote:"台南市、高雄市、屏東縣全區，花蓮縣、台東縣（含玉里、關山）" },
+  { id:"remote",   label:"離島 ／ 偏遠山區",    areas:"金門、馬祖、澎湖、南投深山",             km:"專案評估",    travel:null, freeAt:null, areaNote:"金門縣、連江縣、澎湖縣，南投縣山地鄉（仁愛、信義）需另行評估" },
 ];
 
 const CEILING_GROUPS = [
