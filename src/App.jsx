@@ -1393,6 +1393,17 @@ function App() {
   const [installChoice,   setInstallChoice]   = useState(null); // null/true/false
   const [inlineEdit, setInlineEdit] = useState(null);
   const [inlineData, setInlineData] = useState({});
+  const [visitOpen,    setVisitOpen]    = useState(false);
+const [visitStep,    setVisitStep]    = useState(1); // 1=填資料 2=選日期 3=完成
+const [visitForm,    setVisitForm]    = useState({
+  name:"", company:"", phone:"", address:"",
+  interestedSeries:[], interestedModel:"", note:""
+});
+const [visitDate,    setVisitDate]    = useState("");
+const [visitSlot,    setVisitSlot]    = useState("");
+const [visitSlots,   setVisitSlots]   = useState({}); // {YYYY-MM-DD: ["10:00","14:00",...]}
+const [visitLoading, setVisitLoading] = useState(false);
+const [visitDone,    setVisitDone]    = useState(false);
   const [designForm, setDesignForm] = useState({company:"",name:"",phone:"",project:""});
   const [designDone,    setDesignDone]    = useState(false);
   const [contactModal,  setContactModal]  = useState(false);
