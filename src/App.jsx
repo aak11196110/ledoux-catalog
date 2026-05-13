@@ -2424,6 +2424,123 @@ const submitVisit = async () => {
         </>}
 
         {/* ══ 照明設計服務 ══ */}
+{page==="visit"&&<>
+  <div className="phead">
+    <div>
+      <div className="ptitle">預約到府產品介紹</div>
+      <div className="psub">專人攜帶實體樣品親赴現場說明</div>
+    </div>
+  </div>
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:28}}>
+    {[
+      ["🚗 到府服務","業務攜帶實體樣品親赴您的現場，針對您的空間一對一說明"],
+      ["💡 專業選燈","根據您的空間條件、預算與風格，提供最適合的照明配置建議"],
+      ["📐 現場評估","可同步進行安裝難度評估，提供更精準的工程報價"],
+      ["⏱ 服務時間","每次約 60–90 分鐘，服務範圍：桃竹苗、雙北、宜蘭地區"]
+    ].map(([t,d])=>(
+      <div key={t} style={{background:"var(--ivory)",padding:"20px 22px"}}>
+        <div style={{fontSize:14,fontWeight:500,marginBottom:6}}>{t}</div>
+        <div style={{fontSize:11,color:"var(--muted)",lineHeight:1.8}}>{d}</div>
+      </div>
+    ))}
+  </div>
+
+  {visitDone ? (
+    <div style={{textAlign:"center",padding:"60px 0",lineHeight:2.5}}>
+      <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:32,color:"var(--gold)"}}>✓</div>
+      <div style={{fontSize:14,fontWeight:500,marginBottom:6}}>預約申請已送出</div>
+      <div style={{fontSize:11,color:"var(--muted)"}}>業務將於 1 個工作日內電話確認，請保持電話暢通</div>
+      <div style={{marginTop:8,fontSize:11,color:"var(--muted)"}}>預約日期：<strong>{visitDate}</strong> &nbsp;|&nbsp; 時段：<strong>{visitSlot}</strong></div>
+      <button className="btn-outline" style={{marginTop:24}} onClick={()=>{setVisitDone(false);setVisitStep(1);setVisitDate("");setVisitSlot("");setVisitForm({name:"",company:"",phone:"",address:"",interestedSeries:[],interestedModel:"",note:""});}}>重新預約</button>
+    </div>
+  ) : (
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:28,maxWidth:860}}>
+      {/* 左：填寫資料 */}
+      <div>
+        <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:16,paddingBottom:8,borderBottom:"0.5px solid var(--bdr2)"}}>Step 1 · 基本資料</div>
+        {[["聯繫人","name","必填",false],["公司名稱","company","選填",false],["聯絡電話","phone","0912-345-678",false],["地址","address","施工或拜訪地址（選填）",false]].map(([l,k,ph])=>(
+          <div key={k} className="lf">
+            <label>{l}</label>
+            <input value={visitForm[k]} onChange={e=>setVisitForm(p=>({...p,[k]:e.target.value}))} placeholder={ph}/>
+          </div>
+        ))}
+        <div className="lf">
+          <label>感興趣系列（可多選）</label>
+          <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:4}}>
+            {["HEPBURN 赫本","DC48V 磁吸軌道","BLADE 帕雷德","EOS 奧斯","METIS 墨提斯","鋁條燈","戶外燈具","其他"].map(s=>{
+              const on=visitForm.interestedSeries.includes(s);
+              return(<button key={s} onClick={()=>setVisitForm(p=>({...p,interestedSeries:on?p.interestedSeries.filter(x=>x!==s):[...p.interestedSeries,s]}))}
+                style={{padding:"4px 10px",border:`0.5px solid ${on?"var(--gold)":"var(--bdr)"}`,background:on?"#f4efe8":"transparent",color:on?"var(--gold)":"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:9,letterSpacing:1,cursor:"pointer",transition:"all .15s"}}>{s}</button>);
+            })}
+          </div>
+        </div>
+        <div className="lf">
+          <label>指定型號（選填）</label>
+          <input value={visitForm.interestedModel} onChange={e=>setVisitForm(p=>({...p,interestedModel:e.target.value}))} placeholder="例：HB.D120、DC.TS0110-C"/>
+        </div>
+        <div className="lf">
+          <label>備註</label>
+          <input value={visitForm.note} onChange={e=>setVisitForm(p=>({...p,note:e.target.value}))} placeholder="空間類型、特殊需求等"/>
+        </div>
+      </div>
+
+      {/* 右：選擇日期時段 */}
+      <div>
+        <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:16,paddingBottom:8,borderBottom:"0.5px solid var(--bdr2)"}}>Step 2 · 選擇日期 ＆ 時段</div>
+        <div className="lf">
+          <label>偏好日期（僅限平日）</label>
+          <input type="date" value={visitDate}
+            min={new Date(Date.now()+86400000).toISOString().split("T")[0]}
+            max={new Date(Date.now()+60*86400000).toISOString().split("T")[0]}
+            onChange={e=>{
+              if(!isWeekday(e.target.value)){toast$("請選擇平日（週一至週五）");return;}
+              setVisitDate(e.target.value);setVisitSlot("");
+            }}
+            style={{width:"100%",padding:"9px 0",background:"transparent",border:"none",borderBottom:"0.5px solid var(--bdr)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:13,outline:"none"}}
+          />
+          {visitDate && !isWeekday(visitDate) && <div style={{fontSize:10,color:"var(--red)",marginTop:4}}>請選擇平日（週一至週五）</div>}
+        </div>
+        {visitDate && isWeekday(visitDate) && (
+          <div className="lf">
+            <label>可用時段</label>
+            {visitLoading ? (
+              <div style={{fontSize:11,color:"var(--muted)",padding:"12px 0"}}>載入可用時段中...</div>
+            ) : (
+              <div>
+                {(()=>{
+                  const slots = visitSlots[visitDate] || ["10:00","14:00","16:00"];
+                  if(slots.length===0) return <div style={{fontSize:11,color:"var(--red)",padding:"12px 0"}}>此日期暫無可用時段，請選擇其他日期</div>;
+                  return(
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:6}}>
+                      {slots.map(s=>(
+                        <button key={s} onClick={()=>setVisitSlot(s)}
+                          style={{padding:"8px 16px",border:`0.5px solid ${visitSlot===s?"var(--gold)":"var(--bdr)"}`,background:visitSlot===s?"var(--gold)":"transparent",color:visitSlot===s?"var(--blk)":"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,cursor:"pointer",transition:"all .2s"}}>{s}</button>
+                      ))}
+                    </div>
+                  );
+                })()}
+                <div style={{fontSize:10,color:"var(--muted)",marginTop:10,lineHeight:1.7}}>
+                  ※ 實際時段以業務電話確認為準<br/>
+                  ※ 服務範圍：桃竹苗、雙北、宜蘭
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        <div style={{marginTop:20,padding:"14px 16px",background:"#f4efe8",borderLeft:"2px solid var(--gold)",fontSize:11,color:"var(--muted)",lineHeight:1.8}}>
+          <strong style={{color:"var(--blk)",display:"block",marginBottom:4}}>預約說明</strong>
+          ・ 業務將於 1 個工作日內電話確認<br/>
+          ・ 如需取消請提前 24 小時告知<br/>
+          ・ 攜帶品項以申請系列之主力款式為主
+        </div>
+        <button className="btn-primary" style={{marginTop:16}} onClick={submitVisit}
+          disabled={!visitForm.name||!visitForm.phone||!visitDate||!visitSlot||!isWeekday(visitDate)}>
+          確認送出預約申請
+        </button>
+      </div>
+    </div>
+  )}
+</>}
         {page==="design"&&<>
           <div className="phead"><div><div className="ptitle">照明設計配燈服務</div><div className="psub">專業規劃 · 預算最適化</div></div></div>
           <div style={{background:"linear-gradient(135deg,#0e0d0c,#1a1612)",padding:"32px 36px",marginBottom:28,position:"relative",overflow:"hidden"}}>
