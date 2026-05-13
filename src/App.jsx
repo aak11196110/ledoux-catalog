@@ -2131,7 +2131,8 @@ const submitVisit = async () => {
           </button>
           <div className="tn-user-info"><div className="tn-uname">{user.name}</div><div className="tn-ucomp">{user.company}</div></div>
           <span className={`tn-badge ${user.role==="admin"?"tb-admin":user.role==="vip"?"tb-vip":"tb-std"}`}>{roleLabel(user.role)}</span>
-          <button className="btn-signout" onClick={()=>setContactModal(true)} style={{borderColor:"rgba(184,147,90,.3)",color:"var(--gold)"}}>聯繫業務</button>
+<button className="btn-signout" onClick={()=>{setVisitOpen(true);loadVisitSlots();}} style={{borderColor:"rgba(184,147,90,.3)",color:"var(--gold)",background:"rgba(184,147,90,.08)"}}>預約到府介紹</button>
+<button className="btn-signout" onClick={()=>setContactModal(true)} style={{borderColor:"rgba(184,147,90,.3)",color:"var(--gold)"}}>聯繫業務</button>
           <button className="btn-signout" onClick={()=>{setUser(null);setPage("catalog");}}>登出</button>
         </div>
       </nav>
