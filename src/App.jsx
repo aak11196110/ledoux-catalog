@@ -1319,6 +1319,7 @@ function ShowroomPage({ scene, setScene, hoveredLight, setHoveredLight, setPage,
 }
 
 function App() {
+  const [appLoading, setAppLoading] = useState(!!SHEET_URL);
   const [syncStatus, setSyncStatus] = useState("off");
   const [sheetUrl,   setSheetUrl]   = useState(SHEET_URL);
   const [urlInput,   setUrlInput]   = useState(SHEET_URL);
