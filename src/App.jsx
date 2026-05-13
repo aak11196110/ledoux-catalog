@@ -1136,17 +1136,16 @@ function ShowroomPage({ scene, setScene, hoveredLight, setHoveredLight, setPage,
 
   // 室內燈具熱點
   const INDOOR_LIGHTS = [
-    { id:"track2",   x:22,  y:18, name:"二線軌道燈",    series:"EOS 奧斯",        model:"LX-TRK-2",   glow:"rgba(255,220,120,0.7)" },
-    { id:"pendant",  x:20,  y:32, name:"吊燈",          series:"HEPBURN 赫本",    model:"LX-PDN-5",   glow:"rgba(255,200,100,0.6)" },
-    { id:"linear",   x:32,  y:38, name:"間接線型燈",    series:"LINEAR 麗娜",     model:"LX-LIN-3",   glow:"rgba(200,180,255,0.5)" },
-    { id:"downlight1",x:48, y:30, name:"崁燈",          series:"HEPBURN 赫本",   model:"LX-DWN-4",   glow:"rgba(255,230,150,0.8)" },
-    { id:"downlight2",x:47, y:45, name:"崁燈",          series:"BLADE 帕雷德",   model:"LX-DWN-4",   glow:"rgba(255,230,150,0.8)" },
-    { id:"cil",      x:58,  y:38, name:"吸頂燈",        series:"EOS 奧斯",        model:"LX-CIL-6",   glow:"rgba(255,240,180,0.6)" },
-    { id:"mag",      x:68,  y:22, name:"磁吸軌道燈",    series:"DC48V 磁吸軌道", model:"LX-MAG-1",   glow:"rgba(180,220,255,0.7)" },
-    { id:"wall",     x:78,  y:52, name:"浴室洗牆燈",    series:"WALL LIGHT 壁燈",model:"LX-WSH-1",   glow:"rgba(255,210,130,0.6)" },
-    { id:"outdoor1", x:88,  y:30, name:"陽台投射燈",    series:"OUTDOOR LIGHT 戶外燈具",model:"LX-101",glow:"rgba(255,180,80,0.8)"  },
-    { id:"outdoor2", x:88,  y:60, name:"落地投射燈",    series:"OUTDOOR LIGHT 戶外燈具",model:"LX-GND-1",glow:"rgba(255,160,60,0.7)"},
-  ];
+  { id:"magnetic",   x:33,  y:18, name:"磁吸軌道燈",  series:"DC48V 磁吸軌道",         model:"DC.TS0110-C", glow:"rgba(255,220,120,0.8)" },
+  { id:"linear",     x:22,  y:32, name:"鋁條燈",       series:"鋁條燈",                 model:"ALA0011-A",   glow:"rgba(255,200,80,0.6)"  },
+  { id:"pendant",    x:10,  y:52, name:"吊燈",          series:"HEPBURN 赫本",           model:"HB.D130",     glow:"rgba(255,210,120,0.7)" },
+  { id:"softstrip",  x:28,  y:68, name:"軟條燈",        series:"LED STRIP LIGHT 低壓燈帶",model:"ALA0011-P",  glow:"rgba(255,180,60,0.6)"  },
+  { id:"track",      x:58,  y:25, name:"軌道燈",        series:"EOS 奧斯",               model:"TSU0515-C",   glow:"rgba(255,230,150,0.8)" },
+  { id:"track2",     x:76,  y:22, name:"二線軌道燈",    series:"EOS 奧斯",               model:"TSU0823-C",   glow:"rgba(255,220,120,0.7)" },
+  { id:"recessed",   x:60,  y:48, name:"崁入式射燈",    series:"HEPBURN 赫本",           model:"HB.D120",     glow:"rgba(255,240,180,0.9)" },
+  { id:"wall",       x:88,  y:48, name:"壁燈",          series:"WALL LIGHT 壁燈",        model:"LX-WSH-1",    glow:"rgba(255,210,130,0.7)" },
+  { id:"steplight",  x:83,  y:72, name:"地角燈",        series:"STEP LIGHT 地腳燈",      model:"LX-STP-1",    glow:"rgba(255,180,80,0.7)"  },
+];
 
   // 戶外燈具熱點
   const OUTDOOR_LIGHTS = [
