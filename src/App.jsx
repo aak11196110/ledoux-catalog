@@ -1922,6 +1922,31 @@ useEffect(() => {
 
   return (
     <><style>{G}</style>
+      {appLoading && (
+  <div style={{
+    position:"fixed",inset:0,background:"#0e0d0c",zIndex:9999,
+    display:"flex",flexDirection:"column",alignItems:"center",
+    justifyContent:"center",gap:24
+  }}>
+    <div style={{
+      fontFamily:"'Cormorant Garamond',serif",fontSize:38,
+      letterSpacing:10,color:"#b8935a",textTransform:"uppercase"
+    }}>LEDOUX</div>
+    <div style={{width:220,height:1,background:"linear-gradient(90deg,transparent,#b8935a,transparent)",animation:"shimmer 1.8s ease-in-out infinite"}}/>
+    <div style={{fontSize:11,letterSpacing:4,color:"#6a5a4a",textTransform:"uppercase",textAlign:"center",lineHeight:2}}>
+      正在為您同步最新燈具資訊<br/>
+      <span style={{fontSize:9,color:"#3a3028"}}>Syncing latest products...</span>
+    </div>
+    <div style={{display:"flex",gap:6,marginTop:8}}>
+      {[0,1,2].map(i=>(
+        <div key={i} style={{
+          width:6,height:6,borderRadius:"50%",background:"#b8935a",
+          animation:`dotPulse 1.2s ease-in-out ${i*0.2}s infinite`
+        }}/>
+      ))}
+    </div>
+  </div>
+)}
     <div className="app">
 
       {/* SIDE MENU */}
