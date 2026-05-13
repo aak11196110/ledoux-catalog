@@ -2953,7 +2953,8 @@ const submitVisit = async () => {
               </div>
               <div style={{marginBottom:18}}>
                 <div className="ip-sec-title">選擇安裝地點區域</div>
-                <div className="region-grid">{INSTALL_REGIONS.map(r=>(<div key={r.id} className={`region-card ${instRegion===r.id?"on":""}`} onClick={()=>setInstRegion(r.id)}><div className="rc-label">{r.label}</div><div className="rc-km">{r.km}</div><div className="rc-fee">{r.travel===null?"另議":`NT$ ${r.travel.toLocaleString()}`}</div>{r.freeAt&&<div className="rc-free">{r.freeAt} 盞以上免收</div>}</div>))}</div>
+                <div className="region-grid">{INSTALL_REGIONS.map(r=>(<div key={r.id} className={`region-card ${instRegion===r.id?"on":""}`} onClick={()=>setInstRegion(r.id)}><div className="rc-label">{r.label}</div><div className="rc-km">{r.km}</div>
+{r.areaNote && <div style={{fontSize:"10px",color:"#9a8a7a",marginTop:2,lineHeight:1.5}}>{r.areaNote}</div>}<div className="rc-fee">{r.travel===null?"另議":`NT$ ${r.travel.toLocaleString()}`}</div>{r.freeAt&&<div className="rc-free">{r.freeAt} 盞以上免收</div>}</div>))}</div>
               </div>
               {installTypes.includes("recessed")&&(
                 <div style={{marginBottom:18}}>
