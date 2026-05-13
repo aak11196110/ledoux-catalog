@@ -2138,6 +2138,21 @@ const submitVisit = async () => {
       </nav>
 
       {/* 業務聯絡資訊 Modal */}
+      {visitOpen&&<div className="modal-wrap" onClick={()=>setVisitOpen(false)}>
+  <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:520}}>
+    <div className="modal-head">
+      <div className="modal-title">預約到府產品介紹</div>
+      <button className="close-btn" onClick={()=>setVisitOpen(false)}><CloseIcon/></button>
+    </div>
+    <div className="modal-body">
+      <div style={{background:"#f4efe8",borderLeft:"2px solid var(--gold)",padding:"10px 14px",marginBottom:18,fontSize:11,color:"var(--muted)",lineHeight:1.8}}>
+        業務攜帶實體樣品親赴您的現場，針對空間進行一對一照明建議。
+      </div>
+      <button className="btn-primary" onClick={()=>{setVisitOpen(false);setPage("visit");}}>前往預約頁面</button>
+      <div style={{textAlign:"center",marginTop:12,fontSize:10,color:"var(--muted)"}}>或直接致電業務：{CONTACT_PHONE}</div>
+    </div>
+  </div>
+</div>}
       {contactModal&&<div className="modal-wrap" onClick={()=>setContactModal(false)}>
         <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:380}}>
           <div className="modal-head">
