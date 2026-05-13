@@ -1454,6 +1454,65 @@ useEffect(() => {
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
   const syncUpsertInv = async it => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("upsertInventory",it); setSyncStatus("ok"); };
 
+  // 載入預約可用時段
+const loadVisitSlots = async () => {
+  setVisitLoading(true);
+  try {
+    const data = await sheetGet("getVisitSlots");
+    if (data && typeof data === "object") setVisitSlots(data);
+  } catch(e) { console.warn("無法載入時段"); }
+  setVisitLoading(false);
+};
+
+// 判斷是否為平日
+const isWeekday = (dateStr) => {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  return day !== 0 && day !== 6; // 排除週六日
+};
+
+// 產生未來 60 天的平日清單
+const getWeekdays = () => {
+  const days = [];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  for (let i = 1; i <= 60; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    if (d.getDay() !== 0 && d.getDay() !== 6) {
+      const str = d.toISOString().split("T")[0];
+      days.push(str);
+    }
+  }
+  return days;
+};
+
+const submitVisit = async () => {
+  if (!visitForm.name || !visitForm.phone || !visitDate || !visitSlot) {
+    toast$("請填寫完整資料並選擇日期時段");
+    return;
+  }
+  const rec = {
+    id: "VISIT"+Date.now(),
+    date: new Date().toISOString().split("T")[0],
+    visitDate, visitSlot,
+    customerName: visitForm.name,
+    company: visitForm.company,
+    phone: visitForm.phone,
+    address: visitForm.address,
+    interestedSeries: visitForm.interestedSeries.join("、"),
+    interestedModel: visitForm.interestedModel,
+    note: visitForm.note,
+    status: "待確認"
+  };
+  if (sheetUrl) await sheetPost("saveVisitRequest", rec);
+  sendNotifyEmail(
+    `【預約到府介紹】${visitForm.name}（${visitForm.company||"—"}）— ${visitDate} ${visitSlot}`,
+    `預約到府產品介紹申請\n\n聯繫人：${visitForm.name}\n公司：${visitForm.company||"—"}\n電話：${visitForm.phone}\n地址：${visitForm.address||"—"}\n\n預約日期：${visitDate}\n預約時段：${visitSlot}\n\n感興趣系列：${visitForm.interestedSeries.join("、")||"—"}\n指定型號：${visitForm.interestedModel||"—"}\n備註：${visitForm.note||"—"}\n\nLEDOUX 諾科照明 報價系統自動通知`
+  );
+  setVisitDone(true);
+};
   const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
 
   // 折扣碼驗證
