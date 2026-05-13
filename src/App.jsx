@@ -1417,14 +1417,23 @@ function App() {
   const allWatts   = [...new Set(products.map(p=>p.watt).filter(Boolean).filter(w=>!w.includes("/")))].sort();
   const allCcts    = ["2700K","3000K","3500K","4000K","6500K"];
 
-  useEffect(() => {
-    if (!sheetUrl) return;
+useEffect(() => {
+    if (!sheetUrl) { setAppLoading(false); return; }
     (async () => {
       setSyncStatus("loading");
-      const [prods, invs] = await Promise.all([sheetGet("getProducts"),sheetGet("getInventory")]);
-      if (prods?.length>0) setProducts(prods);
-      if (invs?.length>0)  setInventory(invs);
-      setSyncStatus("ok");
+      try {
+        const [prods, invs] = await Promise.all([
+          sheetGet("getProducts"),
+          sheetGet("getInventory")
+        ]);
+        if (prods?.length > 0) setProducts(prods);
+        if (invs?.length > 0)  setInventory(invs);
+        setSyncStatus("ok");
+      } catch(e) {
+        setSyncStatus("off");
+      } finally {
+        setAppLoading(false);
+      }
     })();
   }, [sheetUrl]);
 
