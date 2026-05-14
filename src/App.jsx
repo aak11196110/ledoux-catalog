@@ -1706,6 +1706,12 @@ const submitVisit = async () => {
       `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
       `━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${Math.round(lampSubtotal*0.05).toLocaleString()}\n含稅總計：NT$ ${Math.round(lampSubtotal*1.05).toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`
     );
+    if(urgentData){
+      sendNotifyEmail(
+        `【⚡ 急件訂單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
+        `━━━━━━━━━━━━━━━━━━━━\n⚡ 閃電緊急支援訂單通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n━━━━━━━━━━━━━━━━━━━━\n配送地區：${urgentData.label}\n急件費用：NT$ ${urgentData.fee.toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return \`  • ${p.model}（${p.series}）× ${i.qty} 盞\`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n⚠ 請盡快與客戶確認出勤時間\nLEDOUX 諾科照明 報價系統自動通知`
+      );
+    }
     toast$("報價單已下載");
   };
 
