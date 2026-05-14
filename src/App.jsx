@@ -1725,7 +1725,7 @@ const submitVisit = async () => {
     const name    = custName.trim()    || (isGuest ? "" : user.name)    || "";
     const phone   = custPhone.trim()   || "";
     const address = custAddress.trim() || "";
-    if(isGuest && (!company || !name)){
+    if(isGuest && (!company || !name || !phone)){
       const errs={};
       if(!guestInfo.company.trim()&&!company)errs.company="必填";
       if(!guestInfo.contact.trim()&&!name)errs.contact="必填";
