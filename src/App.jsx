@@ -209,24 +209,7 @@ const INIT_PRODUCTS = [
   { id:28, model:"YODA 系列",   series:"YODA 優打",         category:"崁燈",    watt:"—",      lumen:"—",       cct:"—",                       beam:"—",               voltage:"—",      cri:"—",     color:"—",             cutout:"—",      size:"—",           install:"—",        cert:"—",     shipping:90,  stdPrice:0,    projPrice:0,    video:"", desc:"YODA 系列即將上市。此為系列佔位產品，管理員請至「產品管理」新增正式品項。", images:[], note:"新系列開發中，敬請期待。" },
 ];
 
-const INIT_INVENTORY = [
-  { id:"inv001", model:"HB.D110",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"10W",    cct:"3000K",             color:"白色",      totalQty:24,  reservedQty:4,  availableQty:20,  location:"桃園倉 A-01", updatedAt:"2026-04-25", note:"" },
-  { id:"inv002", model:"HB.D120",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    cct:"3000K",             color:"白色",      totalQty:18,  reservedQty:2,  availableQty:16,  location:"桃園倉 A-02", updatedAt:"2026-04-25", note:"暢銷款" },
-  { id:"inv003", model:"HB.D120",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    cct:"3000K",             color:"黑色",      totalQty:12,  reservedQty:0,  availableQty:12,  location:"桃園倉 A-03", updatedAt:"2026-04-25", note:"" },
-  { id:"inv004", model:"HB.D130",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"30W",    cct:"3000K",             color:"白色",      totalQty:8,   reservedQty:3,  availableQty:5,   location:"桃園倉 A-04", updatedAt:"2026-04-25", note:"庫存偏低" },
-  { id:"inv005", model:"HB.T130S",    series:"HEPBURN 赫本",      category:"軌道燈",  watt:"30W",    cct:"3000K",             color:"黑色",      totalQty:10,  reservedQty:0,  availableQty:10,  location:"桃園倉 B-01", updatedAt:"2026-04-25", note:"" },
-  { id:"inv006", model:"NDB0306-C",   series:"BLADE 帕雷德",        category:"崁燈",    watt:"6W",     cct:"3000K/4000K",       color:"白色/黑色", totalQty:36,  reservedQty:6,  availableQty:30,  location:"桃園倉 A-05", updatedAt:"2026-04-26", note:"雙色皆有庫存" },
-  { id:"inv007", model:"NDB0309-C",   series:"BLADE 帕雷德",        category:"崁燈",    watt:"9W",     cct:"3000K/4000K",       color:"白色/黑色", totalQty:24,  reservedQty:4,  availableQty:20,  location:"桃園倉 A-06", updatedAt:"2026-04-26", note:"" },
-  { id:"inv008", model:"DFB0206-C",   series:"METIS 墨提斯",        category:"崁燈",    watt:"6W",     cct:"3000K",             color:"白色",      totalQty:20,  reservedQty:0,  availableQty:20,  location:"桃園倉 A-07", updatedAt:"2026-04-24", note:"" },
-  { id:"inv009", model:"TSU0506-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"6W",     cct:"3000K",             color:"白色/黑色", totalQty:16,  reservedQty:0,  availableQty:16,  location:"桃園倉 B-02", updatedAt:"2026-04-24", note:"" },
-  { id:"inv010", model:"TSU0515-C",   series:"EOS 奧斯",          category:"軌道燈",  watt:"15W",    cct:"3000K",             color:"白色",      totalQty:14,  reservedQty:2,  availableQty:12,  location:"桃園倉 B-03", updatedAt:"2026-04-26", note:"" },
-  { id:"inv011", model:"DC.TS0110-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"10W",    cct:"3000K/4000K",       color:"砂白/砂黑", totalQty:20,  reservedQty:5,  availableQty:15,  location:"桃園倉 C-01", updatedAt:"2026-04-25", note:"高需求款" },
-  { id:"inv012", model:"DC.TS0120-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"20W",    cct:"3000K",             color:"砂白",      totalQty:12,  reservedQty:2,  availableQty:10,  location:"桃園倉 C-02", updatedAt:"2026-04-25", note:"" },
-  { id:"inv013", model:"DC.TS0206-C", series:"DC48V 磁吸軌道", category:"磁吸系統",watt:"6W",     cct:"2700K/3000K/4000K", color:"砂白/砂黑", totalQty:0,   reservedQty:0,  availableQty:0,   location:"—",           updatedAt:"2026-04-20", note:"補貨中，預計 5 月初到貨" },
-  { id:"inv014", model:"ALA0011-A",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", cct:"3000K",             color:"透明",      totalQty:200, reservedQty:30, availableQty:170, location:"桃園倉 D-01", updatedAt:"2026-04-27", note:"計量單位：公尺" },
-  { id:"inv015", model:"ALA0011-P",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", cct:"3000K",             color:"透明",      totalQty:120, reservedQty:10, availableQty:110, location:"桃園倉 D-02", updatedAt:"2026-04-27", note:"防水版，計量單位：公尺" },
-  { id:"inv016", model:"HB.D120-N",   series:"HEPBURN 赫本",      category:"崁燈",    watt:"20W",    cct:"3000K/4000K",       color:"白色/黑色", totalQty:30,  reservedQty:8,  availableQty:22,  location:"桃園倉 A-08", updatedAt:"2026-04-27", note:"全系列暢銷款" },
-];
+const INIT_INVENTORY = [];
 
 // ─────────────────────────────────────────────
 //  CSS
