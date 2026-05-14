@@ -1342,6 +1342,7 @@ function App() {
   const [searchHist, setSearchHist] = useState([]);
   const [selProd,    setSelProd]    = useState(null);
   const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", addon:[]});
+  const [addons, setAddons] = useState([]);
   const [editProd,   setEditProd]   = useState(null);
   const [showAdd,    setShowAdd]    = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
@@ -1433,12 +1434,14 @@ useEffect(() => {
     (async () => {
       setSyncStatus("loading");
       try {
-        const [prods, invs] = await Promise.all([
-          sheetGet("getProducts"),
-          sheetGet("getInventory")
-        ]);
+const [prods, invs, addonData] = await Promise.all([
+  sheetGet("getProducts"),
+  sheetGet("getInventory"),
+  sheetGet("getAddons")
+]);
         if (prods?.length > 0) setProducts(prods);
         if (invs?.length > 0)  setInventory(invs);
+        if (addonData?.length > 0) setAddons(addonData);
         setSyncStatus("ok");
       } catch(e) {
         setSyncStatus("off");
@@ -2914,8 +2917,29 @@ if(urgentData){
     </div>
   </div>):null}
 </div>
+            {addons.filter(a=>a.category==="全部"||a.category===selProd.category).length>0&&(
+  <div style={{marginBottom:10}}>
+    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>配件加購</div>
+    <div style={{display:"flex",flexDirection:"column",gap:5}}>
+      {addons.filter(a=>a.category==="全部"||a.category===selProd.category).map(a=>{
+        const isOn=selSpec.addon?.find(x=>x.id===a.id);
+        return(
+          <button key={a.id} onClick={()=>setSelSpec(s=>({...s,addon:isOn?s.addon.filter(x=>x.id!==a.id):[...(s.addon||[]),a]}))}
+            style={{padding:"7px 12px",border:"0.5px solid",fontSize:11,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",
+              background:isOn?"var(--blk)":"transparent",borderColor:isOn?"var(--blk)":"var(--bdr)",color:isOn?"var(--ivory)":"var(--blk)"}}>
+            <span>{a.name}{a.desc&&<span style={{fontSize:9,opacity:.7,marginLeft:6}}>{a.desc}</span>}</span>
+            <span style={{fontSize:11,color:isOn?"var(--ivory)":"var(--gold)"}}>+NT$ {a.price.toLocaleString()}</span>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+)}
 <div className="price-block">
-            
+
+  {selSpec.addon?.length>0&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:4}}>
+  配件：{selSpec.addon.map(a=>a.name).join("、")} ＋NT$ {selSpec.addon.reduce((s,a)=>s+a.price,0).toLocaleString()}
+</div>}
               <div className="pb-label">{isVip?"專案價":"售價"}</div>
               {isVip?<div className="pb-val gold">NT$ {selProd.projPrice?.toLocaleString()}</div>:(selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>)}
             </div>
