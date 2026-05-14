@@ -152,7 +152,7 @@ const TRAVEL_STAY = { kmThreshold:150, lampThreshold:80, stayPerNight:2000, meal
 
 // 商照燈系列（含中文名）
 const COMMERCIAL_SERIES = [
-  "DC48V 磁吸軌道","EOS 奧斯","SLOT 希洛特","COSY 寇斯","YODA 優打",
+  "DC48V 磁吸軌道","EOS 奧斯","SLOT 希洛特","COSY 寇斯","YODA 優打1代","YODA 優打2代",
   "YOMAX 優麥斯","HEPBURN 赫本","METIS 墨提斯","MINI 珠寶","BLADE 帕雷德",
   "LINEAR 麗娜","POLA 泊拉","WALL LIGHT 壁燈","STEP LIGHT 地腳燈",
   "CABINET LINEAR LIGHT 高端線條燈","LED STRIP LIGHT 低壓燈帶",
@@ -206,7 +206,7 @@ const INIT_PRODUCTS = [
   { id:25, model:"BSB0508-C",   series:"OUTDOOR LIGHT 戶外燈具",      category:"戶外燈",  watt:"8W",     lumen:"508lm",   cct:"2700K/3000K/3500K/4000K", beam:"12°/20°/30°/40°", voltage:"DC 24V", cri:"Ra≥90", color:"黑色",          cutout:"Ø68mm",  size:"Ø75×H123mm",  install:"插地式",   cert:"IP67",  shipping:100, stdPrice:2180, projPrice:1780, video:"", desc:"316L 不鏽鋼大功率插地燈 8W，Bridgelux 508lm，適合商業廣場景觀。", images:[], note:"DC24V 供電。" },
   { id:26, model:"ALA0011-A",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", lumen:"110lm/W", cct:"2700K/3000K/4000K/6500K", beam:"120°",            voltage:"DC 24V", cri:"Ra≥98", color:"透明",          cutout:"—",      size:"W8×H2mm/m",   install:"卡槽嵌入", cert:"IP20",  shipping:75,  stdPrice:480,  projPrice:380,  video:"", desc:"高顯色 Ra≥98 鋁條燈，色容差 <3，精緻櫃體照明首選。", images:[], note:"⚠ 單條建議最長 2m；串聯最長 5.5m。需搭配 DC 24V 恒壓電源。" },
   { id:27, model:"ALA0011-P",   series:"鋁條燈",    category:"鋁條燈",  watt:"4.8W/m", lumen:"110lm/W", cct:"2700K/3000K/4000K/6500K", beam:"120°",            voltage:"DC 24V", cri:"Ra≥98", color:"透明",          cutout:"—",      size:"W10×H4.5mm/m",install:"卡槽嵌入", cert:"IP67",  shipping:75,  stdPrice:580,  projPrice:460,  video:"", desc:"防水 IP67 版，實心矽膠擠出不翻轉，耐久性極強，適合潮濕環境。", images:[], note:"⚠ 單條建議最長 2m；串聯最長 5.5m。" },
-  { id:28, model:"YODA 系列",   series:"YODA 優打",         category:"崁燈",    watt:"—",      lumen:"—",       cct:"—",                       beam:"—",               voltage:"—",      cri:"—",     color:"—",             cutout:"—",      size:"—",           install:"—",        cert:"—",     shipping:90,  stdPrice:0,    projPrice:0,    video:"", desc:"YODA 系列即將上市。此為系列佔位產品，管理員請至「產品管理」新增正式品項。", images:[], note:"新系列開發中，敬請期待。" },
+  { id:28, model:"YODA 系列",   series:"YODA 優打1代",         category:"崁燈",    watt:"—",      lumen:"—",       cct:"—",                       beam:"—",               voltage:"—",      cri:"—",     color:"—",             cutout:"—",      size:"—",           install:"—",        cert:"—",     shipping:90,  stdPrice:0,    projPrice:0,    video:"", desc:"YODA 優打1代系列，DSU/DSB/DSH/DSS/DSA/DSB-X 多款崁燈，Ra≥95 高顯色。", images:[], note:"新系列開發中，敬請期待。" },
 ];
 
 const INIT_INVENTORY = [];
