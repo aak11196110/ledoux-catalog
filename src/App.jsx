@@ -130,6 +130,13 @@ const INSTALL_BASE     = 200; // 崁燈安裝 NT$200/盞
 const INSTALL_MIN      = 2000;
 const INSTALL_LINEAR_M = 500; // 線型燈安裝 NT$500/米
 
+const URGENT_REGIONS = [
+  { id:"taoyuan",  label:"桃園核心區",      fee:1500 },
+  { id:"newTaipei",label:"新北地區",        fee:2500 },
+  { id:"taipei",   label:"台北地區",        fee:3500 },
+  { id:"regional", label:"宜蘭／新竹／苗栗", fee:5000 },
+  { id:"taichung", label:"台中地區",        fee:8000 },
+];
 const INSTALL_REGIONS = [
   { id:"core",     label:"桃園核心區",         areas:"八德、桃園、中壢、大溪、鶯歌",           km:"0–10 km",     travel:600,  freeAt:15,  areaNote:"桃園市八德、桃園、中壢、大溪、鶯歌等核心鄉鎮市區"  },
   { id:"outer",    label:"桃園外環區",          areas:"大園、觀音、新屋、龜山、蘆竹",           km:"11–25 km",    travel:1000, freeAt:25,  areaNote:"桃園市大園、觀音、新屋、龜山、蘆竹等外圍行政區"    },
@@ -716,7 +723,7 @@ function ProjBanner({onContact}) {
   );
 }
 
-function generatePDF({cart, projectName, customer, installCalc=null, isVip, discountRate=1, discountLabel=""}) {
+function generatePDF({cart, projectName, customer, installCalc=null, isVip, discountRate=1, discountLabel="", orderType="", urgentData=null}) {
   const today = new Date();
   const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`;
@@ -792,7 +799,8 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
       installRows += `<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達門檻）</td></tr>`;
     }
   }
-  const grandTotal = untaxed + Math.round(untaxed * 0.05) + installTotal;
+  const urgentFee = urgentData ? urgentData.fee : 0;
+const grandTotal = untaxed + Math.round(untaxed * 0.05) + installTotal + urgentFee;
   const tax = Math.round(untaxed * 0.05);
   const total = untaxed + tax;
 
@@ -891,6 +899,7 @@ ${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>
 <div class="totals">
   <div class="totals-inner">
     ${discRow}
+    ${urgentData ? `<div class="tot-row" style="color:#b8935a;font-weight:700"><span>⚡ 閃電緊急支援（${urgentData.label}）</span><span>NT$ ${urgentData.fee.toLocaleString()}</span></div>` : ""}
     <div class="tot-row"><span>金額（未稅）</span><span>NT$ ${untaxed.toLocaleString()}</span></div>
     <div class="tot-row tax-row"><span>稅金（5%）</span><span>NT$ ${tax.toLocaleString()}</span></div>
     <div class="tot-row final"><span>總金額（含稅）</span><span>NT$ ${total.toLocaleString()}</span></div>
@@ -1354,6 +1363,7 @@ function App() {
   const [loginErr,   setLoginErr]   = useState("");
   const [seriesExp,  setSeriesExp]  = useState(true);
   const [catExp,     setCatExp]     = useState(true);
+const [linearExp,  setLinearExp]  = useState(true);
   const [instRegion, setInstRegion] = useState("");
   const [instGroups, setInstGroups] = useState([{ceilingId:"std",qty:0}]);
   const [instNote,   setInstNote]   = useState("");
@@ -1376,6 +1386,9 @@ function App() {
   // 安裝詢問 Modal
   const [installAskModal, setInstallAskModal] = useState(false);
   const [installChoice,   setInstallChoice]   = useState(null); // null/true/false
+  const [orderType,       setOrderType]       = useState("");   // "stock" | "new"
+const [urgentSupport,   setUrgentSupport]   = useState(false);
+const [urgentRegion,    setUrgentRegion]    = useState("");
   const [inlineEdit, setInlineEdit] = useState(null);
   const [inlineData, setInlineData] = useState({});
   const [visitOpen,    setVisitOpen]    = useState(false);
@@ -1683,7 +1696,7 @@ const submitVisit = async () => {
   const doPdfDownload = (customer) => {
     // 整合報價單：燈具（含折扣）+ 安裝費（若有）合為一份 PDF
     const installData = (installChoice===true && instRegion && instCalc) ? {instCalc,instRegion,instGroups,linearGroups,linearMeters,instNote,installTypes} : null;
-    generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel});
+ generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel,orderType,urgentData:urgentSupport&&urgentRegion?URGENT_REGIONS.find(r=>r.id===urgentRegion):null});
     const baseSubtotal=cart.reduce((s,i)=>s+(Number(i.product.stdPrice)||0)*i.qty,0);
     const lampSubtotal=Math.round(baseSubtotal*discountRate);
     if(sheetUrl){
@@ -1700,6 +1713,7 @@ const submitVisit = async () => {
   const handleGenPDF = () => {
     if(!projName.trim()){toast$("請先填寫案名");return;}
     if(!allChecked){toast$("請先勾選確認所有注意事項");return;}
+    if(orderType==="stock" && urgentSupport && !urgentRegion){toast$("請選擇急件配送地區");return;}
     // 先跳出安裝詢問 Modal
     setInstallChoice(null);
     setInstallAskModal(true);
@@ -2024,11 +2038,11 @@ const submitVisit = async () => {
               <span className="sm-dot"/>{s}
             </div>
           ))}
-          <div className="sm-group-hd" onClick={()=>setCatExp(v=>!v)}>
+         <div className="sm-group-hd" onClick={()=>setLinearExp(v=>!v)}>
             <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>線型燈系列</span>
-            <span className={`sm-group-arrow ${catExp?"open":""}`}>›</span>
+            <span className={`sm-group-arrow ${linearExp?"open":""}`}>›</span>
           </div>
-          {catExp&&LINEAR_SERIES_LIST.map(s=>(
+          {linearExp&&LINEAR_SERIES_LIST.map(s=>(
             <div key={s} className={`sm-sub ${seriesF===s?"on":""}`} onClick={()=>{setSeriesF(s);setCat("全部");setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{s}
             </div>
@@ -2615,6 +2629,45 @@ const submitVisit = async () => {
                 />
                 {discountLabel&&<span style={{fontSize:"9px",color:"var(--gold)",letterSpacing:"2px",whiteSpace:"nowrap",border:"0.5px solid var(--gold)",padding:"3px 9px"}}>{discountLabel}</span>}
               </div>
+              {/* ── 下單類型 ── */}
+<div style={{marginBottom:14}}>
+  <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>下單類型</div>
+  <div style={{display:"flex",gap:6}}>
+    {[["stock","庫存品（快速出貨）"],["new","新品生產（約1個月）"]].map(([v,l])=>(
+      <button key={v} onClick={()=>{setOrderType(v);if(v==="new"){setUrgentSupport(false);setUrgentRegion("");}}}
+        style={{flex:1,padding:"9px 6px",border:"0.5px solid",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"8px",letterSpacing:"1.5px",cursor:"pointer",transition:"all .2s",
+          background:orderType===v?"var(--blk)":"transparent",borderColor:orderType===v?"var(--blk)":"var(--bdr)",color:orderType===v?"var(--ivory)":"var(--muted)"}}>
+        {l}
+      </button>
+    ))}
+  </div>
+</div>
+{orderType==="stock"&&(
+  <div style={{border:"0.5px solid var(--gold)",padding:"12px 14px",marginBottom:14,background:"#fdf9f0"}}>
+    <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",marginBottom:urgentSupport?10:0}}>
+      <input type="checkbox" checked={urgentSupport} onChange={e=>{setUrgentSupport(e.target.checked);if(!e.target.checked)setUrgentRegion("");}}/>
+      <span style={{fontSize:"9px",letterSpacing:"2px",color:"var(--gold)",fontWeight:700}}>⚡ 閃電緊急支援服務</span>
+    </label>
+    {urgentSupport&&<>
+      <div style={{fontSize:10,color:"var(--muted)",lineHeight:1.7,marginBottom:10}}>
+        台中以北 <strong>24 小時</strong>到貨 · 業務親送到場 · 現場技術諮詢<br/>
+        <span style={{color:"var(--red)",fontSize:9}}>⚠ 安裝高度超過 4.5m 僅提供地面交貨，不提供登高施作。</span><br/>
+        <span style={{fontSize:9}}>下單後請立即與業務聯繫，將有專員為您接洽。</span>
+      </div>
+      <div style={{fontSize:"7px",letterSpacing:"2px",color:"var(--muted)",marginBottom:6,textTransform:"uppercase"}}>選擇配送地區</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>
+        {URGENT_REGIONS.map(r=>(
+          <button key={r.id} onClick={()=>setUrgentRegion(r.id)}
+            style={{padding:"8px 6px",border:"0.5px solid",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"8px",letterSpacing:"1px",cursor:"pointer",textAlign:"left",
+              background:urgentRegion===r.id?"var(--blk)":"transparent",borderColor:urgentRegion===r.id?"var(--blk)":"var(--bdr)",color:urgentRegion===r.id?"var(--ivory)":"var(--muted)"}}>
+            {r.label}<br/>
+            <span style={{fontSize:9,opacity:.8}}>NT$ {r.fee.toLocaleString()}</span>
+          </button>
+        ))}
+      </div>
+    </>}
+  </div>
+)}
               <div className="checklist">
                 <div className="cl-title">下載前請確認</div>
                 {[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}
