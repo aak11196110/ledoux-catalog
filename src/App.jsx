@@ -1332,6 +1332,7 @@ function App() {
   const [searchFocus,setSearchFocus]= useState(false);
   const [searchHist, setSearchHist] = useState([]);
   const [selProd,    setSelProd]    = useState(null);
+  const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", addon:[]});
   const [editProd,   setEditProd]   = useState(null);
   const [showAdd,    setShowAdd]    = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
@@ -1433,7 +1434,9 @@ useEffect(() => {
       }
     })();
   }, [sheetUrl]);
-
+useEffect(()=>{
+  if(selProd) setSelSpec({beam:"", color:"", cct:"", addon:[]});
+}, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
   const syncUpsertInv = async it => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("upsertInventory",it); setSyncStatus("ok"); };
@@ -1554,7 +1557,7 @@ const submitVisit = async () => {
     } else { setLoginErr("帳號或密碼錯誤"); }
   };
 
-  const addToCart = p => { setCart(c=>{const ex=c.find(i=>i.product.id===p.id);return ex?c.map(i=>i.product.id===p.id?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1}];}); toast$(`${p.model} 已加入詢價單`); };
+ const addToCart = (p, spec={}) => { const key=p.id+JSON.stringify(spec); setCart(c=>{const ex=c.find(i=>i._key===key);return ex?c.map(i=>i._key===key?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1,spec,_key:key}];}); toast$(`${p.model} 已加入詢價單`); };
   const updateQty = (id,d) => setCart(c=>c.map(i=>i.product.id===id?{...i,qty:Math.max(1,i.qty+d)}:i));
   const removeItem = id => setCart(c=>c.filter(i=>i.product.id!==id));
   const addToSamp  = p  => { setSampCart(c=>c.find(i=>i.id===p.id)?c:[...c,p]); toast$(`${p.model} 已加入樣品清單`); };
@@ -2832,12 +2835,33 @@ const submitVisit = async () => {
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
             {selProd.note&&<div className="drawer-note">{selProd.note}</div>}
-            <div className="price-block">
+            <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
+  {selProd.beam&&selProd.beam.includes("/")?(<div>
+    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>光束角</div>
+    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+      {selProd.beam.split("/").map(b=>b.trim()).map(b=>(<button key={b} onClick={()=>setSelSpec(s=>({...s,beam:b}))} style={{padding:"5px 12px",borderRadius:4,border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>{b}</button>))}
+    </div>
+  </div>):null}
+  {selProd.color&&selProd.color.includes("/")?(<div>
+    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>顏色</div>
+    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+      {selProd.color.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,color:c}))} style={{padding:"5px 12px",borderRadius:4,border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.color===c?"var(--blk)":"transparent",color:selSpec.color===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.color===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
+    </div>
+  </div>):null}
+  {selProd.cct&&selProd.cct.includes("/")?(<div>
+    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>色溫</div>
+    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+      {selProd.cct.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,cct:c}))} style={{padding:"5px 12px",borderRadius:4,border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.cct===c?"var(--blk)":"transparent",color:selSpec.cct===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.cct===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
+    </div>
+  </div>):null}
+</div>
+<div className="price-block">
+            
               <div className="pb-label">{isVip?"專案價":"售價"}</div>
               {isVip?<div className="pb-val gold">NT$ {selProd.projPrice?.toLocaleString()}</div>:(selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>)}
             </div>
             <div className="drawer-actions">
-              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd)}>加入詢價單</button>
+              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
               <button className={`btn-samp ${sampCart.find(i=>i.id===selProd.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===selProd.id)?removeSamp(selProd.id):addToSamp(selProd)}>{sampCart.find(i=>i.id===selProd.id)?"已申請樣品":"申請樣品"}</button>
             </div>
           </div>
@@ -2851,7 +2875,7 @@ const submitVisit = async () => {
           <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
             ✦ 設計公司享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setCartOpen(false);setContactModal(true);}}>點此聯繫業務</span>
           </div>
-          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div><div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
+          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div>{item.spec&&(item.spec.cct||item.spec.beam||item.spec.color)&&<div style={{fontSize:11,color:"var(--muted)",marginTop:2}}>{[item.spec.cct,item.spec.beam,item.spec.color].filter(Boolean).join(" / ")}</div>}<div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
         </div>
         {cart.length>0&&<div className="sp-foot">
           <div className="cart-total"><span className="cart-total-lbl">小計</span><span className="cart-total-val">NT$ {cartTotal.toLocaleString()}</span></div>
