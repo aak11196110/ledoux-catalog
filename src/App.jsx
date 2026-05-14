@@ -1318,7 +1318,7 @@ function App() {
   const [installOrd, setInstallOrd] = useState([]);
   const [catalogs,   setCatalogs]   = useState(DEFAULT_CATALOGS);
   const [user,       setUser]       = useState(null);
-  const [page,       setPage]       = useState("showroom");
+  const [page, setPage] = useState("catalog");
   const [showroomScene, setShowroomScene] = useState("indoor");
   const [adminTab,     setAdminTab]     = useState("products"); // products | inventory | install
   const [editProduct,  setEditProduct]  = useState(null);  // null=關閉, {}=新增, {...}=編輯
@@ -1824,7 +1824,7 @@ const submitVisit = async () => {
         <div className={`sidemenu ${menuOpen?"open":""}`}>
           <div className="sm-head"><div className="sm-logo">LEDOUX</div><button className="sm-close-btn" onClick={()=>setMenuOpen(false)}>✕</button></div>
           <div className="sm-nav">
-            <div className="sm-item" onClick={()=>{setPage("showroom");setMenuOpen(false);}}><span>互動展示間</span></div>
+            
             <div className="sm-item" onClick={()=>{setPage("catalog");setMenuOpen(false);}}><span>產品目錄</span></div>
             <div className="sm-item on"><span>產品管理</span></div>
           </div>
@@ -1926,24 +1926,7 @@ const submitVisit = async () => {
     );
   }
 
-  // ── Showroom Page ──
-  if(page==="showroom" && user) return (
-    <><style>{G}</style>
-    <div className="app">
-      {menuOpen&&<div className="sidemenu-overlay" onClick={()=>setMenuOpen(false)}/>}
-      <div className={`sidemenu ${menuOpen?"open":""}`}>
-        <div className="sm-head"><div className="sm-logo">LEDOUX</div><button className="sm-close-btn" onClick={()=>setMenuOpen(false)}>✕</button></div>
-        <div className="sm-nav">
-          <div className="sm-item on"><span>互動展示間</span></div>
-          <div className="sm-item" onClick={()=>{setPage("catalog");setMenuOpen(false);}}><span>產品目錄</span></div>
-          <div className="sm-item" onClick={()=>{setPage("inventory");setMenuOpen(false);}}><span>現貨庫存</span></div>
-        </div>
-      </div>
-      <button className="menu-btn" onClick={()=>setMenuOpen(true)} style={{position:"fixed",top:16,left:16,zIndex:200,background:"rgba(0,0,0,0.5)",border:"0.5px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",padding:"8px 12px",cursor:"pointer",fontSize:16}}>☰</button>
-      <ShowroomPage scene={showroomScene} setScene={setShowroomScene} hoveredLight={hoveredLight} setHoveredLight={setHoveredLight} setPage={setPage} setSeriesF={setSeriesF}/>
-    </div>
-    </>
-  );
+
 
   if(!user) return(
     <><style>{G}</style>
