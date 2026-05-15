@@ -1540,7 +1540,7 @@ const submitVisit = async () => {
   const filtered = (() => {
     let ps = searchQ.trim() ? searchProducts(products, searchQ) : products;
     if (seriesF) ps = ps.filter(p=>p.series===seriesF);
-    else if (cat!=="全部") ps = ps.filter(p=>p.category===cat);
+   else if (cat!=="全部") ps = ps.filter(p=>p.category===cat||(cat==="鋁條燈"&&p.category==="軟條燈")||(cat==="軟條燈"&&p.category==="鋁條燈"));
     for (const tag of activeTags) {
       if (tag.type==="watt") ps = ps.filter(p=>p.watt===tag.value);
       if (tag.type==="cct")  ps = ps.filter(p=>p.cct&&p.cct.includes(tag.value.replace("K","")));
@@ -2338,8 +2338,7 @@ if(urgentData){
           </div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
-        {!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats.filter(c=>c&&c.trim())].map(c=><button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>{setCat(c);setActiveTags([]);}}>{c}</button>)}</div>}
-          <div className="filter-area">
+   {!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats.filter(c=>c&&c.trim()).filter((c,i,a)=>!(c==="軟條燈"&&a.includes("鋁條燈")))].map(c=>{const label=c==="磁吸系統"?"磁吸軌道":c==="鋁條燈"?"鋁條燈／軟條燈":c;return <button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>{setCat(c);setActiveTags([]);}}>{label}</button>})}</div>}
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">色溫</span>{allCcts.map(c=><button key={c} className={`filter-tag ${hasTag("cct",c)?"on":""}`} onClick={()=>toggleTag("cct",c)}>{c}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">演色性</span>{["Ra≥80","Ra≥90","Ra≥95","Ra≥98"].map(r=><button key={r} className={`filter-tag ${hasTag("cri",r)?"on":""}`} onClick={()=>toggleTag("cri",r)}>{r}</button>)}</div>
