@@ -2338,7 +2338,7 @@ if(urgentData){
           </div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
-{!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats.filter(c=>c&&c.trim()).filter((c,i,a)=>!(c==="軟條燈"&&a.includes("鋁條燈")))].map(c=>{const label=c==="磁吸系統"?"磁吸軌道":c==="鋁條燈"?"鋁條燈／軟條燈":c;return(<button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>{setCat(c);setActiveTags([]);}}>{label}</button>);})}</div>}
+          {!seriesF&&!searchQ&&(<div className="catbar">{["全部",...allCats.filter(c=>c&&c.trim()).filter((c,i,a)=>!(c==="軟條燈"&&a.includes("鋁條燈")))].map(c=>{const label=c==="磁吸系統"?"磁吸軌道":c==="鋁條燈"?"鋁條燈／軟條燈":c;return(<button key={c} className={"catbtn"+(cat===c?" on":"")} onClick={()=>{setCat(c);setActiveTags([]);}}>{label}</button>);})}</div>)}
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">色溫</span>{allCcts.map(c=><button key={c} className={`filter-tag ${hasTag("cct",c)?"on":""}`} onClick={()=>toggleTag("cct",c)}>{c}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">演色性</span>{["Ra≥80","Ra≥90","Ra≥95","Ra≥98"].map(r=><button key={r} className={`filter-tag ${hasTag("cri",r)?"on":""}`} onClick={()=>toggleTag("cri",r)}>{r}</button>)}</div>
