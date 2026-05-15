@@ -348,7 +348,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .ptitle{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--blk);line-height:1;letter-spacing:.5px}
 .psub{font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:7px}
 .catbar{display:flex;margin-bottom:0;border-bottom:0.5px solid var(--bdr2);overflow-x:auto}
-.catbtn{padding:10px 20px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--muted);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
+.catbtn{padding:10px 20px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
 .catbtn:hover{color:var(--blk)}
 .catbtn.on{color:var(--blk);border-bottom-color:var(--gold)}
 .filter-area{padding:14px 0 18px;margin-bottom:18px;border-bottom:0.5px solid var(--bdr2)}
@@ -364,7 +364,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .filter-clear:hover{color:var(--red)}
 /* ── 設計公司專案提示橫幅 ── */
 .proj-banner{background:#f9f5ee;border:0.5px solid var(--gold);border-left:2px solid var(--gold);padding:12px 16px;margin-bottom:20px;font-size:11px;color:var(--gold);line-height:1.8}
-.proj-banner-link{color:var(--gold);text-decoration:underline;cursor:pointer;margin:0 3px}
+.proj-banner-link{color:var(--gold);text-decoration:underline;cursor:pointer;margin:0 3px}  
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--bdr2);border:0.5px solid var(--bdr2)}
 .pcard{background:var(--ivory);cursor:pointer;transition:background .2s;display:flex;flex-direction:column;position:relative}
 .pcard:hover{background:#f2ece3}
