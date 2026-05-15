@@ -2440,26 +2440,56 @@ if(urgentData){
   {(invCct!=="全部"||invColor!=="全部"||invBeam!=="全部")&&<button onClick={()=>{setInvCct("全部");setInvColor("全部");setInvBeam("全部");}} style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:10,color:"var(--muted)",cursor:"pointer"}}>清除篩選</button>}
 </div>
           <div className="inv-grid">
-            {filteredInv.map(item=>{
-              const st=invStatusLabel(item);
-              return(
-                <div key={item.id} className="inv-card">
-                  <div className="inv-card-top"><div><div className="inv-card-model">{item.model}</div><div className="inv-card-series">{item.series}</div></div><span className={`inv-status ${st.cls}`}>{st.label}</span></div>
-                  <div className="inv-specs">{item.watt&&<span className="inv-spec-tag">{item.watt}</span>}{item.cct&&<span className="inv-spec-tag">{item.cct}</span>}{item.color&&<span className="inv-spec-tag">{item.color}</span>}</div>
-                  <div className="inv-qty-row">
-                    <div className="inv-qty-cell"><div className="inv-qty-num">{item.totalQty}</div><div className="inv-qty-lbl">總庫存</div></div>
-                    <div className="inv-qty-cell"><div className="inv-qty-num">{item.reservedQty}</div><div className="inv-qty-lbl">已保留</div></div>
-                    <div className="inv-qty-cell"><div className={`inv-qty-num ${Number(item.availableQty)>0?"avail":""}`}>{item.availableQty}</div><div className="inv-qty-lbl">可調貨</div></div>
-                  </div>
-                  {item.note&&<div className="inv-note">{item.note}</div>}
-                  <div className="inv-card-footer">
-                    <div><div className="inv-location">儲位：{item.location||"—"}</div><div className="inv-updated">更新：{item.updatedAt}</div></div>
-                    <button className="btn-inv-cart" disabled={Number(item.availableQty)<=0} onClick={()=>{const prod=products.find(p=>p.model===item.model);if(prod)addToCart(prod);else toast$(`${item.model} 已加入詢價單`);}}>加入詢價</button>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredInv.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>此分類目前無現貨</div>}
+  {[...new Set(filteredInv.map(i=>i.model))].map(model=>{
+    const items=filteredInv.filter(i=>i.model===model);
+    const first=items[0];
+    const ccts=[...new Set(items.map(i=>i.cct).filter(Boolean))];
+    const colors=[...new Set(items.map(i=>i.outerColor||i.color).filter(Boolean))];
+    const beams=[...new Set(items.map(i=>i.beam).filter(Boolean))];
+    const totalAvail=items.reduce((s,i)=>s+Number(i.availableQty||0),0);
+    const st=totalAvail<=0?"out":totalAvail<=5?"low":"in-stock";
+    const stLabel=totalAvail<=0?"無庫存":totalAvail<=5?"庫存偏低":"現貨供應";
+    return(
+      <div key={model} className="inv-card">
+        <div className="inv-card-top">
+          <div><div className="inv-card-model">{model}</div><div className="inv-card-series">{first.series}</div></div>
+          <span className={`inv-status ${st}`}>{stLabel}</span>
+        </div>
+        <div className="inv-specs">{first.watt&&<span className="inv-spec-tag">{first.watt}</span>}</div>
+        {ccts.length>0&&<div style={{marginBottom:8}}>
+          <div style={{fontSize:9,letterSpacing:2,color:"var(--muted)",marginBottom:4}}>色溫</div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {ccts.map(c=>{const qty=items.filter(i=>i.cct===c).reduce((s,i)=>s+Number(i.availableQty||0),0);return(<span key={c} style={{padding:"3px 9px",border:"0.5px solid",fontSize:11,borderColor:qty>0?"var(--gold)":"var(--bdr)",color:qty>0?"var(--blk)":"var(--muted)",background:"transparent"}}>{c} <span style={{fontSize:10,color:qty>0?"var(--green)":"var(--red)"}}>({qty})</span></span>);})}
+          </div>
+        </div>}
+        {beams.length>0&&<div style={{marginBottom:8}}>
+          <div style={{fontSize:9,letterSpacing:2,color:"var(--muted)",marginBottom:4}}>光束角</div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {beams.map(b=>{const qty=items.filter(i=>i.beam===b).reduce((s,i)=>s+Number(i.availableQty||0),0);return(<span key={b} style={{padding:"3px 9px",border:"0.5px solid",fontSize:11,borderColor:qty>0?"var(--gold)":"var(--bdr)",color:qty>0?"var(--blk)":"var(--muted)"}}>{b} <span style={{fontSize:10,color:qty>0?"var(--green)":"var(--red)"}}>({qty})</span></span>);})}
+          </div>
+        </div>}
+        {colors.length>0&&<div style={{marginBottom:8}}>
+          <div style={{fontSize:9,letterSpacing:2,color:"var(--muted)",marginBottom:4}}>外框顏色</div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {colors.map(c=>{const qty=items.filter(i=>(i.outerColor||i.color)===c).reduce((s,i)=>s+Number(i.availableQty||0),0);return(<span key={c} style={{padding:"3px 9px",border:"0.5px solid",fontSize:11,borderColor:qty>0?"var(--gold)":"var(--bdr)",color:qty>0?"var(--blk)":"var(--muted)"}}>{c} <span style={{fontSize:10,color:qty>0?"var(--green)":"var(--red)"}}>({qty})</span></span>);})}
+          </div>
+        </div>}
+        <div className="inv-qty-row">
+          <div className="inv-qty-cell"><div className="inv-qty-num">{items.reduce((s,i)=>s+Number(i.totalQty||0),0)}</div><div className="inv-qty-lbl">總庫存</div></div>
+          <div className="inv-qty-cell"><div className="inv-qty-num">{items.reduce((s,i)=>s+Number(i.reservedQty||0),0)}</div><div className="inv-qty-lbl">已保留</div></div>
+          <div className="inv-qty-cell"><div className={`inv-qty-num ${totalAvail>0?"avail":""}`}>{totalAvail}</div><div className="inv-qty-lbl">可調貨</div></div>
+        </div>
+        {first.note&&<div className="inv-note">{first.note}</div>}
+        <div className="inv-card-footer">
+          <div><div className="inv-location">儲位：{first.location||"—"}</div><div className="inv-updated">更新：{first.updatedAt}</div></div>
+          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);if(prod)addToCart(prod);else toast$(`${model} 已加入詢價單`);}}>加入詢價</button>
+        </div>
+      </div>
+    );
+  })}
+  {filteredInv.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>此分類目前無現貨</div>}
+</div>
+
           </div>
         </>}
 
