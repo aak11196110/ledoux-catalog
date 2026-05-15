@@ -2489,9 +2489,7 @@ if(urgentData){
   })}
   {filteredInv.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>此分類目前無現貨</div>}
 </div>
-
-          </div>
-        </>}
+          </>}
 
         {/* ══ 照明設計服務 ══ */}
 {page==="visit"&&<>
