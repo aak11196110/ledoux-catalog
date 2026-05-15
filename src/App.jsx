@@ -729,7 +729,7 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
   const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`;
   const discSuffix = discountRate < 1 ? String(Math.round(discountRate*10)).padStart(3,"0") : String(Math.floor(Math.random()*900)+100);
   const qn = `C${dateStr}-${discSuffix}`;
-  const priceLabel = discountRate < 1 ? `${discountLabel}折扣價` : isVip ? "專案價" : "建議牌價";
+  const priceLabel = discountRate < 1 ? `專案折扣價` : isVip ? "專案價" : "建議牌價";
 
   const rows = cart.map((item, i) => {
     const p = item.product;
@@ -813,7 +813,7 @@ const lampTotal = untaxed + tax;                              // 只有燈具含
 const grandTotal = lampTotal + installTotal + urgentFee;     // 全部加總
 
   const discRow = discountRate < 1
-    ? `<tr style="background:#fdf8ee;"><td colspan="3" style="text-align:right;padding:5px 12px;font-size:10px;color:#b8935a;">${discountLabel} 折扣已套用</td></tr>`
+    ? `<tr style="background:#fdf8ee;"><td colspan="3" style="text-align:right;padding:5px 12px;font-size:10px;color:#b8935a;">專案折扣已套用</td></tr>`
     : "";
 
   const html = `<!DOCTYPE html>
@@ -883,7 +883,7 @@ const grandTotal = lampTotal + installTotal + urgentFee;     // 全部加總
   <div class="meta-cell"><div class="meta-lbl">E-mail</div><div class="meta-val">${COMPANY.email}</div></div>
 </div>
 
-${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>${discountLabel}</strong> 專屬折扣，報價僅供本次專案使用，請勿對外流通。</div>` : ""}
+${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 專屬折扣，報價僅供本次專案使用，請勿對外流通。</div>` : ""}
 
 <table>
   <thead>
@@ -2644,7 +2644,7 @@ if(urgentData){
                   onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)}
                   maxLength={8}
                 />
-                {discountLabel&&<span style={{fontSize:"9px",color:"var(--gold)",letterSpacing:"2px",whiteSpace:"nowrap",border:"0.5px solid var(--gold)",padding:"3px 9px"}}>{discountLabel}</span>}
+                {discountLabel&&<span style={{fontSize:"9px",color:"var(--gold)",letterSpacing:"2px",whiteSpace:"nowrap",border:"0.5px solid var(--gold)",padding:"3px 9px"}}>✓ 專案價</span>}
               </div>
               {/* ── 下單類型 ── */}
 <div style={{marginBottom:14}}>
@@ -3013,7 +3013,8 @@ if(urgentData){
           <div className="cp-project"><label>案名 *</label><input value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/></div>
           <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:10}}>
             <input style={{flex:1,padding:"6px 9px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)"}} placeholder="— — —" value={discountCode} onChange={e=>setDiscountCode(e.target.value)} onBlur={()=>applyDiscountCode(discountCode)} onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)} maxLength={8}/>
-            {discountLabel&&<span style={{fontSize:"8px",color:"var(--gold)",border:"0.5px solid var(--gold)",padding:"2px 7px",whiteSpace:"nowrap"}}>{discountLabel}</span>}
+            {discountLabel&&<span style={{fontSize:"8px",color:"var(--gold)",border:"0.5px solid var(--gold)",padding:"2px 7px",whiteSpace:"nowrap"}}>✓ 專案價</span>}
+            {discountLabel&&<div style={{fontSize:10,color:"#7a5a2a",background:"#fdf5e8",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"8px 10px",marginTop:6,lineHeight:1.8}}>⚠ 專案報價僅提供設計公司、建築師事務所自行接案使用。本報價不適用於標案、統包轉包或代購用途，如有上述需求請洽業務另行報價。</div>}
           </div>
           <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
           <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"下載報價單":"請先勾選確認事項"}</button>
