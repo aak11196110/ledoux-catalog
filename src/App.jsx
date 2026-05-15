@@ -1345,6 +1345,9 @@ function App() {
   const [cat,        setCat]        = useState("全部");
   const [seriesF,    setSeriesF]    = useState(null);
   const [invCat,     setInvCat]     = useState("全部");
+  const [invCct, setInvCct] = useState("全部");
+const [invColor, setInvColor] = useState("全部");
+const [invBeam, setInvBeam] = useState("全部");
   const [searchQ,    setSearchQ]    = useState("");
   const [searchFocus,setSearchFocus]= useState(false);
   const [searchHist, setSearchHist] = useState([]);
@@ -1568,7 +1571,12 @@ const submitVisit = async () => {
   const hasTag   = (type, value) => activeTags.some(t=>t.type===type&&t.value===value);
   const clearTags = () => { setActiveTags([]); setSearchQ(""); setCat("全部"); setSeriesF(null); };
 
-  const filteredInv = invCat==="全部" ? inventory : inventory.filter(i=>i.category===invCat);
+const filteredInv = inventory.filter(i=>
+  (invCat==="全部"||i.category===invCat)&&
+  (invCct==="全部"||i.cct===invCct)&&
+  (invColor==="全部"||i.color===invColor)&&
+  (invBeam==="全部"||i.beam===invBeam)
+);
   const suggs = getSuggestions(products, searchQ);
   const instCalc = calcInstall(instRegion, instGroups, linearGroups);
   const hasStock = model => inventory.some(i=>i.model===model&&Number(i.availableQty)>0);
@@ -2415,6 +2423,22 @@ if(urgentData){
             <div className="inv-stat"><div className="inv-stat-num">{inventory.length}</div><div className="inv-stat-lbl">品項數 SKU</div></div>
           </div>
           <div className="inv-catbar">{allInvCats.map(c=><button key={c} className={`inv-catbtn ${invCat===c?"on":""}`} onClick={()=>setInvCat(c)}>{c}</button>)}</div>
+<div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"10px 0 16px",alignItems:"center"}}>
+  <span style={{fontSize:9,letterSpacing:2,color:"var(--muted)",textTransform:"uppercase"}}>篩選</span>
+  <select value={invCct} onChange={e=>setInvCct(e.target.value)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,color:"var(--blk)",outline:"none"}}>
+    <option value="全部">全部色溫</option>
+    {[...new Set(inventory.map(i=>i.cct).filter(Boolean))].map(c=><option key={c} value={c}>{c}</option>)}
+  </select>
+  <select value={invColor} onChange={e=>setInvColor(e.target.value)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,color:"var(--blk)",outline:"none"}}>
+    <option value="全部">全部顏色</option>
+    {[...new Set(inventory.map(i=>i.color).filter(Boolean))].map(c=><option key={c} value={c}>{c}</option>)}
+  </select>
+  <select value={invBeam} onChange={e=>setInvBeam(e.target.value)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,color:"var(--blk)",outline:"none"}}>
+    <option value="全部">全部光束角</option>
+    {[...new Set(inventory.map(i=>i.beam).filter(Boolean))].map(c=><option key={c} value={c}>{c}</option>)}
+  </select>
+  {(invCct!=="全部"||invColor!=="全部"||invBeam!=="全部")&&<button onClick={()=>{setInvCct("全部");setInvColor("全部");setInvBeam("全部");}} style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:10,color:"var(--muted)",cursor:"pointer"}}>清除篩選</button>}
+</div>
           <div className="inv-grid">
             {filteredInv.map(item=>{
               const st=invStatusLabel(item);
