@@ -2061,7 +2061,7 @@ if(urgentData){
             <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>依分類</span>
             <span className={`sm-group-arrow ${catExp?"open":""}`}>›</span>
           </div>
-          {catExp&&allCats.map(c=>(
+         {catExp&&allCats.filter(c=>c&&c.trim()).map(c=>(
             <div key={c} className={`sm-sub ${!seriesF&&cat===c&&page==="catalog"?"on":""}`} onClick={()=>{setCat(c);setSeriesF(null);setPage("catalog");setMenuOpen(false);}}>
               <span className="sm-dot"/>{c}
             </div>
@@ -2338,7 +2338,7 @@ if(urgentData){
           </div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
-          {!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats].map(c=><button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>{setCat(c);setActiveTags([]);}}>{c}</button>)}</div>}
+        {!seriesF&&!searchQ&&<div className="catbar">{["全部",...allCats.filter(c=>c&&c.trim())].map(c=><button key={c} className={`catbtn ${cat===c?"on":""}`} onClick={()=>{setCat(c);setActiveTags([]);}}>{c}</button>)}</div>}
           <div className="filter-area">
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">色溫</span>{allCcts.map(c=><button key={c} className={`filter-tag ${hasTag("cct",c)?"on":""}`} onClick={()=>toggleTag("cct",c)}>{c}</button>)}</div>
