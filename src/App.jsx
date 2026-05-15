@@ -733,10 +733,18 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
 
   const rows = cart.map((item, i) => {
     const p = item.product;
+    const sp = item.spec||{};
     const baseP = Number(p.stdPrice) || 0;
     const unitPrice = Math.round(baseP * discountRate);
     const subtotal = unitPrice * item.qty;
-    const desc = [p.watt, p.beam, p.cct, p.voltage, p.cri, p.color, p.cutout ? `開孔${p.cutout}` : ""].filter(Boolean).join(" / ");
+    // 規格顯示：優先使用客戶選擇的自訂值
+    const cctDisplay = sp.cct==="其他"?(sp.customCct||"特殊色溫（待確認）"):sp.cct||p.cct;
+    const beamDisplay = sp.beam==="其他"?(sp.customBeam||"特殊角度"):sp.beam||p.beam;
+    const outerDisplay = sp.outerColor==="其他"?(sp.customColor||"特殊外框色"):sp.outerColor;
+    const innerDisplay = sp.innerColor&&sp.innerColor!=="其他"?`內框:${sp.innerColor}`:sp.innerColor==="其他"?`內框:${sp.customInnerColor||"特殊"}`:null;
+    const colorDisplay = outerDisplay?[`外框:${outerDisplay}`,innerDisplay].filter(Boolean).join(" "):sp.color||p.color;
+    const specNote = [sp.cct==="其他"?"⚠ 特殊色溫需確認":"",sp.beam==="其他"?"⚠ 特殊光束角需確認":"",sp.outerColor==="其他"?"⚠ 特殊顏色需確認":""].filter(Boolean).join(" ");
+    const desc = [p.watt, beamDisplay, cctDisplay, p.voltage, p.cri, colorDisplay, p.cutout ? `開孔${p.cutout}` : ""].filter(Boolean).join(" / ");
     const imgHtml = p.images && p.images[0]
       ? `<img src="${p.images[0]}" style="max-width:70px;max-height:55px;object-fit:contain;" onerror="this.style.display='none'">`
       : `<div style="width:70px;height:55px;background:#f0ebe2;display:flex;align-items:center;justify-content:center;font-size:9px;color:#ccc;">NO IMG</div>`;
@@ -744,7 +752,7 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
       <td style="text-align:center;padding:8px 5px;">${i+1}</td>
       <td style="text-align:center;padding:5px;">${imgHtml}</td>
       <td style="padding:8px 6px;font-weight:500;">${p.model}</td>
-      <td style="padding:8px 6px;font-size:10px;color:#555;">${desc}</td>
+      <td style="padding:8px 6px;font-size:10px;color:#555;">${desc}${specNote?`<br><span style="color:#9b3a3a;font-size:9px;">${specNote}</span>`:""}</td>
       <td style="text-align:center;padding:8px 5px;">${item.qty}</td>
       <td style="text-align:center;padding:8px 5px;">盞</td>
       <td style="text-align:right;padding:8px 8px;">${unitPrice > 0 ? unitPrice.toLocaleString() : "洽業務"}</td>
@@ -1341,7 +1349,7 @@ function App() {
   const [searchFocus,setSearchFocus]= useState(false);
   const [searchHist, setSearchHist] = useState([]);
   const [selProd,    setSelProd]    = useState(null);
-  const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", addon:[]});
+  const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[]});
   const [addons, setAddons] = useState([]);
   const [editProd,   setEditProd]   = useState(null);
   const [showAdd,    setShowAdd]    = useState(false);
@@ -2355,7 +2363,7 @@ if(urgentData){
               const isEditing=isAdmin&&inlineEdit===p.id;
               const d=isEditing?inlineData:p;
               return(
-              <div key={p.id} className="pcard" onClick={()=>!isEditing&&setSelProd(p)}>
+              <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[]});}}}>
                 {hasStock(p.model)&&<div className="pcard-stock-badge"><span className="pcard-stock-dot"/>台灣現貨</div>}
                 <div className="pcard-img">{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div>
                 <div className="pcard-body">
@@ -2898,23 +2906,54 @@ if(urgentData){
             </div>
             {selProd.note&&<div className="drawer-note">{selProd.note}</div>}
             <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
+  {/* 光束角選擇 + 其他 */}
   {selProd.beam&&selProd.beam.includes("/")?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>光束角</div>
-    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-      {selProd.beam.split("/").map(b=>b.trim()).map(b=>(<button key={b} onClick={()=>setSelSpec(s=>({...s,beam:b}))} style={{padding:"5px 12px",borderRadius:4,border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>{b}</button>))}
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+      {selProd.beam.split("/").map(b=>b.trim()).map(b=>(<button key={b} onClick={()=>setSelSpec(s=>({...s,beam:b}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>{b}</button>))}
+      <button onClick={()=>setSelSpec(s=>({...s,beam:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam==="其他"?"var(--gold)":"transparent",color:selSpec.beam==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.beam==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
     </div>
+    {selSpec.beam==="其他"&&<input placeholder="請輸入光束角，例：45°" value={selSpec.customBeam||""} onChange={e=>setSelSpec(s=>({...s,customBeam:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
   </div>):null}
+
+  {/* 顏色選擇：外框色 + 內框色（若產品有色選項） */}
   {selProd.color&&selProd.color.includes("/")?(<div>
-    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>顏色</div>
-    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-      {selProd.color.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,color:c}))} style={{padding:"5px 12px",borderRadius:4,border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.color===c?"var(--blk)":"transparent",color:selSpec.color===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.color===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
+    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>燈體顏色</div>
+    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      {/* 外框顏色 */}
+      <div>
+        <div style={{fontSize:9,letterSpacing:1,color:"var(--muted)",marginBottom:4}}>外框色</div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+          {selProd.color.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,outerColor:c,color:c}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.outerColor===c?"var(--blk)":"transparent",color:selSpec.outerColor===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.outerColor===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
+          <button onClick={()=>setSelSpec(s=>({...s,outerColor:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.outerColor==="其他"?"var(--gold)":"transparent",color:selSpec.outerColor==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.outerColor==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
+        </div>
+        {selSpec.outerColor==="其他"&&<input placeholder="請輸入外框顏色，例：香檳金" value={selSpec.customColor||""} onChange={e=>setSelSpec(s=>({...s,customColor:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
+      </div>
+      {/* 內框顏色（選填） */}
+      <div>
+        <div style={{fontSize:9,letterSpacing:1,color:"var(--muted)",marginBottom:4}}>內框色 <span style={{fontSize:8,color:"var(--muted)"}}>(選填)</span></div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+          {selProd.color.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,innerColor:selSpec.innerColor===c?"":c}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.innerColor===c?"var(--blk)":"transparent",color:selSpec.innerColor===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.innerColor===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
+          <button onClick={()=>setSelSpec(s=>({...s,innerColor:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.innerColor==="其他"?"var(--gold)":"transparent",color:selSpec.innerColor==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.innerColor==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
+          <button onClick={()=>setSelSpec(s=>({...s,innerColor:""}))} style={{padding:"5px 12px",border:"0.5px solid var(--bdr2)",fontSize:11,cursor:"pointer",background:"transparent",color:"var(--muted)"}}>不指定</button>
+        </div>
+        {selSpec.innerColor==="其他"&&<input placeholder="請輸入內框顏色，例：香檳金" value={selSpec.customInnerColor||""} onChange={e=>setSelSpec(s=>({...s,customInnerColor:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
+      </div>
     </div>
   </div>):null}
-  {selProd.cct&&selProd.cct.includes("/")?(<div>
+
+  {/* 色溫選擇 + 其他 */}
+  {selProd.cct&&(selProd.cct.includes("/")||selProd.cct==="色溫可生產")?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>色溫</div>
-    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-      {selProd.cct.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,cct:c}))} style={{padding:"5px 12px",borderRadius:4,border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.cct===c?"var(--blk)":"transparent",color:selSpec.cct===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.cct===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+      {selProd.cct==="色溫可生產"
+        ?["2700K","3000K","3500K","4000K","5000K","6500K"].map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,cct:c}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.cct===c?"var(--blk)":"transparent",color:selSpec.cct===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.cct===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))
+        :selProd.cct.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,cct:c}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.cct===c?"var(--blk)":"transparent",color:selSpec.cct===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.cct===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))
+      }
+      <button onClick={()=>setSelSpec(s=>({...s,cct:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.cct==="其他"?"var(--gold)":"transparent",color:selSpec.cct==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.cct==="其他"?"var(--gold)":"var(--bdr)"}}>其他色溫</button>
     </div>
+    {selSpec.cct==="其他"&&<input placeholder="請輸入色溫，例：3500K、Ra≥95" value={selSpec.customCct||""} onChange={e=>setSelSpec(s=>({...s,customCct:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}} maxLength={40}/>}
+    <div style={{fontSize:9,color:"var(--muted)",marginTop:4,lineHeight:1.6}}>若需特殊色溫請選「其他色溫」填入，業務確認後回覆可行性</div>
   </div>):null}
 </div>
             {addons.filter(a=>a.category==="全部"||a.category===selProd.category).length>0&&(
@@ -2958,7 +2997,15 @@ if(urgentData){
           <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
             ✦ 設計公司享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setCartOpen(false);setContactModal(true);}}>點此聯繫業務</span>
           </div>
-          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div>{item.spec&&(item.spec.cct||item.spec.beam||item.spec.color)&&<div style={{fontSize:11,color:"var(--muted)",marginTop:2}}>{[item.spec.cct,item.spec.beam,item.spec.color].filter(Boolean).join(" / ")}</div>}<div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
+          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;
+            const sp=item.spec||{};
+            const cctDisplay=sp.cct==="其他"?(sp.customCct||"特殊色溫"):sp.cct;
+            const beamDisplay=sp.beam==="其他"?(sp.customBeam||"特殊角度"):sp.beam;
+            const outerDisplay=sp.outerColor==="其他"?(sp.customColor||"特殊顏色"):sp.outerColor;
+            const innerDisplay=sp.innerColor&&sp.innerColor!=="其他"?sp.innerColor:sp.innerColor==="其他"?(sp.customInnerColor||"特殊內框"):"";
+            const colorDisplay=[outerDisplay&&`外框:${outerDisplay}`,innerDisplay&&`內框:${innerDisplay}`].filter(Boolean).join(" / ")||sp.color;
+            const specLine=[cctDisplay,beamDisplay,colorDisplay].filter(Boolean).join(" · ");
+            return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div>{specLine&&<div style={{fontSize:10,color:"var(--muted)",marginTop:2,lineHeight:1.5}}>{specLine}</div>}<div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
         </div>
         {cart.length>0&&<div className="sp-foot">
           <div className="cart-total"><span className="cart-total-lbl">小計</span><span className="cart-total-val">NT$ {cartTotal.toLocaleString()}</span></div>
