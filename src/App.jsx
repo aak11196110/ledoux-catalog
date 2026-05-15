@@ -1358,6 +1358,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [selProd,    setSelProd]    = useState(null);
   const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[]});
   const [addons, setAddons] = useState([]);
+  const [allParts,   setAllParts]   = useState([]);
   const [editProd,   setEditProd]   = useState(null);
   const [showAdd,    setShowAdd]    = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
@@ -1449,14 +1450,16 @@ useEffect(() => {
     (async () => {
       setSyncStatus("loading");
       try {
-const [prods, invs, addonData] = await Promise.all([
+const [prods, invs, addonData, partsData] = await Promise.all([
   sheetGet("getProducts"),
   sheetGet("getInventory"),
-  sheetGet("getAddons")
+  sheetGet("getAddons"),
+  sheetGet("getParts")
 ]);
-        if (prods?.length > 0) setProducts(prods);
-        if (invs?.length > 0)  setInventory(invs);
-        if (addonData?.length > 0) setAddons(addonData);
+if (prods?.length > 0) setProducts(prods);
+if (invs?.length > 0) setInventory(invs);
+if (addonData?.length > 0) setAddons(addonData);
+if (partsData?.length > 0) setAllParts(partsData);
         setSyncStatus("ok");
       } catch(e) {
         setSyncStatus("off");
@@ -3010,6 +3013,37 @@ if(urgentData){
             <div className="spec-grid">
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
+            {/* 零件庫存規格選擇 */}
+{allParts.filter(p=>{
+  const s = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(x=>x.trim());
+  return s.some(x=>x==='全部系列'||selProd?.series?.includes(x.replace(/ 優打\d代/,'').trim())||selProd?.series===x);
+}).length>0&&(
+  <div style={{marginBottom:16}}>
+    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:8}}>可選規格庫存</div>
+    {['色溫','光束角','外框顏色','內框顏色','配件'].map(type=>{
+      const items = allParts.filter(p=>{
+        const s = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(x=>x.trim());
+        return p['零件類別']===type && s.some(x=>x==='全部系列'||selProd?.series===x);
+      });
+      if(!items.length) return null;
+      return(
+        <div key={type} style={{marginBottom:10}}>
+          <div style={{fontSize:10,color:"var(--muted)",marginBottom:4}}>{type}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {items.map(p=>(
+              <div key={p['編號']} style={{padding:"4px 10px",border:"0.5px solid var(--bdr)",fontSize:11,background:"var(--ivory2)"}}>
+                {p['零件名稱']}
+                <span style={{fontSize:9,color:p['庫存數量']>0?"var(--green)":"var(--red)",marginLeft:4}}>
+                  {p['庫存數量']>0?`庫存${p['庫存數量']}`:"無庫存"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)}
             {selProd.note&&<div className="drawer-note">{selProd.note}</div>}
             <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
   {/* 光束角選擇 + 其他 */}
