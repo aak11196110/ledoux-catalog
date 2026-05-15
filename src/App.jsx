@@ -3050,7 +3050,13 @@ if(urgentData){
   {selProd.beam&&selProd.beam.includes("/")?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>光束角</div>
     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
-      {selProd.beam.split("/").map(b=>b.trim()).map(b=>(<button key={b} onClick={()=>setSelSpec(s=>({...s,beam:b}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>{b}</button>))}
+     {selProd.beam.split("/").map(b=>b.trim()).map(b=>{
+  const bPart = allParts.find(p=>p['零件類別']==='光束角'&&p['零件名稱']===b&&(() => { const s=Array.isArray(p['適用產品'])?p['適用產品']:String(p['適用產品']||'').split(',').map(x=>x.trim()); return s.some(x=>x==='全部系列'||selProd?.series===x); })());
+  const bStock = bPart ? Number(bPart['庫存數量']) : null;
+  return <button key={b} onClick={()=>setSelSpec(s=>({...s,beam:b}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>
+    {b}{bStock!==null&&<span style={{fontSize:9,color:selSpec.beam===b?"var(--ivory)":bStock>0?"var(--green)":"var(--red)",marginLeft:4}}>{bStock>0?`(${bStock})`:"(無)"}</span>}
+  </button>;
+})} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>{b}</button>))}
       <button onClick={()=>setSelSpec(s=>({...s,beam:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam==="其他"?"var(--gold)":"transparent",color:selSpec.beam==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.beam==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
     </div>
     {selSpec.beam==="其他"&&<input placeholder="請輸入光束角，例：45°" value={selSpec.customBeam||""} onChange={e=>setSelSpec(s=>({...s,customBeam:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
