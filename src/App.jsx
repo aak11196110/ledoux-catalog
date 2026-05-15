@@ -3055,9 +3055,9 @@ if(urgentData){
   const bStock = bPart ? Number(bPart['庫存數量']) : null;
   return <button key={b} onClick={()=>setSelSpec(s=>({...s,beam:b}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>
     {b}{bStock!==null&&<span style={{fontSize:9,color:selSpec.beam===b?"var(--ivory)":bStock>0?"var(--green)":"var(--red)",marginLeft:4}}>{bStock>0?`(${bStock})`:"(無)"}</span>}
-  </button>;
-})} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam===b?"var(--blk)":"transparent",color:selSpec.beam===b?"var(--ivory)":"var(--blk)",borderColor:selSpec.beam===b?"var(--blk)":"var(--bdr)"}}>{b}</button>))}
-      <button onClick={()=>setSelSpec(s=>({...s,beam:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam==="其他"?"var(--gold)":"transparent",color:selSpec.beam==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.beam==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
+</button>;
+})}
+      <button onClick={()=>setSelSpec(s=>({...s,beam:"其他"}))}style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam==="其他"?"var(--gold)":"transparent",color:selSpec.beam==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.beam==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
     </div>
     {selSpec.beam==="其他"&&<input placeholder="請輸入光束角，例：45°" value={selSpec.customBeam||""} onChange={e=>setSelSpec(s=>({...s,customBeam:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
   </div>):null}
