@@ -799,10 +799,10 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
       installRows += `<tr><td>—</td><td><b>車馬費</b></td><td colspan="3" style="color:#3a6b4a;text-align:center">免收（已達門檻）</td></tr>`;
     }
   }
-  const urgentFee = urgentData ? urgentData.fee : 0;
-const grandTotal = untaxed + Math.round(untaxed * 0.05) + installTotal + urgentFee;
-  const tax = Math.round(untaxed * 0.05);
-  const total = untaxed + tax;
+const urgentFee = urgentData ? urgentData.fee : 0;
+const tax = Math.round(untaxed * 0.05);
+const lampTotal = untaxed + tax;                              // 只有燈具含稅
+const grandTotal = lampTotal + installTotal + urgentFee;     // 全部加總
 
   const discRow = discountRate < 1
     ? `<tr style="background:#fdf8ee;"><td colspan="3" style="text-align:right;padding:5px 12px;font-size:10px;color:#b8935a;">${discountLabel} 折扣已套用</td></tr>`
@@ -902,7 +902,7 @@ ${discountRate < 1 ? `<div class="price-note">⚠ 本報價單已套用 <strong>
     ${urgentData ? `<div class="tot-row" style="color:#b8935a;font-weight:700"><span>⚡ 閃電緊急支援（${urgentData.label}）</span><span>NT$ ${urgentData.fee.toLocaleString()}</span></div>` : ""}
     <div class="tot-row"><span>金額（未稅）</span><span>NT$ ${untaxed.toLocaleString()}</span></div>
     <div class="tot-row tax-row"><span>稅金（5%）</span><span>NT$ ${tax.toLocaleString()}</span></div>
-    <div class="tot-row final"><span>總金額（含稅）</span><span>NT$ ${total.toLocaleString()}</span></div>
+    <div class="tot-row final"><span>總金額（含稅）</span><span>NT$ ${lampTotal.toLocaleString()}</span></div>
   </div>
 </div>
 
