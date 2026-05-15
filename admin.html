@@ -1,1 +1,1129 @@
-<h1>test</h1>
+<!DOCTYPE html>
+<!-- saved from url=(0041)file:///C:/Users/Kim/Downloads/admin.html -->
+<html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEDOUX 後台管理系統</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:#f7f4ef;color:#0e0d0c;display:flex;min-height:100vh}
+
+/* NAV */
+.nav{width:64px;background:#0e0d0c;display:flex;flex-direction:column;align-items:center;padding:16px 0;position:fixed;top:0;left:0;height:100vh;z-index:200}
+.nav-logo{font-family:Georgia,serif;font-size:11px;letter-spacing:3px;color:#b8935a;writing-mode:vertical-rl;margin-bottom:24px;padding-bottom:16px;border-bottom:0.5px solid #2a2926}
+.nav-item{width:44px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;margin-bottom:4px;transition:all .15s;color:#5a5650;font-size:9px;letter-spacing:1px;text-align:center;gap:3px}
+.nav-item:hover{background:#1a1916;color:#c8c0b4}
+.nav-item.active{background:#b8935a20;color:#b8935a}
+.nav-item svg{width:18px;height:18px}
+.nav-bottom{margin-top:auto}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:#fff;border-right:0.5px solid #d9d4cc;position:fixed;top:0;left:64px;height:100vh;display:flex;flex-direction:column;z-index:100;overflow:hidden}
+.sb-head{padding:16px 16px 12px;border-bottom:0.5px solid #e8e0d8}
+.sb-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0e0d0c;margin-bottom:10px}
+.sb-search input{width:100%;padding:7px 10px;border:0.5px solid #d9d4cc;border-radius:6px;font-family:inherit;font-size:12px;background:#faf9f6;outline:none}
+.sb-search input:focus{border-color:#b8935a}
+.sb-body{flex:1;overflow-y:auto;padding:8px}
+.sb-body::-webkit-scrollbar{width:3px}
+.sb-body::-webkit-scrollbar-thumb{background:#d9d4cc;border-radius:2px}
+.grp-hd{padding:7px 10px;font-size:10px;letter-spacing:2px;color:#b8935a;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-radius:5px;transition:background .15s}
+.grp-hd:hover{background:#f4efe8}
+.grp-arr{font-size:8px;transition:transform .2s}
+.grp-arr.open{transform:rotate(90deg)}
+.grp-models{display:none}
+.grp-models.open{display:block}
+.sb-item{padding:7px 10px 7px 18px;font-size:12px;color:#5a4a3a;cursor:pointer;border-radius:5px;display:flex;align-items:center;gap:6px;transition:all .15s}
+.sb-item:hover{background:#f4efe8}
+.sb-item.active{background:#b8935a15;color:#b8935a;border-left:2px solid #b8935a;padding-left:16px}
+.dot{width:6px;height:6px;border-radius:50%;background:#d9d4cc;flex-shrink:0}
+.dot.green{background:#0f6e56}
+.sb-foot{padding:12px 16px;border-top:0.5px solid #e8e0d8}
+.btn-add{width:100%;padding:9px;background:#0e0d0c;color:#f7f4ef;border:none;border-radius:6px;font-family:inherit;font-size:10px;letter-spacing:2px;cursor:pointer;transition:opacity .2s}
+.btn-add:hover{opacity:.8}
+
+/* MAIN */
+.main{margin-left:324px;flex:1;padding:24px 28px;min-height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.topbar-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#8a8278}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+
+/* CARDS */
+.card{background:#fff;border:0.5px solid #d9d4cc;border-radius:10px;padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0e0d0c;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-title svg{width:14px;height:14px;color:#b8935a;flex-shrink:0}
+
+/* FORM */
+.field-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a8278;margin-bottom:4px}
+.field-group{margin-bottom:12px}
+input[type=text],input[type=number],input[type=password],select,textarea{width:100%;padding:8px 11px;border:0.5px solid #d9d4cc;border-radius:6px;font-family:inherit;font-size:13px;color:#0e0d0c;background:#faf9f6;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:#b8935a;background:#fff}
+textarea{resize:vertical;line-height:1.6}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.price-wrap{position:relative}
+.price-wrap span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#8a8278;pointer-events:none}
+.price-wrap input{padding-left:28px}
+
+/* TABS */
+.tabs{display:flex;border-bottom:0.5px solid #d9d4cc;margin-bottom:18px;gap:0}
+.tab{padding:9px 16px;font-size:11px;letter-spacing:1.5px;color:#8a8278;cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.tab.active{color:#0e0d0c;border-bottom-color:#b8935a}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* IMAGES */
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:10px}
+.img-item{position:relative;border-radius:7px;overflow:hidden;aspect-ratio:1;border:0.5px solid #d9d4cc;background:#f4efe8}
+.img-item img{width:100%;height:100%;object-fit:cover;display:block}
+.img-del{position:absolute;top:3px;right:3px;width:20px;height:20px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.img-lbl{position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.45);color:#fff;font-size:9px;padding:2px 5px;border-radius:3px}
+.drop-zone{border:1.5px dashed #c8c0b4;border-radius:8px;padding:18px;text-align:center;cursor:pointer;position:relative;background:#faf9f6;transition:all .2s}
+.drop-zone:hover,.drop-zone.over{background:#f0ebe2;border-color:#b8935a}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-text{font-size:12px;color:#8a8278}
+.url-row{display:flex;gap:8px;margin-bottom:8px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:9px 12px;text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a8278;border-bottom:0.5px solid #d9d4cc;white-space:nowrap;background:#faf9f6}
+td{padding:9px 12px;border-bottom:0.5px solid #f0ebe2;vertical-align:top;line-height:1.5}
+tr:hover td{background:#faf9f6}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:500}
+.b-green{background:#eaf3de;color:#3b6d11}
+.b-red{background:#fcebeb;color:#a32d2d}
+.b-amber{background:#faeeda;color:#854f0b}
+.b-blue{background:#e6f1fb;color:#185fa5}
+.b-gray{background:#f1efe8;color:#5f5e5a}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:6px;font-family:inherit;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .2s;border:0.5px solid transparent;text-transform:uppercase}
+.btn-dark{background:#0e0d0c;color:#f7f4ef;border-color:#0e0d0c}
+.btn-dark:hover{opacity:.8}
+.btn-dark:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:transparent;color:#5a4a3a;border-color:#c8c0b4}
+.btn-ghost:hover{border-color:#b8935a;color:#b8935a}
+.btn-sm{padding:5px 12px;font-size:10px;letter-spacing:1px}
+
+/* BOTTOM BAR */
+.bot-bar{position:sticky;bottom:0;background:#fff;border-top:0.5px solid #d9d4cc;padding:12px 0;display:flex;gap:10px;align-items:center;margin-top:8px}
+.save-st{flex:1;font-size:12px}
+.tag-ok{color:#0f6e56;font-weight:600}
+.tag-err{color:#993c1d;font-weight:600}
+.tag-info{color:#185fa5}
+
+/* INVENTORY */
+.inv-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.inv-stat-item{background:#f4efe8;border-radius:6px;padding:8px 12px;text-align:center}
+.inv-stat-num{font-size:20px;font-weight:600;color:#0e0d0c}
+.inv-stat-lbl{font-size:10px;color:#8a8278;letter-spacing:1px}
+
+/* HINT */
+.hint{font-size:11px;color:#8a8278;margin-top:3px;line-height:1.5}
+.divider{height:0.5px;background:#e8e0d8;margin:12px 0}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:#8a8278}
+.empty-icon{font-size:40px;margin-bottom:10px}
+
+/* SETTINGS */
+.settings-form .field-group{max-width:480px}
+
+/* VIDEO PREVIEW */
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;margin-top:8px}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%}
+
+/* VISIT CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cal-day{padding:8px;border-radius:6px;border:0.5px solid #d9d4cc;text-align:center;cursor:pointer;font-size:12px;transition:all .15s;background:#fff}
+.cal-day:hover{border-color:#b8935a;background:#f4efe8}
+.cal-day.has-slot{background:#eaf3de;border-color:#3b6d11;color:#3b6d11}
+.cal-day.selected{background:#b8935a;border-color:#b8935a;color:#fff}
+
+/* UPLOAD PROGRESS */
+#upload-prog{font-size:11px;color:#185fa5;margin-top:4px;min-height:16px}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="nav">
+  <div class="nav-logo">LEDOUX</div>
+  <div class="nav-item active" onclick="gotoModule(&#39;products&#39;)" title="產品目錄">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+    產品
+  </div>
+  <div class="nav-item" onclick="gotoModule(&#39;inventory&#39;)" title="庫存管理">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+    庫存
+  </div>
+<div class="nav-item" onclick="gotoModule(&#39;parts&#39;)" title="零件庫存">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 7l-9-4-9 4m18 0v10l-9 4m-9-4V7m9 4v10M3 7l9 4"></path></svg>
+      零件
+    </div>
+  <div class="nav-item" onclick="gotoModule(&#39;orders&#39;)" title="報價記錄">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+    報價
+  </div>
+  <div class="nav-item" onclick="gotoModule(&#39;samples&#39;)" title="樣品申請">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+    樣品
+  </div>
+  <div class="nav-item" onclick="gotoModule(&#39;installs&#39;)" title="安裝申請">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    安裝
+  </div>
+  <div class="nav-item" onclick="gotoModule(&#39;visits&#39;)" title="預約申請">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    預約
+  </div>
+  <div class="nav-bottom">
+    <div class="nav-item" onclick="gotoModule(&#39;settings&#39;)" title="設定">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      設定
+    </div>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR (products only) ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-title" id="sb-title">產品目錄</div>
+    <div class="sb-search"><input id="sb-search" type="text" placeholder="搜尋型號..." oninput="filterSidebar()"></div>
+  </div>
+  <div class="sb-body" id="sb-body"><div style="padding:16px;font-size:12px;color:#8a8278;text-align:center">先到「設定」填入 API 資訊後載入</div></div>
+  <div class="sb-foot"><button class="btn-add" onclick="newProduct()">＋ 新增產品</button></div>
+</aside>
+
+<!-- ══ MAIN CONTENT ══ -->
+<main class="main" id="main">
+
+<!-- ─ PRODUCTS MODULE ─ -->
+<div id="mod-products">
+  <div class="topbar">
+    <div class="topbar-title" id="prod-breadcrumb">選擇左側產品</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="loadAll()">⟳ 重新載入</button>
+    </div>
+  </div>
+  <div id="prod-empty" class="empty"><div class="empty-icon">💡</div><div>從左側選擇產品，或按「新增產品」</div></div>
+  <div id="prod-editor" style="display:none">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(&#39;spec&#39;)">基本規格</div>
+      <div class="tab" onclick="switchTab(&#39;price&#39;)">價格</div>
+      <div class="tab" onclick="switchTab(&#39;media&#39;)">圖片＆影片</div>
+      <div class="tab" onclick="switchTab(&#39;desc&#39;)">說明＆備註</div>
+    </div>
+    <!-- SPEC -->
+    <div class="tab-panel active" id="tab-spec">
+      <div class="row2" style="gap:14px">
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>識別</div>
+          <div class="row2">
+            <div class="field-group"><div class="field-label">系列</div><select id="f-series" onchange="dirty()"><option value="">—</option><option value="DC48V 磁吸軌道">DC48V 磁吸軌道</option><option value="EOS 奧斯">EOS 奧斯</option><option value="SLOT 希洛特">SLOT 希洛特</option><option value="COSY 寇斯">COSY 寇斯</option><option value="YODA 優打">YODA 優打</option><option value="YOMAX 優麥斯">YOMAX 優麥斯</option><option value="HEPBURN 赫本">HEPBURN 赫本</option><option value="METIS 墨提斯">METIS 墨提斯</option><option value="MINI 珠寶">MINI 珠寶</option><option value="BLADE 帕雷德">BLADE 帕雷德</option><option value="LINEAR 麗娜">LINEAR 麗娜</option><option value="POLA 泊拉">POLA 泊拉</option><option value="WALL LIGHT 壁燈">WALL LIGHT 壁燈</option><option value="STEP LIGHT 地腳燈">STEP LIGHT 地腳燈</option><option value="CABINET LINEAR LIGHT 高端線條燈">CABINET LINEAR LIGHT 高端線條燈</option><option value="LED STRIP LIGHT 低壓燈帶">LED STRIP LIGHT 低壓燈帶</option><option value="OUTDOOR LIGHT 戶外燈具">OUTDOOR LIGHT 戶外燈具</option><option value="VELA">VELA</option><option value="商照燈－特殊款／其他">商照燈－特殊款／其他</option><option value="鋁擠洗牆燈">鋁擠洗牆燈</option><option value="鋁條燈">鋁條燈</option><option value="燈帶">燈帶</option><option value="軟條燈">軟條燈</option><option value="線型燈－特殊款／其他">線型燈－特殊款／其他</option><option value="DC48V 磁吸軌道">DC48V 磁吸軌道</option><option value="EOS 奧斯">EOS 奧斯</option><option value="SLOT 希洛特">SLOT 希洛特</option><option value="COSY 寇斯">COSY 寇斯</option><option value="YODA 優打">YODA 優打</option><option value="YOMAX 優麥斯">YOMAX 優麥斯</option><option value="HEPBURN 赫本">HEPBURN 赫本</option><option value="METIS 墨提斯">METIS 墨提斯</option><option value="MINI 珠寶">MINI 珠寶</option><option value="BLADE 帕雷德">BLADE 帕雷德</option><option value="LINEAR 麗娜">LINEAR 麗娜</option><option value="POLA 泊拉">POLA 泊拉</option><option value="WALL LIGHT 壁燈">WALL LIGHT 壁燈</option><option value="STEP LIGHT 地腳燈">STEP LIGHT 地腳燈</option><option value="CABINET LINEAR LIGHT 高端線條燈">CABINET LINEAR LIGHT 高端線條燈</option><option value="LED STRIP LIGHT 低壓燈帶">LED STRIP LIGHT 低壓燈帶</option><option value="OUTDOOR LIGHT 戶外燈具">OUTDOOR LIGHT 戶外燈具</option><option value="VELA">VELA</option><option value="商照燈－特殊款／其他">商照燈－特殊款／其他</option><option value="鋁擠洗牆燈">鋁擠洗牆燈</option><option value="鋁條燈">鋁條燈</option><option value="燈帶">燈帶</option><option value="軟條燈">軟條燈</option><option value="線型燈－特殊款／其他">線型燈－特殊款／其他</option><option value="DC48V 磁吸軌道">DC48V 磁吸軌道</option><option value="EOS 奧斯">EOS 奧斯</option><option value="SLOT 希洛特">SLOT 希洛特</option><option value="COSY 寇斯">COSY 寇斯</option><option value="YODA 優打1代">YODA 優打1代</option><option value="YODA 優打2代">YODA 優打2代</option><option value="YOMAX 優麥斯">YOMAX 優麥斯</option><option value="HEPBURN 赫本">HEPBURN 赫本</option><option value="METIS 墨提斯">METIS 墨提斯</option><option value="MINI 珠寶">MINI 珠寶</option><option value="BLADE 帕雷德">BLADE 帕雷德</option><option value="LINEAR 麗娜">LINEAR 麗娜</option><option value="POLA 泊拉">POLA 泊拉</option><option value="WALL LIGHT 壁燈">WALL LIGHT 壁燈</option><option value="STEP LIGHT 地腳燈">STEP LIGHT 地腳燈</option><option value="CABINET LINEAR LIGHT 高端線條燈">CABINET LINEAR LIGHT 高端線條燈</option><option value="LED STRIP LIGHT 低壓燈帶">LED STRIP LIGHT 低壓燈帶</option><option value="OUTDOOR LIGHT 戶外燈具">OUTDOOR LIGHT 戶外燈具</option><option value="VELA">VELA</option><option value="商照燈－特殊款／其他">商照燈－特殊款／其他</option><option value="鋁擠洗牆燈">鋁擠洗牆燈</option><option value="鋁條燈">鋁條燈</option><option value="燈帶">燈帶</option><option value="軟條燈">軟條燈</option><option value="線型燈－特殊款／其他">線型燈－特殊款／其他</option></select></div>
+            <div class="field-group"><div class="field-label">型號</div><input type="text" id="f-model" oninput="dirty()"></div>
+          </div>
+          <div class="row2">
+            <div class="field-group"><div class="field-label">型錄分類</div><select id="f-catalog" onchange="dirty()"><option value="商照燈">商照燈</option><option value="線型燈">線型燈</option></select></div>
+            <div class="field-group"><div class="field-label">燈具類型</div><select id="f-category" onchange="dirty()"><option>崁燈</option><option>軌道燈</option><option>吸頂燈</option><option>磁吸系統</option><option>壁燈</option><option>地腳燈</option><option>戶外燈</option><option>鋁條燈</option><option>矽膠燈帶</option><option>燈帶</option><option>洗牆燈</option><option>軟條燈</option><option>特殊款</option></select></div>
+          </div>
+          <div class="field-group"><div class="field-label">銷售狀態</div><select id="f-status" onchange="dirty()"><option value="銷售中">銷售中</option><option value="停產">停產</option><option value="客製">客製</option><option value="預購">預購</option></select></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>光學</div>
+          <div class="row3">
+            <div class="field-group"><div class="field-label">瓦數</div><input type="text" id="f-watt" placeholder="10W" oninput="dirty()"></div>
+            <div class="field-group"><div class="field-label">流明</div><input type="text" id="f-lumen" placeholder="680lm" oninput="dirty()"></div>
+            <div class="field-group"><div class="field-label">演色性</div><input type="text" id="f-cri" placeholder="Ra≥90" oninput="dirty()"></div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">色溫 <span style="font-size:9px;color:#b8935a;font-weight:400;letter-spacing:0">(用 / 分隔，若全系列可輸入「色溫可生產」)</span></div>
+            <input type="text" id="f-cct" placeholder="2700K/3000K/4000K 或 色溫可生產" oninput="dirty()">
+            <div class="hint">客戶端會自動出現各色溫按鈕＋「其他色溫」自填欄位</div>
+          </div>
+          <div class="row2">
+            <div class="field-group">
+              <div class="field-label">光束角 <span style="font-size:9px;color:#b8935a;font-weight:400;letter-spacing:0">(用 / 分隔)</span></div>
+              <input type="text" id="f-beam" placeholder="15°/24°/36°/50°" oninput="dirty()">
+              <div class="hint">客戶端會顯示各角度按鈕＋「其他」自填欄位</div>
+            </div>
+            <div class="field-group"><div class="field-label">電壓</div><input type="text" id="f-voltage" placeholder="220V" oninput="dirty()"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>尺寸＆安裝</div>
+        <div class="row4">
+          <div class="field-group"><div class="field-label">開孔尺寸</div><input type="text" id="f-cutout" oninput="dirty()"></div>
+          <div class="field-group"><div class="field-label">產品尺寸</div><input type="text" id="f-size" oninput="dirty()"></div>
+          <div class="field-group"><div class="field-label">安裝方式</div><input type="text" id="f-install" oninput="dirty()"></div>
+          <div class="field-group">
+            <div class="field-label">燈體顏色（外框）<span style="font-size:9px;color:#b8935a;font-weight:400;letter-spacing:0"> (用 / 分隔)</span></div>
+            <input type="text" id="f-color" placeholder="白色/黑色/金色" oninput="dirty()">
+            <div class="hint">客戶端會顯示各顏色按鈕，並分為外框色與內框色兩組，各有「其他」自填欄位</div>
+          </div>
+        </div>
+        <div class="field-group"><div class="field-label">認證</div><input type="text" id="f-cert" placeholder="CE/3C/IP67" oninput="dirty()"></div>
+      </div>
+    </div>
+    <!-- PRICE -->
+    <div class="tab-panel" id="tab-price">
+      <div class="card">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>價格設定</div>
+        <div class="row3">
+          <div class="field-group"><div class="field-label">標準牌價（NT$）</div><div class="price-wrap"><span>$</span><input type="number" id="f-stdPrice" min="0" oninput="dirty();calcDiscount()"></div></div>
+          <div class="field-group"><div class="field-label">專案價（NT$）</div><div class="price-wrap"><span>$</span><input type="number" id="f-projPrice" min="0" oninput="dirty();calcDiscount()"></div><div class="hint">0 = 不顯示</div></div>
+          <div class="field-group"><div class="field-label">運費（NT$）</div><div class="price-wrap"><span>$</span><input type="number" id="f-shipping" min="0" oninput="dirty()"></div></div>
+        </div>
+        <div style="background:#f4efe8;border-radius:6px;padding:10px 14px;font-size:12px;color:#5a4a3a" id="discount-info">輸入牌價與專案價後自動計算折扣率</div>
+      </div>
+    </div>
+    <!-- MEDIA -->
+    <div class="tab-panel" id="tab-media">
+      <div class="card">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>產品圖片</div>
+        <div id="img-grid" class="img-grid"></div>
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" multiple="" accept="image/*" onchange="onFilePick(event)">
+          <div style="font-size:22px;margin-bottom:4px">📷</div>
+          <div class="drop-text">點擊或拖曳上傳（自動上傳至 imgbb）</div>
+          <div id="upload-prog"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="field-label" style="margin-bottom:6px">貼上圖片網址</div>
+        <div class="url-row">
+          <input type="text" id="manual-img-url" placeholder="https://..." onkeydown="if(event.key===&#39;Enter&#39;)addImgUrl()">
+          <button class="btn btn-dark btn-sm" onclick="addImgUrl()">新增</button>
+        </div>
+        <div class="hint">拖曳圖片可調整順序，第一張為主圖</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>YouTube 影片</div>
+        <div class="field-group"><div class="field-label">影片連結</div><input type="text" id="f-video" placeholder="https://www.youtube.com/watch?v=..." oninput="dirty();previewYt()"></div>
+        <div id="yt-preview" style="display:none"><div class="video-wrap"><iframe id="yt-iframe" frameborder="0" allowfullscreen="" src="./LEDOUX 後台管理系統_files/saved_resource.html"></iframe></div></div>
+      </div>
+    </div>
+    <!-- DESC -->
+    <div class="tab-panel" id="tab-desc">
+      <div class="card">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>說明＆備註</div>
+        <div class="field-group"><div class="field-label">產品描述（官網顯示）</div><textarea id="f-desc" rows="4" oninput="dirty()"></textarea></div>
+        <div class="field-group"><div class="field-label">安裝說明＆備註</div><textarea id="f-note" rows="5" placeholder="安裝注意事項、配件選項、特殊規格說明..." oninput="dirty()"></textarea></div>
+      </div>
+    </div>
+    <div class="bot-bar">
+      <button class="btn btn-dark" id="prod-save-btn" onclick="saveProduct()" disabled="">儲存變更</button>
+      <button class="btn btn-ghost" onclick="newProduct()">＋ 新增</button>
+      <div class="save-st" id="prod-save-st"></div>
+    </div>
+  </div>
+</div>
+
+<!-- —— PARTS MODULE —— -->
+<div id="mod-parts" style="display:none">
+  <div class="topbar">
+    <div class="topbar-title">零件庫存</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="loadParts()">↻ 重新載入</button>
+      <button class="btn btn-dark btn-sm" onclick="openPartEditor(null)">＋ 新增零件</button>
+    </div>
+  </div>
+  <div class="card">
+<div style="margin-bottom:12px;">
+  <select id="parts-series-filter" onchange="renderPartsTable()" style="padding:6px 12px;border:1px solid #ddd;font-size:13px;">
+    <option value="">全部系列</option>
+    <option value="DC48V 磁吸軌道">DC48V 磁吸軌道</option>
+    <option value="HEPBURN 赫本">HEPBURN 赫本</option>
+    <option value="BLADE 帕雷德">BLADE 帕雷德</option>
+    <option value="METIS 墨提斯">METIS 墨提斯</option>
+    <option value="YODA 優打1代">YODA 優打1代</option>
+    <option value="YODA 優打2代">YODA 優打2代</option>
+    <option value="EOS 奧斯">EOS 奧斯</option>
+    <option value="鋁條燈">鋁條燈</option>
+    <option value="燈帶">燈帶</option>
+  </select>
+</div>
+    <div id="parts-table-wrap">載入中...</div>
+  </div>
+</div>
+
+<!-- 零件編輯器 Modal -->
+<div id="part-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:32px;min-width:420px;max-width:560px;width:90%;">
+    <h3 style="margin-bottom:20px;font-size:14px;letter-spacing:2px;">零件資料</h3>
+    <div class="field-group"><div class="field-label">零件類別</div>
+      <select id="pe-type" style="width:100%;padding:8px;border:1px solid #ddd;">
+        <option value="色溫">色溫</option>
+        <option value="光束角">光束角</option>
+        <option value="外框顏色">外框顏色</option>
+        <option value="內框顏色">內框顏色</option>
+        <option value="配件">配件</option>
+      </select>
+    </div>
+    <div class="field-group"><div class="field-label">零件名稱</div><input id="pe-name" type="text" placeholder="例：2700K、15°、黑色、蜂巢網"></div>
+    <div class="field-group"><div class="field-label">庫存數量</div><input id="pe-stock" type="number" min="0" value="0"></div>
+   <div class="field-group"><div class="field-label">適用系列</div>
+<div id="pe-usedby-wrap" style="border:1px solid #ddd;padding:10px;max-height:160px;overflow-y:auto;">
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="全部系列"> 全部系列</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="DC48V 磁吸軌道"> DC48V 磁吸軌道</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="EOS 奧斯"> EOS 奧斯</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="HEPBURN 赫本"> HEPBURN 赫本</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="BLADE 帕雷德"> BLADE 帕雷德</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="METIS 墨提斯"> METIS 墨提斯</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="YODA 優打1代"> YODA 優打1代</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="YODA 優打2代"> YODA 優打2代</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="YOMAX 優麥斯"> YOMAX 優麥斯</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="MINI 珠寶"> MINI 珠寶</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="鋁條燈"> 鋁條燈</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="燈帶"> 燈帶</label>
+  <label style="display:block;margin-bottom:6px;"><input type="checkbox" value="軟條燈"> 軟條燈</label>
+</div></div>
+    <div class="field-group"><div class="field-label">備註</div><input id="pe-note" type="text"></div>
+    <input type="hidden" id="pe-id">
+    <div style="display:flex;gap:8px;margin-top:24px;">
+      <button class="btn btn-dark" onclick="savePart()">儲存</button>
+      <button class="btn btn-ghost" onclick="closePartModal()">取消</button>
+      <button class="btn" style="margin-left:auto;color:#c00;" onclick="deletePart()">刪除</button>
+    </div>
+  </div>
+</div>
+<!-- ─ INVENTORY MODULE ─ -->
+<div id="mod-inventory" style="display:none">
+  <div class="topbar">
+    <div class="topbar-title">庫存管理</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="loadInventory()">⟳ 重新載入</button>
+      <button class="btn btn-dark btn-sm" onclick="openInvEditor(null)">＋ 新增庫存</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <input type="text" id="inv-search" placeholder="搜尋型號/系列..." style="max-width:220px;margin:0" oninput="renderInvTable()">
+      <select id="inv-filter" style="max-width:160px;margin:0" onchange="renderInvTable()">
+        <option value="">全部庫存狀態</option>
+        <option value="ok">有庫存</option>
+        <option value="low">偏低（≤5）</option>
+        <option value="zero">無庫存</option>
+      </select>
+    </div>
+    <div class="tbl-wrap"><table id="inv-table"><thead><tr><th>型號</th><th>系列</th><th>色溫</th><th>顏色</th><th>總庫存</th><th>已保留</th><th>可調貨</th><th>儲位</th><th>更新日期</th><th>備註</th><th style="width:120px">操作</th></tr></thead><tbody id="inv-tbody"></tbody></table></div>
+  </div>
+
+<!-- INV EDITOR MODAL -->
+  <div id="inv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;padding:24px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="card-title" style="margin:0" id="inv-modal-title">庫存資料</div>
+        <button onclick="closeInvModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#8a8278">✕</button>
+      </div>
+
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">系列</div>
+          <select id="inv-series" style="margin:0" onchange="onInvSeriesChange()">
+            <option value="">— 選擇系列 —</option>
+          <option value="DC48V 磁吸軌道">DC48V 磁吸軌道</option><option value="EOS 奧斯">EOS 奧斯</option><option value="SLOT 希洛特">SLOT 希洛特</option><option value="COSY 寇斯">COSY 寇斯</option><option value="YODA 優打1代">YODA 優打1代</option><option value="YODA 優打2代">YODA 優打2代</option><option value="YOMAX 優麥斯">YOMAX 優麥斯</option><option value="HEPBURN 赫本">HEPBURN 赫本</option><option value="METIS 墨提斯">METIS 墨提斯</option><option value="MINI 珠寶">MINI 珠寶</option><option value="BLADE 帕雷德">BLADE 帕雷德</option><option value="LINEAR 麗娜">LINEAR 麗娜</option><option value="POLA 泊拉">POLA 泊拉</option><option value="WALL LIGHT 壁燈">WALL LIGHT 壁燈</option><option value="STEP LIGHT 地腳燈">STEP LIGHT 地腳燈</option><option value="CABINET LINEAR LIGHT 高端線條燈">CABINET LINEAR LIGHT 高端線條燈</option><option value="LED STRIP LIGHT 低壓燈帶">LED STRIP LIGHT 低壓燈帶</option><option value="OUTDOOR LIGHT 戶外燈具">OUTDOOR LIGHT 戶外燈具</option><option value="VELA">VELA</option><option value="商照燈－特殊款／其他">商照燈－特殊款／其他</option><option value="鋁擠洗牆燈">鋁擠洗牆燈</option><option value="鋁條燈">鋁條燈</option><option value="燈帶">燈帶</option><option value="軟條燈">軟條燈</option><option value="線型燈－特殊款／其他">線型燈－特殊款／其他</option></select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">型號</div>
+          <input type="text" id="inv-model" style="margin:0" placeholder="例：A10524365">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">燈具類型</div>
+          <select id="inv-cat" style="margin:0">
+            <option>崁燈</option><option>軌道燈</option><option>吸頂燈</option>
+            <option>磁吸系統</option><option>鋁條燈</option><option>燈帶</option>
+            <option>洗牆燈</option><option>其他</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">計量單位（線型燈填「公尺」）</div>
+          <input type="text" id="inv-unit" placeholder="盞" style="margin:0">
+        </div>
+      </div>
+
+      <div id="inv-parts-section" style="display:none;margin-top:4px">
+        <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#b8935a;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid #e8e0d8">
+          ▼ 選擇此型號包含哪些規格零件
+        </div>
+        <div id="inv-parts-list" style="display:flex;flex-direction:column;gap:14px"></div>
+        <div style="font-size:11px;color:#8a8278;margin-top:8px">💡 可複選多個規格，每個規格可填自己的庫存數量</div>
+      </div>
+
+      <div id="inv-manual-section" style="display:none;margin-top:4px">
+        <div style="font-size:10px;color:#8a8278;margin-bottom:8px">此系列目前無零件資料，請手動填寫</div>
+        <div class="row2">
+          <div class="field-group"><div class="field-label">色溫</div><input type="text" id="inv-cct-manual" placeholder="2700K" style="margin:0"></div>
+          <div class="field-group"><div class="field-label">光束角</div><input type="text" id="inv-beam-manual" placeholder="24°" style="margin:0"></div>
+        </div>
+        <div class="row3">
+          <div class="field-group"><div class="field-label">總庫存</div><input type="number" id="inv-total" min="0" style="margin:0"></div>
+          <div class="field-group"><div class="field-label">已保留</div><input type="number" id="inv-reserved" min="0" style="margin:0"></div>
+          <div class="field-group"><div class="field-label">可調貨</div><input type="number" id="inv-avail" min="0" style="margin:0" readonly=""></div>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-top:12px">
+        <div class="field-group"><div class="field-label">儲位</div><input type="text" id="inv-location" placeholder="桃園倉 A-01" style="margin:0"></div>
+        <div class="field-group"><div class="field-label">更新日期</div><input type="text" id="inv-date" style="margin:0"></div>
+      </div>
+      <div class="field-group"><div class="field-label">備註</div><textarea id="inv-note" rows="2" style="margin:0"></textarea></div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-dark" onclick="saveInv()" style="flex:1">儲存庫存</button>
+        <button class="btn btn-ghost" onclick="closeInvModal()">取消</button>
+      </div>
+      <div id="inv-save-st" style="font-size:12px;margin-top:8px"></div>
+    </div>
+  </div>
+
+<!-- ─ ORDERS MODULE ─ -->
+<div id="mod-orders" style="display:none">
+  <div class="topbar"><div class="topbar-title">報價記錄</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="loadOrders()">⟳ 重新載入</button></div></div>
+  <div class="card">
+    <input type="text" id="ord-search" placeholder="搜尋聯繫人/公司/案名..." style="max-width:280px;margin-bottom:12px" oninput="renderOrderTable()">
+    <div class="tbl-wrap"><table><thead><tr><th>報價單號</th><th>日期</th><th>聯繫人</th><th>公司</th><th>案名</th><th>折扣</th><th>含稅總價</th><th>VIP</th></tr></thead><tbody id="ord-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ─ SAMPLES MODULE ─ -->
+<div id="mod-samples" style="display:none">
+  <div class="topbar"><div class="topbar-title">樣品申請</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="loadSamples()">⟳ 重新載入</button></div></div>
+  <div class="card">
+    <div class="tbl-wrap"><table><thead><tr><th>申請編號</th><th>日期</th><th>聯繫人</th><th>公司</th><th>電話</th><th>地址</th><th>申請品項</th><th>狀態</th><th>備註</th></tr></thead><tbody id="samp-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ─ INSTALLS MODULE ─ -->
+<div id="mod-installs" style="display:none">
+  <div class="topbar"><div class="topbar-title">安裝申請</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="loadInstalls()">⟳ 重新載入</button></div></div>
+  <div class="card">
+    <div class="tbl-wrap"><table><thead><tr><th>申請編號</th><th>日期</th><th>聯繫人</th><th>公司</th><th>服務區域</th><th>崁燈盞數</th><th>線型米數</th><th>預估費用</th><th>狀態</th></tr></thead><tbody id="inst-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ─ VISITS MODULE ─ -->
+<div id="mod-visits" style="display:none">
+  <div class="topbar"><div class="topbar-title">預約申請</div><div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="loadVisits()">⟳ 重新載入</button></div></div>
+  <div class="card">
+    <div class="tbl-wrap"><table><thead><tr><th>申請編號</th><th>申請日期</th><th>預約日期</th><th>時段</th><th>聯繫人</th><th>公司</th><th>電話</th><th>感興趣系列</th><th>指定型號</th><th>狀態</th></tr></thead><tbody id="visit-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ─ SETTINGS MODULE ─ -->
+<div id="mod-settings" style="display:none">
+  <div class="topbar"><div class="topbar-title">系統設定</div></div>
+  <div class="card settings-form" style="max-width:520px">
+    <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>API 連線</div>
+    <div class="field-group"><div class="field-label">Google Apps Script URL</div><input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/..." oninput="saveSettings()"></div>
+    <div class="field-group"><div class="field-label">imgbb API Key（上傳圖片用）</div><input type="password" id="cfg-imgbb" placeholder="e839f19ca87063..." oninput="saveSettings()"><div class="hint">到 api.imgbb.com 取得免費 Key</div></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-dark" onclick="loadAll()">連線並載入資料</button>
+    </div>
+    <div id="cfg-st" style="font-size:12px;margin-top:8px"><span class="tag-err">✗ Failed to fetch</span></div>
+  </div>
+</div>
+
+</div></main>
+
+<script>
+// ══ STATE ══
+const SERIES_LIST=["DC48V 磁吸軌道","EOS 奧斯","SLOT 希洛特","COSY 寇斯","YODA 優打1代","YODA 優打2代","YOMAX 優麥斯","HEPBURN 赫本","METIS 墨提斯","MINI 珠寶","BLADE 帕雷德","LINEAR 麗娜","POLA 泊拉","WALL LIGHT 壁燈","STEP LIGHT 地腳燈","CABINET LINEAR LIGHT 高端線條燈","LED STRIP LIGHT 低壓燈帶","OUTDOOR LIGHT 戶外燈具","VELA","商照燈－特殊款／其他","鋁擠洗牆燈","鋁條燈","燈帶","軟條燈","線型燈－特殊款／其他"];
+let allProducts=[],allInventory=[],allOrders=[],allSamples=[],allInstalls=[],allVisits=[];
+let curProduct=null,imgUrls=[],isDirty=false,curModule='products';
+let editingInv=null;
+
+// ══ INIT ══
+const _URL='https://script.google.com/macros/s/AKfycbylNuQW2ADr6behwvzj95GwTeGnFfkH-PQKe7M2jomgPMW1d1x7e2LkNHhDU7TvIKQyNg/exec';
+const _KEY='e839f19ca87063763e8e6b4699d9f83f';
+window.onload=function(){
+  document.getElementById('cfg-url').value=_URL;
+  document.getElementById('cfg-imgbb').value=_KEY;
+  [document.getElementById('f-series'),document.getElementById('inv-series')].forEach(sel=>{
+    SERIES_LIST.forEach(s=>sel.innerHTML+=`<option value="${s}">${s}</option>`);
+  });
+  setupDrop();
+  loadAll();
+};
+function getUrl(){return _URL;}
+function getKey(){return _KEY;}
+function saveSettings(){}
+
+// ══ MODULE ROUTING ══
+function gotoModule(m){
+  curModule=m;
+  document.querySelectorAll('.nav-item').forEach((el,i)=>{
+    el.classList.toggle('active',['products','inventory','parts','orders','samples','installs','visits','settings'][i]===m);
+  });
+  ['products','inventory','parts','orders','samples','installs','visits','settings'].forEach(id=>{
+    document.getElementById('mod-'+id).style.display=id===m?'block':'none';
+  });
+  const sidebar=document.getElementById('sidebar');
+  sidebar.style.display=m==='products'?'flex':'none';
+  document.getElementById('main').style.marginLeft=m==='products'?'324px':'64px';
+  if(m==='inventory'&&allInventory.length===0)loadInventory();
+if(m==='parts'&&allParts.length===0)loadParts();
+  if(m==='orders'&&allOrders.length===0)loadOrders();
+  if(m==='samples'&&allSamples.length===0)loadSamples();
+  if(m==='installs'&&allInstalls.length===0)loadInstalls();
+  if(m==='visits'&&allVisits.length===0)loadVisits();
+}
+
+// ══ LOAD ALL ══
+// ==== PARTS ====
+let allParts = [];
+async function loadParts() {
+  const url = getUrl();
+  if (!url) return;
+  const res = await fetch(url + '?action=getParts');
+  const json = await res.json();
+  allParts = json.success ? json.data : [];
+  renderPartsTable();
+}
+function renderPartsTable() {
+  const wrap = document.getElementById('parts-table-wrap');
+  if (!allParts.length) { wrap.innerHTML = '<p style="color:#999;padding:16px;">尚無零件資料</p>'; return; }
+  const seriesFilter = document.getElementById('parts-series-filter')?.value || '';
+const filtered = seriesFilter ? allParts.filter(p => {
+  const s = Array.isArray(p['適用產品']) ? p['適用產品'].join('/') : String(p['適用產品']||'');
+  return s.includes(seriesFilter);
+}) : allParts;
+let rows = filtered.map(p => `<tr>
+    <td>${p['編號']||''}</td>
+    <td>${p['零件類別']||''}</td>
+    <td><b>${p['零件名稱']||''}</b></td>
+    <td>${p['庫存數量']||0}</td>
+    <td style="font-size:11px;color:#999;">${Array.isArray(p['適用產品'])?p['適用產品'].join(', '):p['適用產品']||''}</td>
+    <td>${p['備註']||''}</td>
+    <td><button class="btn btn-sm btn-ghost" onclick="openPartEditor(${allParts.indexOf(p)})">編輯</button></td>
+  </tr>`).join('');
+  wrap.innerHTML = `<table class="tbl-inv"><thead><tr><th>編號</th><th>類別</th><th>名稱</th><th>庫存</th><th>適用產品</th><th>備註</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function openPartEditor(idx) {
+  const p = idx !== null ? allParts[idx] : {};
+  document.getElementById('pe-id').value = p['編號'] || '';
+  document.getElementById('pe-type').value = p['零件類別'] || '色溫';
+  document.getElementById('pe-name').value = p['零件名稱'] || '';
+  document.getElementById('pe-stock').value = p['庫存數量'] || 0;
+const usedBy = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(s=>s.trim());
+document.querySelectorAll('#pe-usedby-wrap input').forEach(cb => { cb.checked = usedBy.includes(cb.value); });
+  document.getElementById('pe-note').value = p['備註'] || '';
+  document.getElementById('part-modal').style.display = 'flex';
+}
+function closePartModal() {
+  document.getElementById('part-modal').style.display = 'none';
+}
+async function savePart() {
+  const url = getUrl(); if (!url) return;
+  const data = {
+    編號: document.getElementById('pe-id').value || 'p' + Date.now(),
+    零件類別: document.getElementById('pe-type').value,
+    零件名稱: document.getElementById('pe-name').value,
+    庫存數量: Number(document.getElementById('pe-stock').value),
+    適用產品: Array.from(document.querySelectorAll('#pe-usedby-wrap input:checked')).map(cb=>cb.value).join(','),
+    備註: document.getElementById('pe-note').value,
+  };
+  await fetch(url + '?action=savePart&payload=' + encodeURIComponent(JSON.stringify(data)));
+  closePartModal();
+  allParts = [];
+  loadParts();
+}
+async function deletePart() {
+  if (!confirm('確定刪除此零件？')) return;
+  const url = getUrl(); if (!url) return;
+  const id = document.getElementById('pe-id').value;
+  await fetch(url + '?action=deletePart&payload=' + encodeURIComponent(JSON.stringify({編號: id})));
+  closePartModal();
+  allParts = [];
+  loadParts();
+}
+async function loadAll(){
+  const url=getUrl();
+  if(!url){alert('請先到「設定」填入 Apps Script URL');gotoModule('settings');return;}
+  const st=document.getElementById('cfg-st');
+  st.innerHTML='<span class="tag-info">載入中...</span>';
+  try{
+    const res=await fetch(url+'?action=getProducts');
+    const json=await res.json();
+    if(!json.success)throw new Error(json.error||'失敗');
+    allProducts=json.data||[];
+    renderSidebar(allProducts);
+    st.innerHTML=`<span class="tag-ok">✓ 已載入 ${allProducts.length} 筆產品</span>`;
+  }catch(e){st.innerHTML=`<span class="tag-err">✗ ${e.message}</span>`;}
+}
+
+// ══ SIDEBAR ══
+function renderSidebar(products){
+  const body=document.getElementById('sb-body');
+  const groups={};
+  products.forEach(p=>{if(!groups[p.series])groups[p.series]=[];groups[p.series].push(p);});
+  body.innerHTML='';
+  Object.keys(groups).sort().forEach(s=>{
+    const div=document.createElement('div');
+    const key='grp_'+s.replace(/[^a-zA-Z0-9]/g,'_');
+    div.innerHTML=`<div class="grp-hd" onclick="toggleGrp('${key}')"><span>${s} <small style="color:#8a8278">(${groups[s].length})</small></span><span class="grp-arr" id="arr_${key}">▶</span></div>
+    <div class="grp-models" id="${key}">${groups[s].map(p=>{
+      const hasImg=Array.isArray(p.images)?p.images.filter(Boolean).length>0:(p.images&&String(p.images).trim().length>0);
+      return`<div class="sb-item" id="si_${p.id}" onclick="selectProduct('${p.id}')"><div class="dot${hasImg?' green':''}"></div>${p.model}</div>`;
+    }).join('')}</div>`;
+    body.appendChild(div);
+  });
+}
+function toggleGrp(key){
+  document.getElementById(key).classList.toggle('open');
+  document.getElementById('arr_'+key).classList.toggle('open');
+}
+function filterSidebar(){
+  const q=document.getElementById('sb-search').value.toLowerCase();
+  renderSidebar(q?allProducts.filter(p=>p.model.toLowerCase().includes(q)||p.series.toLowerCase().includes(q)):allProducts);
+  if(q){document.querySelectorAll('.grp-models').forEach(el=>el.classList.add('open'));document.querySelectorAll('.grp-arr').forEach(el=>el.classList.add('open'));}
+}
+
+// ══ PRODUCT EDITOR ══
+function selectProduct(id){
+  if(isDirty&&!confirm('有未儲存的變更，確定切換？'))return;
+  curProduct=allProducts.find(p=>String(p.id)===String(id));
+  if(!curProduct)return;
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const si=document.getElementById('si_'+id);if(si)si.classList.add('active');
+  loadProdEditor(curProduct);
+  isDirty=false;document.getElementById('prod-save-btn').disabled=true;document.getElementById('prod-save-st').innerHTML='';
+}
+
+function loadProdEditor(p){
+  document.getElementById('prod-empty').style.display='none';
+  document.getElementById('prod-editor').style.display='block';
+  document.getElementById('prod-breadcrumb').textContent=`${p.series} / ${p.model}`;
+  const fv=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+  fv('f-series',p.series);fv('f-model',p.model);fv('f-catalog',p.catalog||'商照燈');
+  fv('f-category',p.category);fv('f-status',p.status||'銷售中');
+  fv('f-watt',p.watt);fv('f-lumen',p.lumen);fv('f-cri',p.cri);
+  fv('f-cct',p.cct);fv('f-beam',p.beam);fv('f-voltage',p.voltage);
+  fv('f-cutout',p.cutout);fv('f-size',p.size);fv('f-install',p.install);
+  fv('f-color',p.color);fv('f-cert',p.cert);
+  fv('f-stdPrice',p.stdPrice||'');fv('f-projPrice',p.projPrice||'');fv('f-shipping',p.shipping||'');
+  fv('f-desc',p.desc);fv('f-note',p.note);fv('f-video',p.video);
+  imgUrls=Array.isArray(p.images)?p.images.filter(Boolean):(p.images?String(p.images).split('\n').filter(Boolean):[]);
+  renderImgGrid();calcDiscount();previewYt();
+}
+
+function newProduct(){
+  if(isDirty&&!confirm('有未儲存的變更？'))return;
+  curProduct=null;imgUrls=[];
+  document.getElementById('prod-empty').style.display='none';
+  document.getElementById('prod-editor').style.display='block';
+  document.getElementById('prod-breadcrumb').textContent='新增產品';
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  ['f-model','f-watt','f-lumen','f-cri','f-cct','f-beam','f-voltage','f-cutout','f-size','f-install','f-color','f-cert','f-desc','f-note','f-video'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-series').value='';document.getElementById('f-catalog').value='商照燈';
+  document.getElementById('f-category').value='崁燈';document.getElementById('f-status').value='銷售中';
+  document.getElementById('f-stdPrice').value='';document.getElementById('f-projPrice').value='';document.getElementById('f-shipping').value='90';
+  renderImgGrid();switchTab('spec');
+  isDirty=false;document.getElementById('prod-save-btn').disabled=false;document.getElementById('prod-save-st').innerHTML='';
+}
+
+function switchTab(t){
+  ['spec','price','media','desc'].forEach((id,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('active',id===t);
+    document.getElementById('tab-'+id).classList.toggle('active',id===t);
+  });
+}
+function dirty(){isDirty=true;document.getElementById('prod-save-btn').disabled=false;}
+function calcDiscount(){
+  const s=Number(document.getElementById('f-stdPrice').value),p=Number(document.getElementById('f-projPrice').value);
+  const el=document.getElementById('discount-info');
+  el.innerHTML=s>0&&p>0?`專案價為牌價的 <strong>${Math.round(p/s*100)}%</strong>，節省 NT$${(s-p).toLocaleString()}`:'輸入牌價與專案價後自動計算折扣率';
+}
+
+// ── IMAGES ──
+function renderImgGrid(){
+  const grid=document.getElementById('img-grid');
+  grid.innerHTML=imgUrls.length===0?'':(imgUrls.map((u,i)=>`
+    <div class="img-item" draggable="true" ondragstart="dstart(${i})" ondragover="dov(event)" ondrop="ddrop(event,${i})">
+      <img src="${u}" onerror="this.style.display='none'">
+      <button class="img-del" onclick="removeImg(${i})">✕</button>
+      <div class="img-lbl">${i===0?'主圖':(i+1)}</div>
+    </div>`).join(''));
+  dirty();
+}
+function removeImg(i){imgUrls.splice(i,1);renderImgGrid();}
+function addImgUrl(){const inp=document.getElementById('manual-img-url'),u=inp.value.trim();if(!u||!u.startsWith('http'))return;imgUrls.push(u);inp.value='';renderImgGrid();}
+let dIdx=null;
+function dstart(i){dIdx=i;}
+function dov(e){e.preventDefault();}
+function ddrop(e,i){e.preventDefault();if(dIdx===null||dIdx===i)return;const m=imgUrls.splice(dIdx,1)[0];imgUrls.splice(i,0,m);dIdx=null;renderImgGrid();}
+
+function setupDrop(){
+  const dz=document.getElementById('drop-zone');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');uploadFiles(Array.from(e.dataTransfer.files));});
+}
+function onFilePick(e){uploadFiles(Array.from(e.target.files));e.target.value='';}
+async function uploadFiles(files){
+  const key=getKey();if(!key){alert('請先在「設定」填入 imgbb API Key');return;}
+  const prog=document.getElementById('upload-prog');
+  for(let i=0;i<files.length;i++){
+    const f=files[i];prog.innerHTML=`上傳中 ${i+1}/${files.length}：${f.name}...`;
+    try{
+      const fd=new FormData();fd.append('image',f);
+      const r=await fetch(`https://api.imgbb.com/1/upload?key=${key}`,{method:'POST',body:fd});
+      const j=await r.json();if(!j.success)throw new Error(j.error?.message||'失敗');
+      imgUrls.push(j.data.url);renderImgGrid();
+      prog.innerHTML=`<span class="tag-ok">✓ ${f.name}</span>`;
+    }catch(e){prog.innerHTML=`<span class="tag-err">✗ ${f.name}：${e.message}</span>`;}
+  }
+  setTimeout(()=>prog.innerHTML='',3000);
+}
+
+function previewYt(){
+  const u=document.getElementById('f-video').value.trim();
+  const prev=document.getElementById('yt-preview'),iframe=document.getElementById('yt-iframe');
+  const m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?/]+)/);
+  if(m){iframe.src=`https://www.youtube.com/embed/${m[1]}`;prev.style.display='';}
+  else{prev.style.display='none';}
+}
+
+// ── SAVE PRODUCT ──
+async function saveProduct(){
+  const url=getUrl();if(!url)return;
+  const btn=document.getElementById('prod-save-btn'),st=document.getElementById('prod-save-st');
+  btn.disabled=true;btn.textContent='儲存中...';st.innerHTML='<span class="tag-info">更新中...</span>';
+  const p={
+    id:curProduct?.id||('NEW_'+Date.now()),
+    catalog:document.getElementById('f-catalog').value,series:document.getElementById('f-series').value,
+    model:document.getElementById('f-model').value.trim(),category:document.getElementById('f-category').value,
+    status:document.getElementById('f-status').value,watt:document.getElementById('f-watt').value.trim(),
+    lumen:document.getElementById('f-lumen').value.trim(),cct:document.getElementById('f-cct').value.trim(),
+    beam:document.getElementById('f-beam').value.trim(),voltage:document.getElementById('f-voltage').value.trim(),
+    cri:document.getElementById('f-cri').value.trim(),color:document.getElementById('f-color').value.trim(),
+    cutout:document.getElementById('f-cutout').value.trim(),size:document.getElementById('f-size').value.trim(),
+    install:document.getElementById('f-install').value.trim(),cert:document.getElementById('f-cert').value.trim(),
+    stdPrice:Number(document.getElementById('f-stdPrice').value)||0,
+    projPrice:Number(document.getElementById('f-projPrice').value)||0,
+    shipping:Number(document.getElementById('f-shipping').value)||90,
+    desc:document.getElementById('f-desc').value.trim(),note:document.getElementById('f-note').value.trim(),
+    images:imgUrls.join('\n'),video:document.getElementById('f-video').value.trim()
+  };
+  try{
+    const res=await fetch(`${url}?action=upsertProduct&payload=${encodeURIComponent(JSON.stringify(p))}`);
+    const j=await res.json();if(!j.success)throw new Error(j.error||'失敗');
+    const idx=allProducts.findIndex(x=>String(x.id)===String(p.id));
+    const stored={...p,images:imgUrls};
+    if(idx>=0)allProducts[idx]=stored;else allProducts.push(stored);
+    curProduct=stored;
+    renderSidebar(allProducts);
+    const si=document.getElementById('si_'+p.id);if(si)si.classList.add('active');
+    document.getElementById('prod-breadcrumb').textContent=`${p.series} / ${p.model}`;
+    isDirty=false;st.innerHTML=`<span class="tag-ok">✓ 已儲存 — ${p.series} / ${p.model}</span>`;
+    setTimeout(()=>{if(!isDirty)st.innerHTML='';},5000);
+  }catch(e){st.innerHTML=`<span class="tag-err">✗ ${e.message}</span>`;}
+  btn.disabled=false;btn.textContent='儲存變更';
+}
+
+// ══ INVENTORY ══
+async function loadInventory(){
+  const url=getUrl();if(!url)return;
+  try{
+    const r=await fetch(url+'?action=getInventory');
+    const j=await r.json();if(!j.success)throw new Error(j.error);
+    allInventory=j.data||[];renderInvTable();
+  }catch(e){alert('庫存載入失敗：'+e.message);}
+}
+function renderInvTable(){
+  const q=document.getElementById('inv-search').value.toLowerCase();
+  const f=document.getElementById('inv-filter').value;
+  let rows=allInventory.filter(r=>{
+    const mq=!q||(r.model||'').toLowerCase().includes(q)||(r.series||'').toLowerCase().includes(q);
+    const mf=!f||(f==='ok'&&r.availableQty>5)||(f==='low'&&r.availableQty<=5&&r.availableQty>0)||(f==='zero'&&r.availableQty<=0);
+    return mq&&mf;
+  });
+  document.getElementById('inv-tbody').innerHTML=rows.map(r=>`
+    <tr>
+      <td><strong>${r.model||'—'}</strong></td>
+      <td style="font-size:11px;color:#8a8278">${r.series||'—'}</td>
+      <td>${r.cct||'—'}</td><td>${r.color||'—'}</td><td>${r.beam||'—'}</td><td>${r.outerColor||'—'}</td><td>${r.innerColor||'—'}</td>
+      <td>${r.totalQty??'—'}</td>
+      <td>${r.reservedQty??'—'}</td>
+      <td><span class="badge ${r.availableQty<=0?'b-red':r.availableQty<=5?'b-amber':'b-green'}">${r.availableQty??'—'}${r.unit?' '+r.unit:''}</span></td>
+      <td style="font-size:11px">${r.location||'—'}</td>
+      <td style="font-size:11px;color:#8a8278">${r.updatedAt||'—'}</td>
+      <td style="font-size:11px;color:#8a8278">${r.note||''}</td>
+      <td style="display:flex;gap:5px">
+        <button class="btn btn-ghost btn-sm" onclick='openInvEditor(${JSON.stringify(r)})'>編輯</button>
+        <button class="btn btn-sm" style="background:#fcebeb;color:#a32d2d;border-color:#f09595" onclick='confirmDeleteInv(${JSON.stringify(r)})'>刪除</button>
+      </td>
+    </tr>`).join('')||'<tr><td colspan="11" style="text-align:center;color:#8a8278;padding:24px">無資料</td></tr>';
+}
+function openInvEditor(inv){
+  editingInv=inv;
+  const m=document.getElementById('inv-modal');
+  m.style.display='flex';
+  document.getElementById('inv-parts-section').style.display='none';
+  document.getElementById('inv-manual-section').style.display='none';
+  document.getElementById('inv-save-st').innerHTML='';
+
+  document.getElementById('inv-modal-title').textContent = inv ? '編輯庫存' : '新增庫存';
+  document.getElementById('inv-series').value=inv?.series||'';
+  document.getElementById('inv-model').value=inv?.model||'';
+  document.getElementById('inv-cat').value=inv?.category||'崁燈';
+  document.getElementById('inv-unit').value=inv?.unit||'';
+  document.getElementById('inv-location').value=inv?.location||'';
+  document.getElementById('inv-date').value=inv?.updatedAt||new Date().toISOString().split('T')[0];
+  document.getElementById('inv-note').value=inv?.note||'';
+
+if(window.allParts.length===0){
+  loadParts().then(()=>onInvSeriesChange());
+} else {
+  if(inv?.series) onInvSeriesChange();
+}
+}
+function closeInvModal(){document.getElementById('inv-modal').style.display='none';}
+function confirmDeleteInv(inv){
+  if(!confirm(`確定刪除「${inv.model}」的庫存記錄？\n\n此動作將同步從 Google Sheets 刪除，無法復原。`)) return;
+  deleteInv(inv);
+}
+
+async function deleteInv(inv){
+  const url=getUrl();if(!url)return;
+  const st=document.getElementById('inv-save-st');
+  try{
+    const payload={id:inv.id, model:inv.model, series:inv.series, category:inv.category||''};
+    const res=await fetch(`${url}?action=deleteInventory&payload=${encodeURIComponent(JSON.stringify(payload))}`);
+    const j=await res.json();
+    if(!j.success)throw new Error(j.error||'刪除失敗');
+    // 從本地移除
+    allInventory=allInventory.filter(x=>String(x.id)!==String(inv.id));
+    renderInvTable();
+    // 顯示成功提示
+    const toast=document.createElement('div');
+    toast.textContent=`✓ 已刪除 ${inv.model}`;
+    toast.style.cssText='position:fixed;bottom:24px;right:24px;background:#0e0d0c;color:#f7f4ef;padding:10px 20px;border-radius:6px;font-size:12px;letter-spacing:1px;z-index:9999;';
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),2500);
+  }catch(e){
+    alert('刪除失敗：'+e.message);
+  }
+}
+
+async function saveInv(){
+  const url=getUrl();if(!url)return;
+  const st=document.getElementById('inv-save-st');
+  st.innerHTML='<span class="tag-info">儲存中...</span>';
+
+  const series=document.getElementById('inv-series').value;
+  const model=document.getElementById('inv-model').value.trim();
+  const category=document.getElementById('inv-cat').value;
+  const unit=document.getElementById('inv-unit').value.trim()||'盞';
+  const location=document.getElementById('inv-location').value.trim();
+  const updatedAt=document.getElementById('inv-date').value||new Date().toISOString().split('T')[0];
+  const note=document.getElementById('inv-note').value.trim();
+
+  if(!model){st.innerHTML='<span class="tag-err">✗ 請填寫型號</span>';return;}
+
+  const partsSection=document.getElementById('inv-parts-section');
+  let records=[];
+
+  if(partsSection.style.display!=='none'){
+    const checkboxes=document.querySelectorAll('#inv-parts-list input[type=checkbox]:checked');
+    if(checkboxes.length===0){st.innerHTML='<span class="tag-err">✗ 請至少勾選一個規格零件</span>';return;}
+    checkboxes.forEach(cb=>{
+      const partId=cb.dataset.partId;
+      const partType=cb.dataset.partType;
+      const partName=cb.dataset.partName;
+      const qtyInput=document.querySelector(`input[data-qty-for="${partId}"]`);
+      const qty=Number(qtyInput?.value)||0;
+      const rec={
+        id:'inv'+Date.now()+Math.random().toString(36).slice(2,6),
+        series,model,category,unit,location,updatedAt,note,
+        totalQty:qty,reservedQty:0,availableQty:qty
+      };
+      if(partType==='色溫') rec.cct=partName;
+      else if(partType==='光束角') rec.beam=partName;
+      else if(partType==='外框顏色') rec.outerColor=partName;
+      else if(partType==='內框顏色') rec.innerColor=partName;
+      else if(partType==='配件') rec.note=(note?note+' ':'')+'配件：'+partName;
+      records.push(rec);
+    });
+  } else {
+    const t=Number(document.getElementById('inv-total').value)||0;
+    const r=Number(document.getElementById('inv-reserved').value)||0;
+    const cct=document.getElementById('inv-cct-manual')?.value.trim()||'';
+    const beam=document.getElementById('inv-beam-manual')?.value.trim()||'';
+    records=[{
+      id:editingInv?.id||('inv'+Date.now()),
+      series,model,category,unit,cct,beam,location,updatedAt,note,
+      totalQty:t,reservedQty:r,availableQty:Math.max(0,t-r)
+    }];
+  }
+
+  try{
+    for(const rec of records){
+      const res=await fetch(`${url}?action=upsertInventory&payload=${encodeURIComponent(JSON.stringify(rec))}`);
+      const j=await res.json();if(!j.success)throw new Error(j.error);
+      const idx=allInventory.findIndex(x=>String(x.id)===String(rec.id));
+      if(idx>=0)allInventory[idx]=rec;else allInventory.push(rec);
+    }
+    renderInvTable();
+    st.innerHTML=`<span class="tag-ok">✓ 已儲存 ${records.length} 筆庫存</span>`;
+    const toast=document.createElement('div');
+    toast.textContent=`✓ ${model} 庫存已儲存（${records.length} 筆）`;
+    toast.style.cssText='position:fixed;bottom:24px;right:24px;background:#0e0d0c;color:#f7f4ef;padding:10px 20px;border-radius:6px;font-size:12px;letter-spacing:1px;z-index:9999;';
+    document.body.appendChild(toast);
+    setTimeout(()=>{toast.remove();closeInvModal();},2000);
+  }catch(e){st.innerHTML=`<span class="tag-err">✗ ${e.message}</span>`;}
+}
+
+// ══ ORDERS ══
+async function loadOrders(){
+  const url=getUrl();if(!url)return;
+  try{const r=await fetch(url+'?action=getOrders');const j=await r.json();allOrders=j.data||[];renderOrderTable();}catch(e){}
+}
+function renderOrderTable(){
+  const q=document.getElementById('ord-search').value.toLowerCase();
+  const rows=(q?allOrders.filter(r=>(r.customerName||'').toLowerCase().includes(q)||(r.company||'').toLowerCase().includes(q)||(r.projectName||'').toLowerCase().includes(q)):allOrders);
+  document.getElementById('ord-tbody').innerHTML=rows.map(r=>`<tr>
+    <td style="font-size:11px">${r.id||'—'}</td><td style="font-size:11px">${r.date||'—'}</td>
+    <td>${r.customerName||'—'}</td><td>${r.company||'—'}</td><td>${r.projectName||'—'}</td>
+    <td><span class="badge b-amber">${r.discount||'牌價'}</span></td>
+    <td><strong>NT$ ${Number(r.total||0).toLocaleString()}</strong></td>
+    <td>${r.isVip?'<span class="badge b-blue">VIP</span>':''}</td></tr>`).join('')||'<tr><td colspan="8" style="text-align:center;color:#8a8278;padding:24px">無資料</td></tr>';
+}
+
+// ══ SAMPLES ══
+async function loadSamples(){
+  const url=getUrl();if(!url)return;
+  try{
+    const r=await fetch(url+'?action=getSampleRequests');const j=await r.json();
+    allSamples=j.data||[];
+document.getElementById('samp-tbody').innerHTML=allSamples.map(r=>`<tr>
+      <td style="font-size:11px">${r.id||'—'}</td><td style="font-size:11px">${r.date||'—'}</td>
+      <td>${r.contactName||'—'}</td><td>${r.company||'—'}</td><td>${r.phone||'—'}</td>
+      <td style="font-size:11px">${r.address||'—'}</td><td style="font-size:11px">${r.items||'—'}</td>
+      <td><select onchange="updateRecord('樣品申請','${r.id}',this.value,null)" style="font-size:11px;padding:2px 4px;border:0.5px solid #d9d4cc;border-radius:4px;background:#fff">
+        ${['待處理','聯繫中','已寄出','已完成','已取消'].map(s=>`<option value="${s}" ${(r.status||'待處理')===s?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td><input value="${r.adminNote||''}" placeholder="內部備註" onblur="updateRecord('樣品申請','${r.id}',null,this.value)" style="font-size:11px;padding:2px 6px;border:0.5px solid #d9d4cc;border-radius:4px;width:120px"/></td>
+      <td><button onclick="deleteRecord('樣品申請','${r.id}',this)" style="font-size:10px;padding:2px 8px;background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;border-radius:4px;cursor:pointer">刪除</button></td></tr>`).join('')||'<tr><td colspan="10" style="text-align:center;color:#8a8278;padding:24px">無資料</td></tr>';
+  }catch(e){}
+}
+
+// ══ INSTALLS ══
+async function loadInstalls(){
+  const url=getUrl();if(!url)return;
+  try{
+    const r=await fetch(url+'?action=getInstallOrders');const j=await r.json();
+    allInstalls=j.data||[];
+document.getElementById('inst-tbody').innerHTML=allInstalls.map(r=>`<tr>
+      <td style="font-size:11px">${r.id||'—'}</td><td style="font-size:11px">${r.date||'—'}</td>
+      <td>${r.customerName||'—'}</td><td>${r.company||'—'}</td><td>${r.regionLabel||r.region||'—'}</td>
+      <td>${r.totalQty||0} 盞</td><td>${r.totalMeters||0} 米</td>
+      <td><strong>NT$ ${Number(r.grandTotal||0).toLocaleString()}</strong></td>
+      <td><select onchange="updateRecord('安裝申請','${r.id}',this.value,null)" style="font-size:11px;padding:2px 4px;border:0.5px solid #d9d4cc;border-radius:4px;background:#fff">
+        ${['待確認','聯繫中','已排程','施工中','已完成','已取消'].map(s=>`<option value="${s}" ${(r.status||'待確認')===s?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td><input value="${r.adminNote||''}" placeholder="內部備註" onblur="updateRecord('安裝申請','${r.id}',null,this.value)" style="font-size:11px;padding:2px 6px;border:0.5px solid #d9d4cc;border-radius:4px;width:120px"/></td>
+      <td><button onclick="deleteRecord('安裝申請','${r.id}',this)" style="font-size:10px;padding:2px 8px;background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;border-radius:4px;cursor:pointer">刪除</button></td></tr>`).join('')||'<tr><td colspan="11" style="text-align:center;color:#8a8278;padding:24px">無資料</td></tr>';
+  }catch(e){}
+}
+
+// ══ VISITS ══
+async function loadVisits(){
+  const url=getUrl();if(!url)return;
+  try{
+    const r=await fetch(url+'?action=getVisitRequests');const j=await r.json();
+    allVisits=j.data||[];
+    document.getElementById('visit-tbody').innerHTML=allVisits.map(r=>`<tr>
+      <td style="font-size:11px">${r.id||'—'}</td><td style="font-size:11px">${r.date||'—'}</td>
+      <td style="color:#b8935a;font-weight:600">${r.visitDate||'—'}</td><td>${r.visitSlot||'—'}</td>
+      <td>${r.customerName||'—'}</td><td>${r.company||'—'}</td><td>${r.phone||'—'}</td>
+      <td style="font-size:11px">${r.interestedSeries||'—'}</td><td style="font-size:11px">${r.interestedModel||'—'}</td>
+      <td><select onchange="updateRecord('預約申請','${r.id}',this.value,null)" style="font-size:11px;padding:2px 4px;border:0.5px solid #d9d4cc;border-radius:4px;background:#fff">
+        ${['待確認','已確認','已完成','已取消'].map(s=>`<option value="${s}" ${(r.status||'待確認')===s?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td><input value="${r.adminNote||''}" placeholder="內部備註" onblur="updateRecord('預約申請','${r.id}',null,this.value)" style="font-size:11px;padding:2px 6px;border:0.5px solid #d9d4cc;border-radius:4px;width:120px"/></td>
+      <td><button onclick="deleteRecord('預約申請','${r.id}',this)" style="font-size:10px;padding:2px 8px;background:#fcebeb;color:#a32d2d;border:0.5px solid #f09595;border-radius:4px;cursor:pointer">刪除</button></td></tr>`).join('')||'<tr><td colspan="12" style="text-align:center;color:#8a8278;padding:24px">無資料</td></tr>';
+  }catch(e){}
+}
+// ══ UPDATE RECORD ══
+async function updateRecord(sheetName, id, status, adminNote){
+  const url=getUrl();if(!url)return;
+  try{
+    const payload={sheetName,id,status,adminNote};
+    const r=await fetch(`${url}?action=updateRecord&payload=${encodeURIComponent(JSON.stringify(payload))}`);
+    const j=await r.json();
+    if(!j.success){alert('更新失敗：'+(j.error||'未知錯誤'));}
+  }catch(e){alert('更新失敗：'+e.message);}
+}
+
+// ══ DELETE RECORD ══
+async function deleteRecord(sheetName, id, btn){
+  if(!confirm(`確定刪除這筆資料？此動作無法復原。`))return;
+  const url=getUrl();if(!url)return;
+  try{
+    const payload={sheetName,id};
+    const r=await fetch(`${url}?action=deleteRecord&payload=${encodeURIComponent(JSON.stringify(payload))}`);
+    const j=await r.json();
+    if(j.success){btn.closest('tr').remove();}
+    else{alert('刪除失敗：'+(j.error||'未知錯誤'));}
+  }catch(e){alert('刪除失敗：'+e.message);}
+}
+// ══ 當庫存 Modal 選了系列，載入該系列零件供複選 ══
+async function onInvSeriesChange(){
+  const series = document.getElementById('inv-series').value;
+  const partsSection = document.getElementById('inv-parts-section');
+  const manualSection = document.getElementById('inv-manual-section');
+  const partsList = document.getElementById('inv-parts-list');
+
+  if(!series){ partsSection.style.display='none'; manualSection.style.display='none'; return; }
+
+  const relevant = (window.allParts||[]).filter(p=>{
+    const s = Array.isArray(p['適用產品']) ? p['適用產品'] :
+      String(p['適用產品']||'').split(',').map(x=>x.trim());
+    return s.some(x=>x==='全部系列'||x===series||series.includes(x)||x.includes(series.split(' ')[0]));
+  });
+
+  if(relevant.length===0){
+    partsSection.style.display='none';
+    manualSection.style.display='block';
+    return;
+  }
+
+  const types = ['色溫','光束角','外框顏色','內框顏色','配件'];
+  let html = '';
+  types.forEach(type=>{
+    const items = relevant.filter(p=>p['零件類別']===type);
+    if(!items.length) return;
+    html += `<div>
+      <div style="font-size:10px;letter-spacing:1px;color:#5a4a3a;margin-bottom:6px;text-transform:uppercase">${type}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${items.map(p=>{
+          const stock = Number(p['庫存數量']||0);
+          const stockColor = stock>5?'#0f6e56':stock>0?'#854f0b':'#a32d2d';
+          return `<label style="display:flex;align-items:center;gap:10px;padding:6px 10px;border:0.5px solid #d9d4cc;border-radius:6px;cursor:pointer;background:#faf9f6">
+            <input type="checkbox" data-part-id="${p['編號']}" data-part-type="${type}" data-part-name="${p['零件名稱']}"
+              style="width:14px;height:14px;accent-color:#b8935a;flex-shrink:0">
+            <span style="flex:1;font-size:12px">${p['零件名稱']}</span>
+            <span style="font-size:10px;color:${stockColor};font-weight:600">零件庫存：${stock}</span>
+            <span style="font-size:10px;color:#8a8278">此型號數量：</span>
+            <input type="number" min="0" value="0" style="width:70px;padding:3px 6px;border:0.5px solid #d9d4cc;border-radius:4px;font-size:12px;margin:0"
+              data-qty-for="${p['編號']}">
+          </label>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  partsList.innerHTML = html;
+  partsSection.style.display = 'block';
+  manualSection.style.display = 'none';
+}
+</script>
+
+
+</body></html>
