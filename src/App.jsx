@@ -2347,8 +2347,8 @@ if(urgentData){
               <span style={{fontSize:"7px",letterSpacing:"2px",textTransform:"uppercase",color:"var(--muted)"}}>已選：</span>
               {activeTags.map(t=><span key={t.type+t.value} className="filter-chip">{t.value}<button className="filter-chip-x" onClick={()=>toggleTag(t.type,t.value)}>×</button></span>)}
               <button className="filter-clear" onClick={clearTags}>清除全部</button>
-            </div>}
-          </div>
+            </div>
+    </div>}
           <div className="pgrid">
             {filtered.map(p=>{
               const isEditing=isAdmin&&inlineEdit===p.id;
