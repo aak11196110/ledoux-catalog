@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>程式碼替換工具</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0d0d0d;
+    --panel: #141414;
+    --border: #2a2a2a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --text: #e8e8e8;
+    --muted: #555;
+    --code-bg: #0a0a0a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--panel);
+  }
+
+  .logo {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 16px;
+    color: #000;
+    flex-shrink: 0;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    height: calc(100vh - 73px);
+  }
+
+  .left-panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    flex-shrink: 0;
+  }
+
+  .panel-header .tag {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  textarea {
+    flex: 1;
+    background: var(--code-bg);
+    border: none;
+    outline: none;
+    color: #c9d1d9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: none;
+    width: 100%;
+  }
+
+  textarea::placeholder { color: #333; }
+
+  .controls {
+    padding: 16px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .search-replace-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .input-group label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .input-group input {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+
+  .input-group input:focus { border-color: var(--accent); }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 16px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #00ffb3; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-danger {
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+  }
+  .btn-danger:hover { background: var(--accent2); color: #fff; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { border-color: #555; color: var(--text); }
+
+  .output-area {
+    flex: 1;
+    background: var(--code-bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px;
+    overflow-y: auto;
+    white-space: pre;
+    color: #c9d1d9;
+    tab-size: 2;
+  }
+
+  .output-area mark {
+    background: rgba(0, 229, 160, 0.25);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .output-controls {
+    padding: 12px 16px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .stats {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stats .count {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .upload-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  .file-label {
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .file-label:hover { border-color: var(--accent); color: var(--accent); }
+
+  #fileInput { display: none; }
+
+  .file-name {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+  }
+
+  .history-row {
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .history-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .history-item {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.1s;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history-item:hover { border-color: var(--accent); color: var(--accent); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; height: auto; }
+    .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    .left-panel, .right-panel { height: 50vh; }
+    .search-replace-box { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">&lt;/&gt;</div>
+  <div>
+    <h1>程式碼<span>替換</span>工具</h1>
+    <div class="subtitle">支援 GS · VBA · JS · Python · 任何程式碼</div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- 左側：輸入 -->
+  <div class="left-panel">
+    <div class="panel-header">
+      原始程式碼
+      <span class="tag" id="lineCount">0 行</span>
+    </div>
+    <textarea id="inputCode" placeholder="把你的程式碼貼在這裡...&#10;&#10;支援任何語言：Google Apps Script、VBA、JavaScript、Python 等"></textarea>
+
+    <div class="controls">
+      <!-- 上傳檔案 -->
+      <div class="upload-row">
+        <label class="file-label" for="fileInput">
+          📂 上傳檔案
+        </label>
+        <input type="file" id="fileInput" accept=".gs,.js,.vba,.py,.txt,.ts,.json,.css,.html,.md">
+        <span class="file-name" id="fileName">尚未選擇檔案</span>
+      </div>
+
+      <!-- 搜尋 / 替換 -->
+      <div class="search-replace-box">
+        <div class="input-group">
+          <label>🔍 搜尋（關鍵字）</label>
+          <input type="text" id="searchInput" placeholder="輸入要找的文字...">
+        </div>
+        <div class="input-group">
+          <label>✏️ 替換成</label>
+          <input type="text" id="replaceInput" placeholder="輸入替換後的文字...">
+        </div>
+      </div>
+
+      <!-- 按鈕 -->
+      <div class="btn-row">
+        <button class="btn-primary" onclick="doReplace()">⚡ 執行替換</button>
+        <button class="btn-ghost" onclick="addToHistory()">＋ 加入常用</button>
+        <button class="btn-ghost" onclick="clearAll()">✕ 清除</button>
+      </div>
+
+      <!-- 常用替換歷史 -->
+      <div class="history-row" id="historyRow" style="display:none">
+        <div class="history-label">⚡ 常用替換</div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右側：輸出 -->
+  <div class="right-panel">
+    <div class="panel-header">
+      替換結果
+      <span class="tag" id="replaceCount">尚未替換</span>
+    </div>
+    <div class="output-area" id="outputArea">替換後的程式碼會出現在這裡...</div>
+
+    <div class="output-controls">
+      <div class="stats" id="statsText">等待輸入...</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-ghost" onclick="copyOutput()">📋 複製</button>
+        <button class="btn-primary" onclick="downloadOutput()">⬇ 下載</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let history = JSON.parse(localStorage.getItem('replaceHistory') || '[]');
+let lastFileName = 'output.txt';
+let lastReplaceCount = 0;
+let lastOutputText = '';
+
+// 更新行數
+const inputCode = document.getElementById('inputCode');
+inputCode.addEventListener('input', () => {
+  const lines = inputCode.value.split('\n').length;
+  document.getElementById('lineCount').textContent = lines + ' 行';
+});
+
+// 上傳檔案
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  lastFileName = file.name;
+  document.getElementById('fileName').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    inputCode.value = ev.target.result;
+    const lines = inputCode.value.split('\n').length;
+    document.getElementById('lineCount').textContent = lines + ' 行';
+  };
+  reader.readAsText(file);
+});
+
+// 執行替換
+function doReplace() {
+  const code = inputCode.value;
+  const search = document.getElementById('searchInput').value;
+  const replace = document.getElementById('replaceInput').value;
+
+  if (!code.trim()) { showToast('請先輸入程式碼！'); return; }
+  if (!search) { showToast('請輸入要搜尋的關鍵字！'); return; }
+
+  // 計算出現次數
+  const count = (code.split(search).length - 1);
+  lastReplaceCount = count;
+
+  if (count === 0) {
+    showToast('找不到「' + search + '」，請確認大小寫或空格');
+    document.getElementById('replaceCount').textContent = '找不到';
+    return;
+  }
+
+  // 執行替換
+  const result = code.split(search).join(replace);
+  lastOutputText = result;
+
+  // 顯示（highlight 替換後的文字）
+  const escaped = escapeHtml(result);
+  const highlighted = replace
+    ? escaped.split(escapeHtml(replace)).join('<mark>' + escapeHtml(replace) + '</mark>')
+    : escaped;
+
+  document.getElementById('outputArea').innerHTML = highlighted;
+  document.getElementById('replaceCount').textContent = '替換了 ' + count + ' 處';
+  document.getElementById('statsText').textContent = `搜尋：「${search}」→ 「${replace}」 · 共替換 ${count} 處`;
+
+  showToast('✅ 替換完成！共 ' + count + ' 處');
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// 複製輸出
+function copyOutput() {
+  if (!lastOutputText) { showToast('沒有可複製的內容'); return; }
+  navigator.clipboard.writeText(lastOutputText).then(() => {
+    showToast('📋 已複製到剪貼簿！');
+  });
+}
+
+// 下載輸出
+function downloadOutput() {
+  if (!lastOutputText) { showToast('沒有可下載的內容'); return; }
+  const blob = new Blob([lastOutputText], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const ext = lastFileName.split('.').pop();
+  a.download = lastFileName.replace('.' + ext, '_replaced.' + ext);
+  a.click();
+  showToast('⬇ 下載成功！');
+}
+
+// 加入常用
+function addToHistory() {
+  const search = document.getElementById('searchInput').value;
+  const replace = document.getElementById('replaceInput').value;
+  if (!search) { showToast('請輸入搜尋關鍵字'); return; }
+
+  const item = { search, replace };
+  history = history.filter(h => h.search !== search);
+  history.unshift(item);
+  if (history.length > 10) history.pop();
+  localStorage.setItem('replaceHistory', JSON.stringify(history));
+  renderHistory();
+  showToast('已加入常用替換！');
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const row = document.getElementById('historyRow');
+  if (history.length === 0) { row.style.display = 'none'; return; }
+  row.style.display = 'block';
+  list.innerHTML = '';
+  history.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'history-item';
+    el.title = `搜尋：${item.search}\n替換：${item.replace}`;
+    el.textContent = item.search + ' → ' + (item.replace || '（空）');
+    el.onclick = () => {
+      document.getElementById('searchInput').value = item.search;
+      document.getElementById('replaceInput').value = item.replace;
+    };
+    list.appendChild(el);
+  });
+}
+
+function clearAll() {
+  inputCode.value = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('replaceInput').value = '';
+  document.getElementById('outputArea').textContent = '替換後的程式碼會出現在這裡...';
+  document.getElementById('replaceCount').textContent = '尚未替換';
+  document.getElementById('statsText').textContent = '等待輸入...';
+  document.getElementById('lineCount').textContent = '0 行';
+  document.getElementById('fileName').textContent = '尚未選擇檔案';
+  lastOutputText = '';
+  showToast('已清除');
+}
+
+// Enter 鍵觸發替換
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doReplace();
+});
+document.getElementById('replaceInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doReplace();
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// 初始化歷史
+renderHistory();
+</script>
+</body>
+</html>
