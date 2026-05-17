@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEDOUX 諾科照明 · 管理後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blk: #0e0d0c;
+    --gold: #b8935a;
+    --gold-lt: #d4a96a;
+    --bg: #f5f2ed;
+    --bg2: #eee9e1;
+    --wht: #faf8f5;
+    --bdr: rgba(14,13,12,0.12);
+    --muted: #8a8278;
+    --red: #9b3a3a;
+    --green: #3a7a4a;
+    --sidebar-w: 220px;
+    --top-h: 56px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--blk); min-height: 100vh; }
+  #app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); background: var(--blk); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.25s; }
+  .sb-logo { padding: 24px 20px 20px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .sb-logo-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold); letter-spacing: 4px; }
+  .sb-logo-sub { font-size: 8px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .sb-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .sb-section { font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.22); text-transform: uppercase; padding: 12px 20px 6px; }
+  .sb-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; transition: all 0.15s; font-size: 11px; color: rgba(255,255,255,0.5); border-left: 2px solid transparent; }
+  .sb-item:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.85); }
+  .sb-item.active { background: rgba(184,147,90,0.1); color: var(--gold); border-left-color: var(--gold); }
+  .sb-icon { font-size: 14px; width: 18px; text-align: center; }
+  .sb-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 9px; padding: 1px 6px; border-radius: 10px; }
+  .sb-footer { padding: 14px 20px; border-top: 0.5px solid rgba(255,255,255,0.08); font-size: 9px; color: rgba(255,255,255,0.2); letter-spacing: 1px; }
+
+  /* TOPBAR */
+  .topbar { position: fixed; top: 0; left: var(--sidebar-w); right: 0; height: var(--top-h); background: var(--wht); border-bottom: 0.5px solid var(--bdr); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 90; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; letter-spacing: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .sync-pill { display: flex; align-items: center; gap: 6px; font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; flex-shrink: 0; }
+  .sync-dot.err { background: var(--red); animation: none; }
+  .sync-dot.loading { background: var(--gold); }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+  .refresh-btn { padding: 7px 16px; background: var(--blk); border: none; font-size: 9px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; font-family: 'Noto Sans TC', sans-serif; color: var(--wht); }
+  .refresh-btn:hover { background: #333; }
+  .mobile-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar-w); margin-top: var(--top-h); padding: 28px 32px; flex: 1; }
+
+  /* STATS */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px,1fr)); gap: 14px; margin-bottom: 26px; }
+  .stat-card { background: var(--wht); border: 0.5px solid var(--bdr); padding: 18px 20px; border-left: 3px solid var(--bdr); }
+  .stat-card.accent { border-left-color: var(--gold); }
+  .stat-card.danger { border-left-color: var(--red); }
+  .stat-card.ok { border-left-color: var(--green); }
+  .stat-label { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 28px; line-height: 1; }
+  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* SECTION */
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; letter-spacing: 1px; }
+
+  /* BUTTONS */
+  .btn { padding: 8px 18px; border: none; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; transition: all 0.15s; }
+  .btn-primary { background: var(--blk); color: var(--wht); }
+  .btn-primary:hover { background: #333; }
+  .btn-gold { background: var(--gold); color: var(--blk); }
+  .btn-gold:hover { background: var(--gold-lt); }
+  .btn-sm { padding: 5px 11px; font-size: 9px; }
+  .btn-outline { background: transparent; border: 0.5px solid var(--bdr); color: var(--blk); }
+  .btn-outline:hover { background: var(--bg2); }
+  .btn-danger { background: transparent; border: 0.5px solid var(--red); color: var(--red); }
+  .btn-danger:hover { background: var(--red); color: #fff; }
+
+  /* TABLE */
+  .tbl-wrap { background: var(--wht); border: 0.5px solid var(--bdr); overflow-x: auto; margin-bottom: 26px; }
+  table { width: 100%; border-collapse: collapse; min-width: 500px; }
+  th { padding: 10px 14px; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; text-align: left; background: var(--blk); color: var(--gold); font-weight: 400; white-space: nowrap; }
+  td { padding: 11px 14px; font-size: 11px; border-bottom: 0.5px solid var(--bdr); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(184,147,90,0.025); }
+  .no-data { padding: 36px; text-align: center; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  /* BADGE */
+  .badge { display: inline-block; padding: 3px 9px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; border-radius: 2px; }
+  .b-pending { background: rgba(184,147,90,0.12); color: #a07840; }
+  .b-ok { background: rgba(58,122,74,0.12); color: var(--green); }
+  .b-cancel { background: rgba(155,58,58,0.12); color: var(--red); }
+  .b-vip { background: var(--gold); color: var(--blk); }
+  .b-new { background: rgba(14,13,12,0.07); color: var(--blk); }
+
+  /* FILTER */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .f-select, .f-input { padding: 8px 11px; border: 0.5px solid var(--bdr); background: var(--wht); font-family: 'Noto Sans TC', sans-serif; font-size: 11px; color: var(--blk); outline: none; }
+  .f-input { min-width: 190px; }
+  .f-select:focus, .f-input:focus { border-color: var(--gold); }
+
+  /* MODAL */
+  .modal-wrap { position: fixed; inset: 0; background: rgba(14,13,12,0.65); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal-box { background: var(--wht); width: 100%; max-width: 620px; max-height: 88vh; overflow-y: auto; }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 0.5px solid var(--bdr); position: sticky; top: 0; background: var(--wht); z-index: 1; }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+  .modal-body { padding: 22px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 15px; }
+  .form-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; }
+  .form-input, .form-select, .form-textarea { width: 100%; padding: 9px 11px; border: 0.5px solid var(--bdr); font-family: 'Noto Sans TC', sans-serif; font-size: 12px; color: var(--blk); background: var(--wht); outline: none; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+  .form-textarea { resize: vertical; min-height: 75px; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; padding-top: 16px; border-top: 0.5px solid var(--bdr); }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 22px; right: 22px; z-index: 9999; background: var(--blk); color: var(--gold); padding: 11px 20px; font-size: 11px; letter-spacing: 1px; border-left: 3px solid var(--gold); display: none; }
+
+  /* PAGE */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* OVERLAY */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 99; display: none; }
+  .overlay.show { display: block; }
+
+  /* SETTINGS */
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .settings-card { background: var(--wht); border: 0.5px solid var(--bdr); padding: 20px; }
+  .settings-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 16px; margin-bottom: 14px; border-bottom: 0.5px solid var(--bdr); padding-bottom: 10px; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 0.5px solid var(--bdr); font-size: 11px; }
+  .setting-row:last-child { border-bottom: none; }
+
+  /* DASH */
+  .dash-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 26px; }
+
+  /* FLOW */
+  .flow-box { background: var(--wht); border: 0.5px solid var(--bdr); padding: 20px; margin-bottom: 18px; }
+  .flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .flow-node { padding: 10px 14px; border: 0.5px solid var(--bdr); font-size: 11px; text-align: center; min-width: 110px; }
+  .flow-node b { display: block; font-size: 12px; margin-bottom: 2px; color: var(--gold); font-family: 'Space Mono', monospace; }
+  .flow-arrow { font-size: 16px; color: var(--muted); }
+
+  @media (max-width: 800px) {
+    :root { --sidebar-w: 0px; }
+    .sidebar { transform: translateX(-220px); width: 220px; }
+    .sidebar.open { transform: none; }
+    .topbar { left: 0; }
+    .main { margin-left: 0; padding: 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .dash-2col { grid-template-columns: 1fr; }
+    .mobile-btn { display: block !important; }
+  }
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSB()"></div>
+
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">LEDOUX</div>
+      <div class="sb-logo-sub">Admin Dashboard</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">總覽</div>
+      <div class="sb-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="sb-icon">▪</span>儀表板</div>
+      <div class="sb-section">產品</div>
+      <div class="sb-item" onclick="nav('products')" id="nav-products"><span class="sb-icon">💡</span>燈具產品</div>
+      <div class="sb-item" onclick="nav('inventory')" id="nav-inventory"><span class="sb-icon">📦</span>庫存管理</div>
+      <div class="sb-section">業務</div>
+      <div class="sb-item" onclick="nav('orders')" id="nav-orders"><span class="sb-icon">📋</span>報價記錄<span class="sb-badge" id="b-orders" style="display:none">0</span></div>
+      <div class="sb-item" onclick="nav('samples')" id="nav-samples"><span class="sb-icon">📬</span>樣品申請<span class="sb-badge" id="b-samples" style="display:none">0</span></div>
+      <div class="sb-item" onclick="nav('installs')" id="nav-installs"><span class="sb-icon">🔧</span>安裝申請<span class="sb-badge" id="b-installs" style="display:none">0</span></div>
+      <div class="sb-item" onclick="nav('visits')" id="nav-visits"><span class="sb-icon">📅</span>預約申請<span class="sb-badge" id="b-visits" style="display:none">0</span></div>
+      <div class="sb-section">系統</div>
+      <div class="sb-item" onclick="nav('members')" id="nav-members"><span class="sb-icon">👥</span>會員管理</div>
+      <div class="sb-item" onclick="nav('discounts')" id="nav-discounts"><span class="sb-icon">🏷️</span>折扣碼</div>
+      <div class="sb-item" onclick="nav('settings')" id="nav-settings"><span class="sb-icon">⚙️</span>系統設定</div>
+    </nav>
+    <div class="sb-footer">LEDOUX 諾科照明 · 管理後台 v2.0</div>
+  </aside>
+
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="mobile-btn" onclick="openSB()" style="display:none">☰</button>
+      <div class="page-title" id="page-title">儀表板</div>
+    </div>
+    <div class="topbar-right">
+      <div class="sync-pill"><span class="sync-dot" id="sync-dot"></span><span id="sync-txt">連線中</span></div>
+      <button class="refresh-btn" onclick="loadAll()">↻ 同步</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card accent"><div class="stat-label">燈具產品</div><div class="stat-value" id="ds-prod">—</div><div class="stat-sub">上架中</div></div>
+        <div class="stat-card danger"><div class="stat-label">待處理</div><div class="stat-value" id="ds-pend">—</div><div class="stat-sub">需要跟進</div></div>
+        <div class="stat-card ok"><div class="stat-label">報價記錄</div><div class="stat-value" id="ds-ord">—</div><div class="stat-sub">累計筆數</div></div>
+        <div class="stat-card"><div class="stat-label">會員帳號</div><div class="stat-value" id="ds-mem">—</div><div class="stat-sub">已開通</div></div>
+      </div>
+      <div class="dash-2col">
+        <div class="tbl-wrap" style="margin-bottom:0">
+          <div style="padding:13px 16px;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:0.5px solid var(--bdr)">最新樣品申請</div>
+          <table><thead><tr><th>客戶</th><th>品項</th><th>狀態</th></tr></thead><tbody id="dash-samp"><tr><td colspan="3" class="no-data">載入中...</td></tr></tbody></table>
+        </div>
+        <div class="tbl-wrap" style="margin-bottom:0">
+          <div style="padding:13px 16px;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:0.5px solid var(--bdr)">最新安裝申請</div>
+          <table><thead><tr><th>客戶</th><th>地區</th><th>狀態</th></tr></thead><tbody id="dash-inst"><tr><td colspan="3" class="no-data">載入中...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="page" id="page-products">
+      <div class="section-head"><div class="section-title">燈具產品管理</div><button class="btn btn-gold" onclick="openProdM()">＋ 新增產品</button></div>
+      <div class="filter-bar">
+        <input class="f-input" id="pq" placeholder="🔍 搜尋型號、系列..." oninput="rProd()">
+        <select class="f-select" id="pcat" onchange="rProd()"><option value="">所有分類</option><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select>
+        <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th>專案價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="page" id="page-inventory">
+      <div class="section-head"><div class="section-title">庫存管理</div><button class="btn btn-gold" onclick="openInvM()">＋ 新增庫存</button></div>
+      <div class="filter-bar">
+        <input class="f-input" id="iq" placeholder="🔍 搜尋型號..." oninput="rInv()">
+        <select class="f-select" id="icat" onchange="rInv()"><option value="">所有分類</option><option>商照燈</option><option>線型燈</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>色溫</th><th>光束角</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th></tr></thead><tbody id="inv-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="page" id="page-orders">
+      <div class="section-head"><div class="section-title">報價記錄</div></div>
+      <div class="filter-bar">
+        <input class="f-input" id="oq" placeholder="🔍 搜尋客戶、案名..." oninput="rOrd()">
+        <select class="f-select" id="ost" onchange="rOrd()"><option value="">所有狀態</option><option>已下載</option><option>已成交</option><option>未成交</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>單號</th><th>日期</th><th>客戶</th><th>公司</th><th>案名</th><th>品項</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead><tbody id="ord-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- SAMPLES -->
+    <div class="page" id="page-samples">
+      <div class="section-head"><div class="section-title">樣品申請管理</div></div>
+      <div class="filter-bar">
+        <input class="f-input" id="sq" placeholder="🔍 搜尋客戶..." oninput="rSamp()">
+        <select class="f-select" id="sst" onchange="rSamp()"><option value="">所有狀態</option><option>待處理</option><option>已寄出</option><option>已完成</option><option>已取消</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>日期</th><th>聯繫人</th><th>公司</th><th>電話</th><th>品項</th><th>狀態</th><th>操作</th></tr></thead><tbody id="samp-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- INSTALLS -->
+    <div class="page" id="page-installs">
+      <div class="section-head"><div class="section-title">安裝申請管理</div></div>
+      <div class="filter-bar">
+        <input class="f-input" id="nq" placeholder="🔍 搜尋客戶、案名..." oninput="rInst()">
+        <select class="f-select" id="nst" onchange="rInst()"><option value="">所有狀態</option><option>待確認</option><option>已確認</option><option>施工中</option><option>已完成</option><option>已取消</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>日期</th><th>聯繫人</th><th>公司</th><th>案名</th><th>服務區域</th><th>預估費用</th><th>狀態</th><th>操作</th></tr></thead><tbody id="inst-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- VISITS -->
+    <div class="page" id="page-visits">
+      <div class="section-head"><div class="section-title">預約申請管理</div></div>
+      <div class="filter-bar">
+        <input class="f-input" id="vq" placeholder="🔍 搜尋客戶..." oninput="rVis()">
+        <select class="f-select" id="vst" onchange="rVis()"><option value="">所有狀態</option><option>待確認</option><option>已確認</option><option>已完成</option><option>已取消</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>編號</th><th>申請日</th><th>預約日期</th><th>時段</th><th>聯繫人</th><th>公司</th><th>電話</th><th>狀態</th><th>操作</th></tr></thead><tbody id="vis-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="page" id="page-members">
+      <div class="section-head"><div class="section-title">會員管理</div><button class="btn btn-gold" onclick="openMemM()">＋ 新增會員</button></div>
+      <div class="filter-bar">
+        <input class="f-input" id="mq" placeholder="🔍 搜尋帳號、姓名、公司..." oninput="rMem()">
+        <select class="f-select" id="mst" onchange="rMem()"><option value="">所有狀態</option><option>active</option><option>pending</option><option>disabled</option></select>
+        <select class="f-select" id="mr" onchange="rMem()"><option value="">所有角色</option><option>admin</option><option>vip</option><option>member</option></select>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>帳號</th><th>姓名</th><th>公司</th><th>電話</th><th>角色</th><th>狀態</th><th>開通日</th><th>操作</th></tr></thead><tbody id="mem-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
+    </div>
+
+    <!-- DISCOUNTS -->
+    <div class="page" id="page-discounts">
+      <div class="section-head"><div class="section-title">折扣碼管理</div><button class="btn btn-gold" onclick="showM('modal-disc')">＋ 新增折扣碼</button></div>
+      <div class="tbl-wrap" style="margin-bottom:14px"><table><thead><tr><th>折扣碼</th><th>折扣率</th><th>折數</th><th>備註</th><th>操作</th></tr></thead><tbody id="disc-tb"></tbody></table></div>
+      <div style="background:var(--wht);border:0.5px solid var(--bdr);padding:16px;font-size:11px;color:var(--muted);line-height:1.8">
+        ⚠️ 折扣碼在後台新增後，需手動更新 APP 程式碼裡的 <code style="background:var(--bg2);padding:1px 5px;font-family:'Space Mono',monospace">DISCOUNT_CODES</code> 常數才會在 APP 端生效。
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="section-head"><div class="section-title">系統設定</div></div>
+      <div class="flow-box">
+        <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">資料流說明 · 你不需要手動開 Excel</div>
+        <div class="flow">
+          <div class="flow-node"><b>管理後台</b>你在這裡操作</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node"><b>Apps Script</b>自動中繼</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node"><b>Google Sheets</b>實際資料庫</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node"><b>APP 前台</b>客戶看到</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:12px;line-height:1.8">
+          ✅ 在後台修改/新增/刪除產品 → Sheets 立即更新 → APP 下次開啟就看到新資料<br>
+          ✅ 客戶在 APP 填報價/申請 → Apps Script 自動寫入 Sheets → 後台同步後顯示紅點通知
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>Google Sheets 連線</h3>
+          <div class="form-group"><label class="form-label">Apps Script 網址（SHEET_URL）</label><input class="form-input" id="cfg-url" style="font-family:'Space Mono',monospace;font-size:10px" placeholder="https://script.google.com/macros/s/..."><div style="font-size:10px;color:var(--muted);margin-top:4px">就是你 code 裡 SHEET_URL 那一串</div></div>
+          <div class="form-group"><label class="form-label">通知 Email</label><input class="form-input" id="cfg-email"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="saveCfg()">儲存設定</button>
+            <button class="btn btn-outline" onclick="testConn()">測試連線</button>
+          </div>
+          <div id="cfg-res" style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6"></div>
+        </div>
+        <div class="settings-card">
+          <h3>公司資訊</h3>
+          <div class="form-group"><label class="form-label">公司名稱</label><input class="form-input" id="cfg-co"></div>
+          <div class="form-group"><label class="form-label">聯絡電話</label><input class="form-input" id="cfg-phone"></div>
+          <div class="form-group"><label class="form-label">電子信箱</label><input class="form-input" id="cfg-cemail"></div>
+          <button class="btn btn-primary" onclick="saveCo()">儲存</button>
+        </div>
+        <div class="settings-card">
+          <h3>快速操作</h3>
+          <div class="setting-row"><span>開啟 Google Sheets</span><button class="btn btn-sm btn-outline" onclick="window.open('https://docs.google.com/spreadsheets','_blank')">開啟 →</button></div>
+          <div class="setting-row"><span>初始化所有工作表</span><button class="btn btn-sm btn-gold" onclick="initSheets()">執行</button></div>
+          <div class="setting-row"><span>清除本機設定</span><button class="btn btn-sm btn-danger" onclick="clearCfg()">清除</button></div>
+        </div>
+        <div class="settings-card">
+          <h3>APP 折扣碼同步說明</h3>
+          <div style="font-size:11px;color:var(--muted);line-height:1.8">
+            在「折扣碼」頁面新增後，找到 APP 程式碼裡的：<br>
+            <code style="background:var(--bg2);padding:3px 7px;display:block;margin:6px 0;font-family:'Space Mono',monospace;font-size:10px">const DISCOUNT_CODES = { "LED006":0.6, ... }</code>
+            把新折扣碼加進去即可，格式：<br>
+            <code style="font-family:'Space Mono',monospace;background:var(--bg2);padding:2px 5px">"代碼": 折扣率數字</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<!-- 產品 Modal -->
+<div class="modal-wrap" id="modal-prod" style="display:none" onclick="if(event.target===this)hideM('modal-prod')">
+<div class="modal-box">
+  <div class="modal-head"><div class="modal-title" id="pm-title">新增產品</div><button class="modal-close" onclick="hideM('modal-prod')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="p-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="p-model" placeholder="例：LD-H50-10W"></div>
+      <div class="form-group"><label class="form-label">系列 *</label><input class="form-input" id="p-series" placeholder="例：HEPBURN 赫本"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">分類</label><select class="form-select" id="p-cat"><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select></div>
+      <div class="form-group"><label class="form-label">狀態</label><select class="form-select" id="p-status"><option>上架</option><option>下架</option><option>停產</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">瓦數 (W)</label><input class="form-input" id="p-watt" placeholder="10"></div>
+      <div class="form-group"><label class="form-label">色溫（逗號分隔）</label><input class="form-input" id="p-cct" placeholder="3000,4000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">牌價 NT$</label><input class="form-input" id="p-price" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">專案價 NT$</label><input class="form-input" id="p-proj" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">演色性 CRI</label><input class="form-input" id="p-cri" placeholder="Ra90,Ra95"></div>
+      <div class="form-group"><label class="form-label">認證 Cert</label><input class="form-input" id="p-cert" placeholder="CNS,CE"></div>
+    </div>
+    <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
+    <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()">
+      <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideM('modal-prod')">取消</button>
+      <button class="btn btn-gold" onclick="saveProd()">儲存並同步到 Sheets</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- 庫存 Modal -->
+<div class="modal-wrap" id="modal-inv" style="display:none" onclick="if(event.target===this)hideM('modal-inv')">
+<div class="modal-box">
+  <div class="modal-head"><div class="modal-title" id="im-title">新增庫存</div><button class="modal-close" onclick="hideM('modal-inv')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="i-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="i-model"></div>
+      <div class="form-group"><label class="form-label">系列</label><input class="form-input" id="i-series"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">分類</label><select class="form-select" id="i-cat"><option>商照燈</option><option>線型燈</option></select></div>
+      <div class="form-group"><label class="form-label">色溫</label><input class="form-input" id="i-cct"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">顏色</label><input class="form-input" id="i-color"></div>
+      <div class="form-group"><label class="form-label">光束角</label><input class="form-input" id="i-beam"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">總庫存數</label><input class="form-input" id="i-qty" type="number" value="0"></div>
+      <div class="form-group"><label class="form-label">可用數量</label><input class="form-input" id="i-avail" type="number" value="0"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideM('modal-inv')">取消</button>
+      <button class="btn btn-gold" onclick="saveInv()">儲存並同步</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- 記錄處理 Modal -->
+<div class="modal-wrap" id="modal-rec" style="display:none" onclick="if(event.target===this)hideM('modal-rec')">
+<div class="modal-box">
+  <div class="modal-head"><div class="modal-title" id="rm-title">處理申請</div><button class="modal-close" onclick="hideM('modal-rec')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="r-id"><input type="hidden" id="r-sheet">
+    <div id="r-detail" style="background:var(--bg2);padding:14px;margin-bottom:16px;font-size:11px;line-height:1.9;border-left:3px solid var(--gold)"></div>
+    <div class="form-group"><label class="form-label">更新狀態</label><select class="form-select" id="r-status"></select></div>
+    <div class="form-group"><label class="form-label">內部備註</label><textarea class="form-textarea" id="r-note" placeholder="備註（不顯示給客戶）"></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" onclick="delRec()">刪除</button>
+      <button class="btn btn-outline" onclick="hideM('modal-rec')">取消</button>
+      <button class="btn btn-gold" onclick="updateRec()">更新狀態</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- 會員 Modal -->
+<div class="modal-wrap" id="modal-mem" style="display:none" onclick="if(event.target===this)hideM('modal-mem')">
+<div class="modal-box">
+  <div class="modal-head"><div class="modal-title" id="mm-title">新增會員</div><button class="modal-close" onclick="hideM('modal-mem')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="m-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">帳號 *</label><input class="form-input" id="m-user"></div>
+      <div class="form-group"><label class="form-label">密碼 *</label><input class="form-input" id="m-pass"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">姓名 *</label><input class="form-input" id="m-name"></div>
+      <div class="form-group"><label class="form-label">職稱</label><input class="form-input" id="m-pos"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">公司</label><input class="form-input" id="m-co"></div>
+      <div class="form-group"><label class="form-label">電話</label><input class="form-input" id="m-ph"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="m-email"></div>
+      <div class="form-group"><label class="form-label">統一編號</label><input class="form-input" id="m-tax"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">角色</label><select class="form-select" id="m-role"><option value="member">member（一般）</option><option value="vip">vip（VIP客戶）</option><option value="admin">admin（管理員）</option></select></div>
+      <div class="form-group"><label class="form-label">狀態</label><select class="form-select" id="m-st"><option value="active">active（開通）</option><option value="pending">pending（待審核）</option><option value="disabled">disabled（停用）</option></select></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideM('modal-mem')">取消</button>
+      <button class="btn btn-gold" onclick="saveMem()">儲存並同步</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- 折扣碼 Modal -->
+<div class="modal-wrap" id="modal-disc" style="display:none" onclick="if(event.target===this)hideM('modal-disc')">
+<div class="modal-box" style="max-width:370px">
+  <div class="modal-head"><div class="modal-title">新增折扣碼</div><button class="modal-close" onclick="hideM('modal-disc')">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label class="form-label">折扣碼 *</label><input class="form-input" id="dc-code" placeholder="例：LED009" style="font-family:'Space Mono',monospace;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+    <div class="form-group"><label class="form-label">折扣率（例：0.85 = 8.5折）</label><input class="form-input" id="dc-rate" type="number" step="0.01" min="0.1" max="1" placeholder="0.85"></div>
+    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="dc-note" placeholder="適用對象說明"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideM('modal-disc')">取消</button>
+      <button class="btn btn-gold" onclick="saveDisc()">新增</button>
+    </div>
+  </div>
+</div></div>
+
+<script>
+// ════════════════════════════════════
+//  LEDOUX 管理後台 · 無登入版 v2.0
+// ════════════════════════════════════
+
+const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbylNuQW2ADr6behwvzj95GwTeGnFfkH-PQKe7M2jomgPMW1d1x7e2LkNHhDU7TvIKQyNg/exec";
+
+let D = {products:[],inventory:[],orders:[],samples:[],installs:[],visits:[],members:[]};
+let DISCS = JSON.parse(localStorage.getItem('ldx_discs')||JSON.stringify([
+  {code:"LED006",rate:0.6,note:"設計師客戶"},
+  {code:"LED007",rate:0.7,note:"一般專案"},
+  {code:"LED008",rate:0.8,note:"大量採購"},
+]));
+const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定'};
+
+// API
+function getURL(){return localStorage.getItem('ldx_url')||DEFAULT_URL;}
+async function apiGet(action){
+  try{const r=await fetch(`${getURL()}?action=${action}`);const j=await r.json();return j.success?j.data:[];}
+  catch(e){return[];}
+}
+async function apiPost(action,data){
+  try{const r=await fetch(getURL(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,data})});return await r.json();}
+  catch(e){return{success:false,error:String(e)};}
+}
+
+// LOAD
+async function loadAll(){
+  setSS('loading');
+  try{
+    const[pr,iv,or,sa,ins,vi,me]=await Promise.all([apiGet('getProducts'),apiGet('getInventory'),apiGet('getOrders'),apiGet('getSampleRequests'),apiGet('getInstallOrders'),apiGet('getVisitRequests'),apiGet('getMembers')]);
+    D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(ins);D.visits=a(vi);D.members=a(me);
+    renderAll();setBadges();setSS('ok');toast('✓ 資料已同步');
+  }catch(e){setSS('err');toast('⚠ 同步失敗');}
+}
+function a(x){return Array.isArray(x)?x:[];}
+function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();}
+
+// NAV
+function nav(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  const nb=document.getElementById('nav-'+id);if(nb)nb.classList.add('active');
+  document.getElementById('page-title').textContent=PT[id]||id;
+  closeSB();
+}
+function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+function setSS(s){
+  const d=document.getElementById('sync-dot'),t=document.getElementById('sync-txt');
+  d.className='sync-dot'+(s==='err'?' err':s==='loading'?' loading':'');
+  t.textContent=s==='ok'?'已同步':s==='err'?'連線異常':'同步中...';
+}
+
+// DASHBOARD
+function rDash(){
+  const pend=D.samples.filter(x=>x.status==='待處理').length+D.installs.filter(x=>x.status==='待確認').length+D.visits.filter(x=>x.status==='待確認').length;
+  set('ds-prod',D.products.filter(p=>p.status==='上架').length||D.products.length);
+  set('ds-pend',pend);set('ds-ord',D.orders.length);
+  set('ds-mem',D.members.filter(m=>m.status==='active').length);
+  const ds=document.getElementById('dash-samp'),sl=D.samples.slice(-5).reverse();
+  ds.innerHTML=sl.length?sl.map(s=>`<tr><td>${s.contactName||s.customerName||'—'}</td><td style="color:var(--muted);font-size:10px">${a2s(s.items)}</td><td>${bdg(s.status)}</td></tr>`).join(''):'<tr><td colspan="3" class="no-data">暫無資料</td></tr>';
+  const di=document.getElementById('dash-inst'),il=D.installs.slice(-5).reverse();
+  di.innerHTML=il.length?il.map(i=>`<tr><td>${i.customerName||'—'}</td><td style="color:var(--muted)">${i.regionLabel||i.region||'—'}</td><td>${bdg(i.status)}</td></tr>`).join(''):'<tr><td colspan="3" class="no-data">暫無資料</td></tr>';
+}
+
+// PRODUCTS
+function rProd(){
+  const q=v('pq'),cat=v('pcat'),st=v('pst');
+  let list=D.products;
+  if(q)list=list.filter(p=>(p.model+p.series+p.category).toLowerCase().includes(q.toLowerCase()));
+  if(cat)list=list.filter(p=>p.category===cat);
+  if(st)list=list.filter(p=>p.status===st);
+  document.getElementById('prod-tb').innerHTML=list.length?list.map(p=>`<tr>
+    <td><b>${p.model||'—'}</b></td><td style="color:var(--muted)">${p.series||'—'}</td><td>${p.category||'—'}</td>
+    <td>${p.watt?p.watt+'W':'—'}</td><td style="color:var(--muted)">${p.cct||'—'}</td>
+    <td style="font-family:'Space Mono',monospace">NT$ ${fmt(p.stdPrice||p.price||0)}</td>
+    <td style="font-family:'Space Mono',monospace;color:var(--gold)">NT$ ${fmt(p.projPrice||0)}</td>
+    <td>${bdg(p.status||'上架')}</td>
+    <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button></td>
+  </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無產品資料</td></tr>';
+}
+function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';showM('modal-prod');}
+function editProd(id){
+  const p=D.products.find(x=>String(x.id)===String(id));if(!p)return;
+  document.getElementById('pm-title').textContent='編輯產品';
+  fv('p-id',p.id);fv('p-model',p.model);fv('p-series',p.series);
+  sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
+  fv('p-watt',p.watt||'');fv('p-cct',p.cct||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',p.projPrice||0);
+  fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');
+  fv('p-img',(p.images&&p.images[0])||'');prevImg();showM('modal-prod');
+}
+function clearPF(){['p-id','p-model','p-series','p-watt','p-cct','p-price','p-proj','p-cri','p-cert','p-desc','p-img'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
+async function saveProd(){
+  const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
+  const id=v('p-id')||'P'+Date.now();
+  const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
+    watt:v('p-watt'),cct:v('p-cct'),stdPrice:Number(v('p-price'))||0,projPrice:Number(v('p-proj'))||0,
+    cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],
+    catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈'};
+  const idx=D.products.findIndex(x=>String(x.id)===String(id));
+  if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
+  rProd();hideM('modal-prod');toast('同步中...');
+  const res=await apiPost('upsertProduct',rec);
+  toast(res&&res.success?'✓ 已同步到 Google Sheets':'⚠ 本地更新，同步失敗');
+}
+async function delProd(id,name){
+  if(!confirm(`確定刪除 ${name}？`))return;
+  D.products=D.products.filter(x=>String(x.id)!==String(id));
+  rProd();await apiPost('deleteProduct',{id});toast('✓ 已刪除');
+}
+function prevImg(){const u=v('p-img');const prev=g('p-prev');if(u){g('p-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
+
+// INVENTORY
+function rInv(){
+  const q=v('iq'),cat=v('icat');
+  let list=D.inventory;
+  if(q)list=list.filter(i=>(i.model+i.series).toLowerCase().includes(q.toLowerCase()));
+  if(cat)list=list.filter(i=>i.category===cat);
+  document.getElementById('inv-tb').innerHTML=list.length?list.map(i=>`<tr>
+    <td><b>${i.model||'—'}</b></td><td style="color:var(--muted)">${i.series||'—'}</td>
+    <td>${i.cct||'—'}</td><td>${i.beam||'—'}</td><td>${i.color||'—'}</td>
+    <td style="font-family:'Space Mono',monospace">${i.totalQty||i.qty||0}</td>
+    <td style="font-family:'Space Mono',monospace;color:${Number(i.availableQty||0)>0?'var(--green)':'var(--red)'}">${i.availableQty||0}</td>
+    <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editInv('${esc(i.id||i.model)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delInv('${esc(i.id||i.model)}','${esc(i.model)}')">刪除</button></td>
+  </tr>`).join(''):'<tr><td colspan="8" class="no-data">暫無庫存資料</td></tr>';
+}
+function openInvM(){['i-id','i-model','i-series','i-cct','i-color','i-beam'].forEach(k=>fv(k,''));fv('i-qty',0);fv('i-avail',0);document.getElementById('im-title').textContent='新增庫存';showM('modal-inv');}
+function editInv(id){
+  const i=D.inventory.find(x=>String(x.id||x.model)===String(id));if(!i)return;
+  document.getElementById('im-title').textContent='編輯庫存';
+  fv('i-id',i.id||i.model);fv('i-model',i.model);fv('i-series',i.series||'');
+  sel('i-cat',i.category||'商照燈');fv('i-cct',i.cct||'');fv('i-color',i.color||'');fv('i-beam',i.beam||'');
+  fv('i-qty',i.totalQty||i.qty||0);fv('i-avail',i.availableQty||0);showM('modal-inv');
+}
+async function saveInv(){
+  const model=v('i-model').trim();if(!model){toast('請填寫型號');return;}
+  const id=v('i-id')||'INV'+Date.now();
+  const rec={id,model,series:v('i-series'),category:g('i-cat').value,cct:v('i-cct'),color:v('i-color'),beam:v('i-beam'),totalQty:Number(v('i-qty'))||0,availableQty:Number(v('i-avail'))||0};
+  const idx=D.inventory.findIndex(x=>String(x.id||x.model)===String(id));
+  if(idx>=0)D.inventory[idx]=rec;else D.inventory.unshift(rec);
+  rInv();hideM('modal-inv');toast('同步中...');
+  const res=await apiPost('upsertInventory',rec);
+  toast(res&&res.success?'✓ 庫存已同步':'⚠ 本地更新，同步失敗');
+}
+async function delInv(id,name){
+  if(!confirm(`確定刪除 ${name} 庫存？`))return;
+  D.inventory=D.inventory.filter(x=>String(x.id||x.model)!==String(id));
+  rInv();await apiPost('deleteInventory',{id});toast('✓ 已刪除');
+}
+
+// ORDERS
+function rOrd(){
+  const q=v('oq'),st=v('ost');
+  let list=[...D.orders].reverse();
+  if(q)list=list.filter(o=>(o.customerName+o.company+o.projectName).toLowerCase().includes(q.toLowerCase()));
+  if(st)list=list.filter(o=>o.status===st);
+  document.getElementById('ord-tb').innerHTML=list.length?list.map(o=>`<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${String(o.id||'—').slice(0,16)}</td>
+    <td style="color:var(--muted)">${o.date||'—'}</td><td><b>${o.customerName||'—'}</b></td><td>${o.company||'—'}</td><td>${o.projectName||'—'}</td>
+    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${o.items||'—'}</td>
+    <td style="font-family:'Space Mono',monospace">NT$ ${fmt(o.subtotal||o.total||0)}</td>
+    <td>${bdg(o.status||'已下載')}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="openRec('orders','${esc(o.id)}')">處理</button></td>
+  </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無報價記錄</td></tr>';
+}
+
+// SAMPLES
+function rSamp(){
+  const q=v('sq'),st=v('sst');
+  let list=[...D.samples].reverse();
+  if(q)list=list.filter(s=>(s.contactName+s.company+s.customerName+'').toLowerCase().includes(q.toLowerCase()));
+  if(st)list=list.filter(s=>s.status===st);
+  document.getElementById('samp-tb').innerHTML=list.length?list.map(s=>`<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${String(s.id||'—').slice(0,14)}</td>
+    <td style="color:var(--muted)">${s.date||'—'}</td><td><b>${s.contactName||s.customerName||'—'}</b></td>
+    <td>${s.company||'—'}</td><td>${s.phone||'—'}</td>
+    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${a2s(s.items)}</td>
+    <td>${bdg(s.status)}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="openRec('samples','${esc(s.id)}')">處理</button></td>
+  </tr>`).join(''):'<tr><td colspan="8" class="no-data">暫無樣品申請</td></tr>';
+}
+
+// INSTALLS
+function rInst(){
+  const q=v('nq'),st=v('nst');
+  let list=[...D.installs].reverse();
+  if(q)list=list.filter(i=>(i.customerName+i.company+i.projectName+'').toLowerCase().includes(q.toLowerCase()));
+  if(st)list=list.filter(i=>i.status===st);
+  document.getElementById('inst-tb').innerHTML=list.length?list.map(i=>`<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${String(i.id||'—').slice(0,14)}</td>
+    <td style="color:var(--muted)">${i.date||'—'}</td><td><b>${i.customerName||'—'}</b></td>
+    <td>${i.company||'—'}</td><td>${i.projectName||'—'}</td><td>${i.regionLabel||i.region||'—'}</td>
+    <td style="font-family:'Space Mono',monospace">NT$ ${fmt(i.grandTotal||0)}</td>
+    <td>${bdg(i.status)}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="openRec('installs','${esc(i.id)}')">處理</button></td>
+  </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無安裝申請</td></tr>';
+}
+
+// VISITS
+function rVis(){
+  const q=v('vq'),st=v('vst');
+  let list=[...D.visits].reverse();
+  if(q)list=list.filter(x=>(x.customerName+x.company+'').toLowerCase().includes(q.toLowerCase()));
+  if(st)list=list.filter(x=>x.status===st);
+  document.getElementById('vis-tb').innerHTML=list.length?list.map(x=>`<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:10px">${String(x.id||'—').slice(0,14)}</td>
+    <td style="color:var(--muted)">${x.date||'—'}</td><td><b>${x.visitDate||'—'}</b></td><td>${x.visitSlot||'—'}</td>
+    <td><b>${x.customerName||'—'}</b></td><td>${x.company||'—'}</td><td>${x.phone||'—'}</td>
+    <td>${bdg(x.status)}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="openRec('visits','${esc(x.id)}')">處理</button></td>
+  </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無預約申請</td></tr>';
+}
+
+// MEMBERS
+function rMem(){
+  const q=v('mq'),st=v('mst'),r=v('mr');
+  let list=D.members;
+  if(q)list=list.filter(m=>(m.username+m.name+m.company+'').toLowerCase().includes(q.toLowerCase()));
+  if(st)list=list.filter(m=>m.status===st);
+  if(r)list=list.filter(m=>m.role===r);
+  document.getElementById('mem-tb').innerHTML=list.length?list.map(m=>`<tr>
+    <td style="font-family:'Space Mono',monospace"><b>${m.username||'—'}</b></td><td>${m.name||'—'}</td>
+    <td>${m.company||'—'}</td><td>${m.phone||'—'}</td>
+    <td>${m.role==='vip'?'<span class="badge b-vip">VIP</span>':m.role==='admin'?'<span class="badge b-pending">Admin</span>':'<span class="badge b-new">Member</span>'}</td>
+    <td>${m.status==='active'?'<span class="badge b-ok">開通</span>':m.status==='pending'?'<span class="badge b-pending">待審</span>':'<span class="badge b-cancel">停用</span>'}</td>
+    <td style="color:var(--muted);font-size:10px">${m.approvedAt||'—'}</td>
+    <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editMem('${esc(m.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delMem('${esc(m.id)}','${esc(m.name)}')">刪除</button></td>
+  </tr>`).join(''):'<tr><td colspan="8" class="no-data">暫無會員資料</td></tr>';
+}
+function openMemM(){['m-id','m-user','m-pass','m-name','m-pos','m-co','m-ph','m-email','m-tax'].forEach(k=>fv(k,''));document.getElementById('mm-title').textContent='新增會員';showM('modal-mem');}
+function editMem(id){
+  const m=D.members.find(x=>String(x.id)===String(id));if(!m)return;
+  document.getElementById('mm-title').textContent='編輯會員';
+  fv('m-id',m.id);fv('m-user',m.username||'');fv('m-pass',m.password||'');fv('m-name',m.name||'');
+  fv('m-pos',m.position||'');fv('m-co',m.company||'');fv('m-ph',m.phone||'');fv('m-email',m.email||'');fv('m-tax',m.taxId||'');
+  sel('m-role',m.role||'member');sel('m-st',m.status||'active');showM('modal-mem');
+}
+async function saveMem(){
+  const uname=v('m-user').trim(),name=v('m-name').trim();if(!uname||!name){toast('請填寫帳號和姓名');return;}
+  const id=v('m-id')||'M'+Date.now();
+  const rec={id,username:uname,name,password:v('m-pass'),position:v('m-pos'),company:v('m-co'),phone:v('m-ph'),email:v('m-email'),taxId:v('m-tax'),role:g('m-role').value,status:g('m-st').value,approvedAt:new Date().toISOString().split('T')[0]};
+  const idx=D.members.findIndex(x=>String(x.id)===String(id));
+  if(idx>=0)D.members[idx]=rec;else D.members.unshift(rec);
+  rMem();hideM('modal-mem');toast('同步中...');
+  const res=await apiPost('upsertMember',rec);
+  toast(res&&res.success?'✓ 會員已同步':'⚠ 本地更新，同步失敗');
+}
+async function delMem(id,name){
+  if(!confirm(`確定刪除會員 ${name}？`))return;
+  D.members=D.members.filter(x=>String(x.id)!==String(id));
+  rMem();await apiPost('deleteMember',{id});toast('✓ 已刪除');
+}
+
+// RECORD MODAL
+const STSTATUS={samples:['待處理','已寄出','已完成','已取消'],installs:['待確認','已確認','施工中','已完成','已取消'],visits:['待確認','已確認','已完成','已取消'],orders:['已下載','已成交','未成交']};
+const SHEETS={samples:'樣品申請',installs:'安裝申請',visits:'預約申請',orders:'報價記錄'};
+function openRec(type,id){
+  const rec=D[type].find(x=>String(x.id)===String(id));if(!rec)return;
+  fv('r-id',id);fv('r-sheet',SHEETS[type]);
+  document.getElementById('rm-title').textContent=(PT[type]||type)+' · 處理';
+  const FLD={
+    samples:[['聯繫人',rec.contactName||rec.customerName],['公司',rec.company],['電話',rec.phone],['地址',rec.address],['申請品項',a2s(rec.items)],['備註',rec.note]],
+    installs:[['聯繫人',rec.customerName],['公司',rec.company],['電話',rec.phone],['案名',rec.projectName],['服務區域',rec.regionLabel||rec.region],['崁燈數',rec.totalQty+'盞'],['安裝工資','NT$ '+fmt(rec.laborTotal||0)],['車馬費','NT$ '+fmt(rec.travelFee||0)],['預估總計','NT$ '+fmt(rec.grandTotal||0)]],
+    visits:[['聯繫人',rec.customerName],['公司',rec.company],['電話',rec.phone],['地址',rec.address],['預約日期',rec.visitDate],['預約時段',rec.visitSlot],['感興趣系列',rec.interestedSeries],['指定型號',rec.interestedModel],['備註',rec.note]],
+    orders:[['客戶',rec.customerName],['公司',rec.company],['案名',rec.projectName],['金額','NT$ '+fmt(rec.subtotal||0)],['折扣',rec.discount||'牌價']],
+  };
+  document.getElementById('r-detail').innerHTML=(FLD[type]||[]).filter(f=>f[1]&&f[1]!=='undefined'&&f[1]!=='0盞').map(f=>`<div><span style="color:var(--muted);display:inline-block;width:76px;font-size:10px">${f[0]}</span>${f[1]||'—'}</div>`).join('');
+  const sel=document.getElementById('r-status');
+  sel.innerHTML=(STSTATUS[type]||[]).map(s=>`<option ${s===rec.status?'selected':''}>${s}</option>`).join('');
+  fv('r-note',rec.adminNote||'');showM('modal-rec');
+}
+async function updateRec(){
+  const id=v('r-id'),sheet=v('r-sheet'),status=v('r-status'),note=v('r-note');
+  const type=Object.keys(SHEETS).find(k=>SHEETS[k]===sheet);
+  if(type){D[type]=D[type].map(x=>String(x.id)===String(id)?{...x,status,adminNote:note}:x);renderAll();setBadges();}
+  hideM('modal-rec');toast('更新中...');
+  const res=await apiPost('updateRecord',{sheetName:sheet,id,status,adminNote:note});
+  toast(res&&res.success?'✓ 狀態已更新':'⚠ 本地更新，同步失敗');
+}
+async function delRec(){
+  const id=v('r-id'),sheet=v('r-sheet');
+  if(!confirm('確定刪除此筆資料？'))return;
+  const type=Object.keys(SHEETS).find(k=>SHEETS[k]===sheet);
+  if(type){D[type]=D[type].filter(x=>String(x.id)!==String(id));renderAll();setBadges();}
+  hideM('modal-rec');await apiPost('deleteRecord',{sheetName:sheet,id});toast('✓ 已刪除');
+}
+
+// DISCOUNTS
+function rDiscs(){
+  document.getElementById('disc-tb').innerHTML=DISCS.length?DISCS.map(d=>`<tr>
+    <td><b style="font-family:'Space Mono',monospace;font-size:15px;color:var(--gold)">${d.code}</b></td>
+    <td style="font-family:'Space Mono',monospace">${d.rate}</td><td>${Math.round(d.rate*10)}折</td>
+    <td style="color:var(--muted)">${d.note||'—'}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delDisc('${d.code}')">刪除</button></td>
+  </tr>`).join(''):'<tr><td colspan="5" class="no-data">暫無折扣碼</td></tr>';
+}
+function saveDisc(){
+  const code=v('dc-code').trim().toUpperCase(),rate=Number(v('dc-rate')),note=v('dc-note').trim();
+  if(!code||isNaN(rate)||rate<=0||rate>1){toast('請填寫正確折扣碼和折扣率');return;}
+  if(DISCS.find(d=>d.code===code)){toast('此折扣碼已存在');return;}
+  DISCS.push({code,rate,note});localStorage.setItem('ldx_discs',JSON.stringify(DISCS));
+  rDiscs();hideM('modal-disc');toast('✓ 已新增（請同步更新 APP）');
+}
+function delDisc(code){
+  if(!confirm(`確定刪除折扣碼 ${code}？`))return;
+  DISCS=DISCS.filter(d=>d.code!==code);localStorage.setItem('ldx_discs',JSON.stringify(DISCS));
+  rDiscs();toast('✓ 已刪除');
+}
+
+// SETTINGS
+function initCfg(){
+  fv('cfg-url',localStorage.getItem('ldx_url')||DEFAULT_URL);
+  fv('cfg-email',localStorage.getItem('ldx_email')||'kim@ledouxlight.com.tw');
+  fv('cfg-co',localStorage.getItem('ldx_co')||'LEDOUX 諾科照明');
+  fv('cfg-phone',localStorage.getItem('ldx_phone')||'0965-502-319');
+  fv('cfg-cemail',localStorage.getItem('ldx_cemail')||'kim@ledouxlight.com.tw');
+}
+function saveCfg(){localStorage.setItem('ldx_url',v('cfg-url').trim());localStorage.setItem('ldx_email',v('cfg-email').trim());toast('✓ 連線設定已儲存');}
+function saveCo(){localStorage.setItem('ldx_co',v('cfg-co').trim());localStorage.setItem('ldx_phone',v('cfg-phone').trim());localStorage.setItem('ldx_cemail',v('cfg-cemail').trim());toast('✓ 公司資訊已儲存');}
+async function testConn(){
+  const url=v('cfg-url').trim()||DEFAULT_URL;
+  const el=document.getElementById('cfg-res');el.textContent='測試中...';
+  try{const r=await fetch(`${url}?action=ping`);const j=await r.json();el.innerHTML=j.success?`<span style="color:var(--green)">✅ 連線成功：${j.message}</span>`:`<span style="color:var(--red)">❌ 失敗：${j.error}</span>`;}
+  catch(e){el.innerHTML=`<span style="color:var(--red)">❌ 無法連線：${e.message}</span>`;}
+}
+async function initSheets(){
+  if(!confirm('確定要初始化 Google Sheets 工作表？'))return;
+  toast('初始化中...');const res=await apiPost('initHeaders',{});
+  toast(res&&res.success?'✅ 初始化完成':'⚠ 初始化失敗');
+}
+function clearCfg(){if(!confirm('確定清除本機設定？'))return;localStorage.clear();toast('清除完成');setTimeout(()=>location.reload(),1000);}
+
+// BADGES
+function setBadges(){
+  setB('b-samples',D.samples.filter(s=>s.status==='待處理').length);
+  setB('b-installs',D.installs.filter(s=>s.status==='待確認').length);
+  setB('b-visits',D.visits.filter(s=>s.status==='待確認').length);
+}
+function setB(id,n){const el=document.getElementById(id);if(!el)return;el.textContent=n;el.style.display=n>0?'inline':'none';}
+
+// UTILS
+function v(id){const el=document.getElementById(id);return el?el.value:'';}
+function g(id){return document.getElementById(id);}
+function fv(id,val){const el=document.getElementById(id);if(el)el.value=val;}
+function sel(id,val){const el=document.getElementById(id);if(el)el.value=val;}
+function set(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function fmt(n){return Number(n).toLocaleString();}
+function esc(s){return String(s||'').replace(/'/g,"\\'");}
+function a2s(x){return Array.isArray(x)?x.slice(0,2).join('、'):(x||'—');}
+function showM(id){document.getElementById(id).style.display='flex';}
+function hideM(id){document.getElementById(id).style.display='none';}
+function bdg(s){
+  const cls=!s?'b-new':['待處理','待確認'].includes(s)?'b-pending':['已完成','已成交','active','已寄出','已確認'].includes(s)?'b-ok':['已取消','未成交','disabled'].includes(s)?'b-cancel':s==='vip'?'b-vip':'b-new';
+  return`<span class="badge ${cls}">${s||'—'}</span>`;
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap').forEach(m=>m.style.display='none');});
+initCfg();
+loadAll();
+</script>
+</body>
+</html>
