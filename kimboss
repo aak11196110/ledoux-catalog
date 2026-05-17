@@ -304,55 +304,25 @@
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="section-head"><div class="section-title">系統設定</div></div>
-      <div class="flow-box">
-        <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">資料流說明 · 你不需要手動開 Excel</div>
-        <div class="flow">
-          <div class="flow-node"><b>管理後台</b>你在這裡操作</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node"><b>Apps Script</b>自動中繼</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node"><b>Google Sheets</b>實際資料庫</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node"><b>APP 前台</b>客戶看到</div>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:12px;line-height:1.8">
-          ✅ 在後台修改/新增/刪除產品 → Sheets 立即更新 → APP 下次開啟就看到新資料<br>
-          ✅ 客戶在 APP 填報價/申請 → Apps Script 自動寫入 Sheets → 後台同步後顯示紅點通知
-        </div>
-      </div>
+      
       <div class="settings-grid">
         <div class="settings-card">
           <h3>Google Sheets 連線</h3>
           <div class="form-group"><label class="form-label">Apps Script 網址（SHEET_URL）</label><input class="form-input" id="cfg-url" style="font-family:'Space Mono',monospace;font-size:10px" placeholder="https://script.google.com/macros/s/..."><div style="font-size:10px;color:var(--muted);margin-top:4px">就是你 code 裡 SHEET_URL 那一串</div></div>
           <div class="form-group"><label class="form-label">通知 Email</label><input class="form-input" id="cfg-email"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-primary" onclick="saveCfg()">儲存設定</button>
-            <button class="btn btn-outline" onclick="testConn()">測試連線</button>
+            <button class="btn btn-primary" onclick="saveCfg();testConn()">儲存並測試連線</button>
           </div>
           <div id="cfg-res" style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6"></div>
         </div>
         <div class="settings-card">
           <h3>公司資訊</h3>
-          <div class="form-group"><label class="form-label">公司名稱</label><input class="form-input" id="cfg-co"></div>
-          <div class="form-group"><label class="form-label">聯絡電話</label><input class="form-input" id="cfg-phone"></div>
-          <div class="form-group"><label class="form-label">電子信箱</label><input class="form-input" id="cfg-cemail"></div>
-          <button class="btn btn-primary" onclick="saveCo()">儲存</button>
+          <div class="form-group"><label class="form-label">公司名稱</label><input class="form-input" id="cfg-co" onblur="saveCo()"></div>
+          <div class="form-group"><label class="form-label">聯絡電話</label><input class="form-input" id="cfg-phone" onblur="saveCo()"></div>
+          <div class="form-group"><label class="form-label">電子信箱</label><input class="form-input" id="cfg-cemail" onblur="saveCo()"></div>
         </div>
-        <div class="settings-card">
-          <h3>快速操作</h3>
-          <div class="setting-row"><span>開啟 Google Sheets</span><button class="btn btn-sm btn-outline" onclick="window.open('https://docs.google.com/spreadsheets','_blank')">開啟 →</button></div>
-          <div class="setting-row"><span>初始化所有工作表</span><button class="btn btn-sm btn-gold" onclick="initSheets()">執行</button></div>
-          <div class="setting-row"><span>清除本機設定</span><button class="btn btn-sm btn-danger" onclick="clearCfg()">清除</button></div>
-        </div>
-        <div class="settings-card">
-          <h3>APP 折扣碼同步說明</h3>
-          <div style="font-size:11px;color:var(--muted);line-height:1.8">
-            在「折扣碼」頁面新增後，找到 APP 程式碼裡的：<br>
-            <code style="background:var(--bg2);padding:3px 7px;display:block;margin:6px 0;font-family:'Space Mono',monospace;font-size:10px">const DISCOUNT_CODES = { "LED006":0.6, ... }</code>
-            把新折扣碼加進去即可，格式：<br>
-            <code style="font-family:'Space Mono',monospace;background:var(--bg2);padding:2px 5px">"代碼": 折扣率數字</code>
-          </div>
-        </div>
+      
+      
       </div>
     </div>
 
