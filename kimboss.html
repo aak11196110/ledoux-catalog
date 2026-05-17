@@ -235,8 +235,26 @@
     <div class="page" id="page-inventory">
       <div class="section-head"><div class="section-title">庫存管理</div><button class="btn btn-gold" onclick="openInvM()">＋ 新增庫存</button></div>
       <div class="filter-bar">
-        <input class="f-input" id="iq" placeholder="🔍 搜尋型號..." oninput="rInv()">
-        <select class="f-select" id="icat" onchange="rInv()"><option value="">所有分類</option><option>商照燈</option><option>線型燈</option></select>
+<input class="f-input" id="iq" placeholder="🔍 搜尋型號..." oninput="rInv()" style="min-width:160px">
+<div style="display:flex;flex-direction:column;gap:4px">
+  <span style="font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--gold);letter-spacing:2px">商照燈</span>
+  <select class="f-select" id="icat-comm" onchange="onInvCatChange('comm')">
+    <option value="">── 選擇系列 ──</option>
+    <option>HEPBURN 赫本</option><option>BLADE 刀鋒</option><option>METIS 美緹絲</option>
+    <option>ARC 弧光</option><option>ZOOM 變焦</option><option>磁吸系列</option>
+    <option>軌道燈系列</option><option>吸頂燈系列</option><option>商照燈－特殊款／其他</option>
+  </select>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+  <span style="font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--gold);letter-spacing:2px">線型燈</span>
+  <select class="f-select" id="icat-line" onchange="onInvCatChange('line')">
+    <option value="">── 選擇系列 ──</option>
+    <option>LINEAR 麗娜</option><option>CABINET LINEAR LIGHT 高端線條燈</option>
+    <option>鋁擠洗牆燈</option><option>鋁條燈</option>
+    <option>LED STRIP LIGHT 低壓燈帶</option><option>矽膠燈帶</option>
+    <option>線型燈－特殊款／其他</option>
+  </select>
+</div>
       </div>
       <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>色溫</th><th>光束角</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th></tr></thead><tbody id="inv-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
@@ -627,74 +645,25 @@ function prevImg(){const u=v('p-img');const prev=g('p-prev');if(u){g('p-prev-img
 // INVENTORY
 function rInv(){
   const q=v('iq');
+  const commSeries=v('icat-comm');
+  const lineSeries=v('icat-line');
   let list=D.inventory;
   if(q)list=list.filter(i=>(i.model+i.series).toLowerCase().includes(q.toLowerCase()));
-
-  function buildCatBlock(catName, items){
-    const seriesMap={};
-    items.forEach(i=>{const s=i.series||'其他';if(!seriesMap[s])seriesMap[s]=[];seriesMap[s].push(i);});
-    const seriesRows=Object.keys(seriesMap).map(s=>{
-      const itemRows=seriesMap[s].map(i=>`
-        <tr class="inv-item-row" style="display:none" data-series-key="${catName}-${s}">
-          <td><b>${i.model||'—'}</b></td>
-          <td style="color:var(--muted)">${i.series||'—'}</td>
-          <td>${i.cct||'—'}</td>
-          <td>${i.color||'—'}</td>
-          <td>${i.totalQty||i.qty||0}</td>
-          <td style="font-family:'Space Mono',monospace;color:${Number(i.availableQty||0)>0?'var(--green)':'var(--red)'}">${i.availableQty||0}</td>
-          <td style="white-space:nowrap">
-            <button class="btn btn-sm btn-outline" onclick="editInv('${esc(i.id||i.model)}')">編輯</button>
-            <button class="btn btn-sm btn-danger" onclick="delInv('${esc(i.id||i.model)}','${esc(i.model)}')">刪除</button>
-          </td>
-        </tr>`).join('');
-      return `
-        <tr class="inv-series-hd" onclick="toggleSeries('${catName}-${s}')" style="cursor:pointer">
-          <td colspan="7" style="background:var(--bg2);padding:10px 16px;font-size:12px;letter-spacing:1px;border-bottom:0.5px solid var(--bdr);">
-            <span id="sarrow-${catName}-${s}" style="margin-right:8px">▶</span>${s}
-            <span style="font-size:10px;color:var(--muted);margin-left:6px">${seriesMap[s].length} 項</span>
-          </td>
-        </tr>${itemRows}`;
-    }).join('');
-    return seriesRows||`<tr><td colspan="7" class="no-data" style="font-size:10px">暫無資料</td></tr>`;
-  }
-
-  const comm=list.filter(i=>i.category==='商照燈');
-  const line=list.filter(i=>i.category==='線型燈');
-
-  const html=`
-  <tr>
-    <td colspan="7" style="padding:0;vertical-align:top">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:0.5px solid var(--bdr)">
-        <!-- 商照燈 -->
-        <div style="border-right:0.5px solid var(--bdr)">
-          <div style="background:var(--blk);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:3px;padding:14px 18px;">
-            商照燈
-            <span style="font-size:10px;color:var(--muted);margin-left:8px">${comm.length} 項</span>
-          </div>
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr style="background:var(--blk)">
-              <th>型號</th><th>系列</th><th>色溫</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th>
-            </tr></thead>
-            <tbody id="inv-comm-tb">${buildCatBlock('商照燈',comm)}</tbody>
-          </table>
-        </div>
-        <!-- 線型燈 -->
-        <div>
-          <div style="background:var(--blk);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:3px;padding:14px 18px;">
-            線型燈
-            <span style="font-size:10px;color:var(--muted);margin-left:8px">${line.length} 項</span>
-          </div>
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr style="background:var(--blk)">
-              <th>型號</th><th>系列</th><th>色溫</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th>
-            </tr></thead>
-            <tbody id="inv-line-tb">${buildCatBlock('線型燈',line)}</tbody>
-          </table>
-        </div>
-      </div>
-    </td>
-  </tr>`;
-  document.getElementById('inv-tb').innerHTML=html;
+  if(commSeries)list=list.filter(i=>i.series===commSeries);
+  else if(lineSeries)list=list.filter(i=>i.series===lineSeries);
+  document.getElementById('inv-tb').innerHTML=list.length?list.map(i=>`<tr>
+    <td><b>${i.model||'—'}</b></td>
+    <td style="color:var(--muted)">${i.series||'—'}</td>
+    <td>${i.cct||'—'}</td><td>${i.color||'—'}</td>
+    <td>${i.totalQty||i.qty||0}</td>
+    <td style="font-family:'Space Mono',monospace;color:${Number(i.availableQty||0)>0?'var(--green)':'var(--red)'}">${i.availableQty||0}</td>
+    <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editInv('${esc(i.id||i.model)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delInv('${esc(i.id||i.model)}','${esc(i.model)}')">刪除</button></td>
+  </tr>`).join(''):'<tr><td colspan="8" class="no-data">暫無庫存資料</td></tr>';
+}
+function onInvCatChange(which){
+  if(which==='comm')document.getElementById('icat-line').value='';
+  else document.getElementById('icat-comm').value='';
+  rInv();
 }
 function toggleSeries(key){
   const rows=document.querySelectorAll(`[data-series-key="${key}"]`);
