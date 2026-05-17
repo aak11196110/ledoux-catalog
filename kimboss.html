@@ -629,15 +629,40 @@ function rInv(){
   const q=v('iq'),cat=v('icat');
   let list=D.inventory;
   if(q)list=list.filter(i=>(i.model+i.series).toLowerCase().includes(q.toLowerCase()));
-  if(cat)list=list.filter(i=>i.category===cat);
-  document.getElementById('inv-tb').innerHTML=list.length?list.map(i=>`<tr>
-    <td><b>${i.model||'—'}</b></td><td style="color:var(--muted)">${i.series||'—'}</td>
-    <td>${i.cct||'—'}</td><td>${i.beam||'—'}</td><td>${i.color||'—'}</td>
-    <td style="font-family:'Space Mono',monospace">${i.totalQty||i.qty||0}</td>
-    <td style="font-family:'Space Mono',monospace;color:${Number(i.availableQty||0)>0?'var(--green)':'var(--red)'}">${i.availableQty||0}</td>
-    <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editInv('${esc(i.id||i.model)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delInv('${esc(i.id||i.model)}','${esc(i.model)}')">刪除</button></td>
-  </tr>`).join(''):'<tr><td colspan="8" class="no-data">暫無庫存資料</td></tr>';
-}
+  if(cat&&cat!=='全部')list=list.filter(i=>i.category===cat);
+  const cats=['商照燈','線型燈'];
+  const rows=[];
+  cats.forEach(c=>{
+    const items=list.filter(i=>i.category===c);
+    if(cat&&cat!=='全部'&&cat!==c)return;
+    const seriesMap={};
+    items.forEach(i=>{const s=i.series||'其他';if(!seriesMap[s])seriesMap[s]=[];seriesMap[s].push(i);});
+    rows.push(`<tr class="inv-cat-row" onclick="toggleInvCat('${c}')">
+      <td colspan="8" style="background:var(--blk);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;padding:12px 14px;cursor:pointer;">
+        <span id="inv-cat-arrow-${c}" style="margin-right:8px">▶</span>${c}
+        <span style="font-size:10px;color:var(--muted);margin-left:8px">${items.length} 項</span>
+      </td></tr>`);
+    Object.keys(seriesMap).forEach(s=>{
+      rows.push(`<tr class="inv-series-row inv-cat-${c.replace(/\s/g,'_')}" style="display:none" onclick="toggleInvSeries('${c}','${s}')">
+        <td colspan="8" style="background:var(--bg2);color:var(--blk);font-size:12px;letter-spacing:1px;padding:10px 28px;cursor:pointer;border-bottom:0.5px solid var(--bdr);">
+          <span id="inv-series-arrow-${c}-${s}" style="margin-right:8px">▸</span>${s}
+          <span style="font-size:10px;color:var(--muted);margin-left:6px">${seriesMap[s].length} 項</span>
+        </td></tr>`);
+      seriesMap[s].forEach(i=>{
+        rows.push(`<tr class="inv-item-row inv-cat-${c.replace(/\s/g,'_')} inv-series-${c.replace(/\s/g,'_')}-${s.replace(/\s/g,'_')}" style="display:none">
+          <td><b>${i.model||'—'}</b></td>
+          <td style="color:var(--muted)">${i.series||'—'}</td>
+          <td>${i.cct||'—'}</td><td>${i.color||'—'}</td>
+          <td>${i.totalQty||i.qty||0}</td>
+          <td style="font-family:'Space Mono',monospace;color:${Number(i.availableQty||0)>0?'var(--green)':'var(--red)'}">${i.availableQty||0}</td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-sm btn-outline" onclick="editInv('${esc(i.id||i.model)}')">編輯</button>
+            <button class="btn btn-sm btn-danger" onclick="delInv('${esc(i.id||i.model)}','${esc(i.model)}')">刪除</button>
+          </td></tr>`);
+      });
+    });
+  });
+ 
 function openInvM(){['i-id','i-model','i-series','i-cct','i-color','i-beam'].forEach(k=>fv(k,''));fv('i-qty',0);fv('i-avail',0);document.getElementById('im-title').textContent='新增庫存';showM('modal-inv');}
 function editInv(id){
   const i=D.inventory.find(x=>String(x.id||x.model)===String(id));if(!i)return;
@@ -928,7 +953,24 @@ function bdg(s){
   const cls=!s?'b-new':['待處理','待確認'].includes(s)?'b-pending':['已完成','已成交','active','已寄出','已確認'].includes(s)?'b-ok':['已取消','未成交','disabled'].includes(s)?'b-cancel':s==='vip'?'b-vip':'b-new';
   return`<span class="badge ${cls}">${s||'—'}</span>`;
 }
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
+function toggleInvCat(cat){
+  const key=cat.replace(/\s/g,'_');
+  const rows=document.querySelectorAll('.inv-cat-'+key);
+  const arrow=document.getElementById('inv-cat-arrow-'+cat);
+  const isOpen=rows[0]&&rows[0].style.display!=='none';
+  rows.forEach(r=>r.style.display=isOpen?'none':'table-row');
+  if(arrow)arrow.textContent=isOpen?'▶':'▼';
+  if(isOpen){document.querySelectorAll('.inv-series-'+key+'-open').forEach(r=>r.style.display='none');}
+}
+function toggleInvSeries(cat,series){
+  const key=cat.replace(/\s/g,'_')+'-'+series.replace(/\s/g,'_');
+  const rows=document.querySelectorAll('.inv-series-'+key);
+  const arrow=document.getElementById('inv-series-arrow-'+cat+'-'+series);
+  const isOpen=rows[0]&&rows[0].style.display!=='none';
+  rows.forEach(r=>r.style.display=isOpen?'none':'table-row');
+  if(arrow)arrow.textContent=isOpen?'▸':'▾';
+}
+  function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap').forEach(m=>m.style.display='none');});
 initCfg();
