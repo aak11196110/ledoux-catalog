@@ -738,10 +738,33 @@ function openRec(type,id){
 async function updateRec(){
   const id=v('r-id'),sheet=v('r-sheet'),status=v('r-status'),note=v('r-note');
   const type=Object.keys(SHEETS).find(k=>SHEETS[k]===sheet);
+  const rec=type?D[type].find(x=>String(x.id)===String(id)):null;
+  if(type==='orders'&&rec){
+    const wasConfirm=rec.status==='已成交';
+    const nowConfirm=status==='已成交';
+    if(nowConfirm&&!wasConfirm) await adjustInventory(rec,-1);
+    else if(!nowConfirm&&wasConfirm) await adjustInventory(rec,+1);
+  }
   if(type){D[type]=D[type].map(x=>String(x.id)===String(id)?{...x,status,adminNote:note}:x);renderAll();setBadges();}
   hideM('modal-rec');toast('更新中...');
   const res=await apiPost('updateRecord',{sheetName:sheet,id,status,adminNote:note});
   toast(res&&res.success?'✓ 狀態已更新':'⚠ 本地更新，同步失敗');
+}
+async function adjustInventory(rec,direction){
+  if(!rec||!rec.items)return;
+  const itemStr=typeof rec.items==='string'?rec.items:'';
+  const parts=itemStr.split(/[、,]/);
+  for(const part of parts){
+    const match=part.match(/([^×x]+)[×x](\d+)/);
+    if(!match)continue;
+    const model=match[1].trim();
+    const qty=parseInt(match[2]);
+    const inv=D.inventory.find(i=>i.model===model);
+    if(!inv)continue;
+    inv.availableQty=Math.max(0,Number(inv.availableQty||0)+(direction*qty));
+    await apiPost('upsertInventory',{...inv});
+  }
+  rInv();
 }
 async function delRec(){
   const id=v('r-id'),sheet=v('r-sheet');
