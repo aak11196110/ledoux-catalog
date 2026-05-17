@@ -404,6 +404,10 @@
   <div class="modal-body">
     <input type="hidden" id="r-id"><input type="hidden" id="r-sheet">
     <div id="r-detail" style="background:var(--bg2);padding:14px;margin-bottom:16px;font-size:11px;line-height:1.9;border-left:3px solid var(--gold)"></div>
+    <div id="r-qty-wrap" style="display:none;margin-bottom:15px">
+  <label class="form-label">修改數量（盞）</label>
+  <div id="r-items-list"></div>
+</div>
     <div class="form-group"><label class="form-label">更新狀態</label><select class="form-select" id="r-status"></select></div>
     <div class="form-group"><label class="form-label">內部備註</label><textarea class="form-textarea" id="r-note" placeholder="備註（不顯示給客戶）"></textarea></div>
     <div class="form-actions">
@@ -733,6 +737,25 @@ function openRec(type,id){
   document.getElementById('r-detail').innerHTML=(FLD[type]||[]).filter(f=>f[1]&&f[1]!=='undefined'&&f[1]!=='0盞').map(f=>`<div><span style="color:var(--muted);display:inline-block;width:76px;font-size:10px">${f[0]}</span>${f[1]||'—'}</div>`).join('');
   const sel=document.getElementById('r-status');
   sel.innerHTML=(STSTATUS[type]||[]).map(s=>`<option ${s===rec.status?'selected':''}>${s}</option>`).join('');
+  const qWrap=document.getElementById('r-qty-wrap');
+const qList=document.getElementById('r-items-list');
+if(type==='orders'&&rec.items){
+  qWrap.style.display='block';
+  const parts=(rec.items||'').split(/[、,]/).filter(x=>x.trim());
+  qList.innerHTML=parts.map((p,i)=>{
+    const m=p.match(/([^×x]+)[×x](\d+)/);
+    const model=m?m[1].trim():p.trim();
+    const qty=m?m[2]:'1';
+    return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="flex:1;font-size:11px">${model}</span>
+      <input type="number" min="0" value="${qty}" id="r-qty-${i}" style="width:70px;padding:6px;border:0.5px solid var(--bdr);font-size:12px;text-align:center">
+      <span style="font-size:10px;color:var(--muted)">盞</span>
+    </div>`;
+  }).join('');
+} else {
+  qWrap.style.display='none';
+  qList.innerHTML='';
+}
   fv('r-note',rec.adminNote||'');showM('modal-rec');
 }
 async function updateRec(){
@@ -740,12 +763,31 @@ async function updateRec(){
   const type=Object.keys(SHEETS).find(k=>SHEETS[k]===sheet);
   const rec=type?D[type].find(x=>String(x.id)===String(id)):null;
   if(type==='orders'&&rec){
-    const wasConfirm=rec.status==='已成交';
-    const nowConfirm=status==='已成交';
-    if(nowConfirm&&!wasConfirm) await adjustInventory(rec,-1);
-    else if(!nowConfirm&&wasConfirm) await adjustInventory(rec,+1);
+    const qList=document.getElementById('r-items-list');
+    if(qList&&qList.children.length>0){
+      const parts=(rec.items||'').split(/[、,]/).filter(x=>x.trim());
+      const newItems=parts.map((p,i)=>{
+        const m=p.match(/([^×x]+)[×x](\d+)/);
+        const model=m?m[1].trim():p.trim();
+        const newQty=Number(document.getElementById('r-qty-'+i)?.value||0);
+        return`${model}×${newQty}`;
+      }).join('、');
+      const wasConfirm=rec.status==='已成交';
+      const nowConfirm=status==='已成交';
+      if(wasConfirm){await adjustInventory(rec,+1);await adjustInventory({...rec,items:newItems},-1);}
+      else if(nowConfirm){await adjustInventory({...rec,items:newItems},-1);}
+      if(type)D[type]=D[type].map(x=>String(x.id)===String(id)?{...x,items:newItems,status,adminNote:note}:x);
+    } else {
+      const wasConfirm=rec.status==='已成交';
+      const nowConfirm=status==='已成交';
+      if(nowConfirm&&!wasConfirm)await adjustInventory(rec,-1);
+      else if(!nowConfirm&&wasConfirm)await adjustInventory(rec,+1);
+      if(type)D[type]=D[type].map(x=>String(x.id)===String(id)?{...x,status,adminNote:note}:x);
+    }
+  } else {
+    if(type)D[type]=D[type].map(x=>String(x.id)===String(id)?{...x,status,adminNote:note}:x);
   }
-  if(type){D[type]=D[type].map(x=>String(x.id)===String(id)?{...x,status,adminNote:note}:x);renderAll();setBadges();}
+  renderAll();setBadges();
   hideM('modal-rec');toast('更新中...');
   const res=await apiPost('updateRecord',{sheetName:sheet,id,status,adminNote:note});
   toast(res&&res.success?'✓ 狀態已更新':'⚠ 本地更新，同步失敗');
