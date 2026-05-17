@@ -339,7 +339,29 @@
     <input type="hidden" id="p-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="p-model" placeholder="例：LD-H50-10W"></div>
-      <div class="form-group"><label class="form-label">系列 *</label><input class="form-input" id="p-series" placeholder="例：HEPBURN 赫本"></div>
+      <div class="form-group"><label class="form-label">系列 *</label><select class="form-select" id="p-series">
+  <option value="">請選擇系列</option>
+  <optgroup label="── 商照燈系列 ──">
+    <option>HEPBURN 赫本</option>
+    <option>BLADE 刀鋒</option>
+    <option>METIS 美緹絲</option>
+    <option>ARC 弧光</option>
+    <option>ZOOM 變焦</option>
+    <option>磁吸系列</option>
+    <option>軌道燈系列</option>
+    <option>吸頂燈系列</option>
+    <option>商照燈－特殊款／其他</option>
+  </optgroup>
+  <optgroup label="── 線型燈系列 ──">
+    <option>LINEAR 麗娜</option>
+    <option>CABINET LINEAR LIGHT 高端線條燈</option>
+    <option>鋁擠洗牆燈</option>
+    <option>鋁條燈</option>
+    <option>LED STRIP LIGHT 低壓燈帶</option>
+    <option>矽膠燈帶</option>
+    <option>線型燈－特殊款／其他</option>
+  </optgroup>
+</select></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">分類</label><select class="form-select" id="p-cat"><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select></div>
@@ -376,7 +398,29 @@
     <input type="hidden" id="i-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="i-model"></div>
-      <div class="form-group"><label class="form-label">系列</label><input class="form-input" id="i-series"></div>
+      <div class="form-group"><label class="form-label">系列</label><select class="form-select" id="i-series">
+  <option value="">請選擇系列</option>
+  <optgroup label="── 商照燈系列 ──">
+    <option>HEPBURN 赫本</option>
+    <option>BLADE 刀鋒</option>
+    <option>METIS 美緹絲</option>
+    <option>ARC 弧光</option>
+    <option>ZOOM 變焦</option>
+    <option>磁吸系列</option>
+    <option>軌道燈系列</option>
+    <option>吸頂燈系列</option>
+    <option>商照燈－特殊款／其他</option>
+  </optgroup>
+  <optgroup label="── 線型燈系列 ──">
+    <option>LINEAR 麗娜</option>
+    <option>CABINET LINEAR LIGHT 高端線條燈</option>
+    <option>鋁擠洗牆燈</option>
+    <option>鋁條燈</option>
+    <option>LED STRIP LIGHT 低壓燈帶</option>
+    <option>矽膠燈帶</option>
+    <option>線型燈－特殊款／其他</option>
+  </optgroup>
+</select
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">分類</label><select class="form-select" id="i-cat"><option>商照燈</option><option>線型燈</option></select></div>
@@ -553,7 +597,7 @@ function openProdM(){clearPF();document.getElementById('pm-title').textContent='
 function editProd(id){
   const p=D.products.find(x=>String(x.id)===String(id));if(!p)return;
   document.getElementById('pm-title').textContent='編輯產品';
-  fv('p-id',p.id);fv('p-model',p.model);fv('p-series',p.series);
+  fv('p-id',p.id);fv('p-model',p.model);sel('p-series',p.series||'');
   sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
   fv('p-watt',p.watt||'');fv('p-cct',p.cct||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',p.projPrice||0);
   fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');
@@ -598,7 +642,7 @@ function openInvM(){['i-id','i-model','i-series','i-cct','i-color','i-beam'].for
 function editInv(id){
   const i=D.inventory.find(x=>String(x.id||x.model)===String(id));if(!i)return;
   document.getElementById('im-title').textContent='編輯庫存';
-  fv('i-id',i.id||i.model);fv('i-model',i.model);fv('i-series',i.series||'');
+  fv('i-id',i.id||i.model);fv('i-model',i.model);sel('i-series',i.series||'');
   sel('i-cat',i.category||'商照燈');fv('i-cct',i.cct||'');fv('i-color',i.color||'');fv('i-beam',i.beam||'');
   fv('i-qty',i.totalQty||i.qty||0);fv('i-avail',i.availableQty||0);showM('modal-inv');
 }
