@@ -774,11 +774,14 @@ function renderModularFields(){
   const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
   ['cct','lens','outer','inner','acc'].forEach(k=>{
     if(!p[k]||!p[k].length)return;
-  p[k].forEach((item,i)=>{
+p[k].forEach((item,i)=>{
       const nm=typeof item==='object'?item.name:item;
       const qty=typeof item==='object'?item.qty:0;
-      html+=`<span style="color:var(--muted)">${labels[k]}・${nm} <span style="color:var(--green);font-size:10px">(庫存${qty})</span></span>
-      <input class="form-input" style="padding:4px 8px;font-size:11px" type="number" value="0" id="mod-${k}-${i}" placeholder="0">`;
+      html+=`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;grid-column:1/-1;padding:4px 0;border-bottom:0.5px solid var(--bdr)">
+        <input type="checkbox" id="mod-${k}-${i}" style="width:16px;height:16px;cursor:pointer">
+        <span style="color:var(--muted);font-size:11px">${labels[k]}・${nm}</span>
+        <span style="color:var(--green);font-size:10px;margin-left:4px">(庫存${qty})</span>
+      </label>`;
     });
   });
   fields.innerHTML=html||'<span style="color:var(--muted);font-size:11px;grid-column:1/-1">此系列尚未設定零件，請先至庫存零件管理新增</span>';
@@ -809,16 +812,19 @@ async function saveInv(){
   const id=v('i-id')||'INV'+Date.now();
   const mode=document.getElementById('modal-inv').dataset.mode||'single';
   let parts={};
-  if(mode==='modular'){
+ if(mode==='modular'){
     const series=v('i-series');
     const p=getSeriesParts(series);
-    const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
     ['cct','lens','outer','inner','acc'].forEach(k=>{
       if(!p[k])return;
-      p[k].forEach((val,i)=>{
-        const qty=Number(document.getElementById('mod-'+k+'-'+i)?.value||0);
-        if(!parts[k])parts[k]=[];
-        parts[k].push({name:val,qty});
+      p[k].forEach((item,i)=>{
+        const cb=document.getElementById('mod-'+k+'-'+i);
+        if(cb&&cb.checked){
+          const nm=typeof item==='object'?item.name:item;
+          const qty=typeof item==='object'?item.qty:0;
+          if(!parts[k])parts[k]=[];
+          parts[k].push({name:nm,qty});
+        }
       });
     });
   }
