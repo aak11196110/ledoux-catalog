@@ -774,8 +774,10 @@ function renderModularFields(){
   const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
   ['cct','lens','outer','inner','acc'].forEach(k=>{
     if(!p[k]||!p[k].length)return;
-    p[k].forEach((val,i)=>{
-      html+=`<span style="color:var(--muted)">${labels[k]}・${val}</span>
+  p[k].forEach((item,i)=>{
+      const nm=typeof item==='object'?item.name:item;
+      const qty=typeof item==='object'?item.qty:0;
+      html+=`<span style="color:var(--muted)">${labels[k]}・${nm} <span style="color:var(--green);font-size:10px">(庫存${qty})</span></span>
       <input class="form-input" style="padding:4px 8px;font-size:11px" type="number" value="0" id="mod-${k}-${i}" placeholder="0">`;
     });
   });
