@@ -3337,7 +3337,6 @@ if(urgentData){
             <button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button>
           </div>
         </div>
-  
       </div>
     </ErrorBoundary>
     );
