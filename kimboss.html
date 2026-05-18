@@ -642,7 +642,13 @@ async function apiGet(action){
   catch(e){return[];}
 }
 async function apiPost(action,data){
-  try{const r=await fetch(getURL(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,data})});return await r.json();}
+  try{
+    const form=new FormData();
+    form.append('action',action);
+    form.append('payload',encodeURIComponent(JSON.stringify(data)));
+    const r=await fetch(getURL(),{method:'POST',body:form});
+    return await r.json();
+  }
   catch(e){return{success:false,error:String(e)};}
 }
 
