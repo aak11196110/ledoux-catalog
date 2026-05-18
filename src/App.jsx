@@ -2137,6 +2137,8 @@ if(urgentData){
           <button className="tn-icon" title="借樣品" onClick={()=>{setSampOpen(v=>!v);setCartOpen(false);setInstOpen(false);}}>
             <FlaskIcon/>{sampCart.length>0&&<span className="tn-ibadge red">{sampCart.length}</span>}
           </button>
+          <button className="tn-icon" title="詢價單" onClick={()=>{setCartOpen(v=>!v);setSampOpen(false);setInstOpen(false);}}>
+            <BagIcon/>{cartCount>0&&<span className="tn-ibadge">{cartCount}</span>}
           </button>
           <div className="tn-user-info"><div className="tn-uname">{user.name}</div><div className="tn-ucomp">{user.company}</div></div>
           <span className={`tn-badge ${user.role==="admin"?"tb-admin":user.role==="vip"?"tb-vip":"tb-std"}`}>{roleLabel(user.role)}</span>
