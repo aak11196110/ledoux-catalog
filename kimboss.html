@@ -173,7 +173,8 @@
       <div class="sb-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="sb-icon">▪</span>儀表板</div>
       <div class="sb-section">產品</div>
       <div class="sb-item" onclick="nav('products')" id="nav-products"><span class="sb-icon">💡</span>燈具產品</div>
-      <div class="sb-item" onclick="nav('inventory')" id="nav-inventory"><span class="sb-icon">📦</span>庫存管理</div>
+      <div class="sb-item" onclick="nav('inventory')" id="nav-inventory"><span class="sb-icon">🎛</span>庫存管理</div>
+      <div class="sb-item" onclick="nav('parts')" id="nav-parts" style="padding-left:32px;font-size:10px"><span class="sb-icon">⚙</span>庫存零件管理</div>
       <div class="sb-section">業務</div>
       <div class="sb-item" onclick="nav('orders')" id="nav-orders"><span class="sb-icon">📋</span>報價記錄<span class="sb-badge" id="b-orders" style="display:none">0</span></div>
       <div class="sb-item" onclick="nav('samples')" id="nav-samples"><span class="sb-icon">📬</span>樣品申請<span class="sb-badge" id="b-samples" style="display:none">0</span></div>
@@ -258,7 +259,49 @@
       </div>
       <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>色溫</th><th>光束角</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th></tr></thead><tbody id="inv-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
+<!-- PARTS -->
+<div class="page" id="page-parts">
+  <div class="section-head"><div class="section-title">庫存零件管理</div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-bottom:24px">
+    <div class="tbl-wrap" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">色溫選項</div>
+        <button class="btn btn-sm btn-gold" onclick="addPartOption('cct')">＋ 新增</button>
+      </div>
+      <div id="parts-cct"></div>
+    </div>
+    <div class="tbl-wrap" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">透鏡角度</div>
+        <button class="btn btn-sm btn-gold" onclick="addPartOption('lens')">＋ 新增</button>
+      </div>
+      <div id="parts-lens"></div>
+    </div>
+    <div class="tbl-wrap" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">外框顏色</div>
+        <button class="btn btn-sm btn-gold" onclick="addPartOption('outer')">＋ 新增</button>
+      </div>
+      <div id="parts-outer"></div>
+    </div>
+    <div class="tbl-wrap" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">內框顏色</div>
+        <button class="btn btn-sm btn-gold" onclick="addPartOption('inner')">＋ 新增</button>
+      </div>
+      <div id="parts-inner"></div>
+    </div>
+    <div class="tbl-wrap" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">配件</div>
+        <button class="btn btn-sm btn-gold" onclick="addPartOption('acc')">＋ 新增</button>
+      </div>
+      <div id="parts-acc"></div>
+    </div>
+  </div>
+</div>
 
+<!-- ORDERS -->
     <!-- ORDERS -->
     <div class="page" id="page-orders">
       <div class="section-head"><div class="section-title">報價記錄</div></div>
@@ -541,7 +584,7 @@ let DISCS = JSON.parse(localStorage.getItem('ldx_discs')||JSON.stringify([
   {code:"LED007",rate:0.7,note:"一般專案"},
   {code:"LED008",rate:0.8,note:"大量採購"},
 ]));
-const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定'};
+const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',parts:'庫存零件管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定'};
 
 // API
 function getURL(){return localStorage.getItem('ldx_url')||DEFAULT_URL;}
@@ -564,7 +607,7 @@ async function loadAll(){
   }catch(e){setSS('err');toast('⚠ 同步失敗');}
 }
 function a(x){return Array.isArray(x)?x:[];}
-function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();}
+function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();}
 
 // NAV
 function nav(id){
@@ -894,7 +937,33 @@ async function delRec(){
   if(type){D[type]=D[type].filter(x=>String(x.id)!==String(id));renderAll();setBadges();}
   hideM('modal-rec');await apiPost('deleteRecord',{sheetName:sheet,id});toast('✓ 已刪除');
 }
-
+// PARTS
+let PARTS = JSON.parse(localStorage.getItem('ldx_parts')||JSON.stringify({
+  cct:['2700K','3000K','4000K','5000K','6500K'],
+  lens:['10°','24°','36°','60°'],
+  outer:['白色','黑色','銀色'],
+  inner:['白色','黑色'],
+  acc:[]
+}));
+function savePARTS(){localStorage.setItem('ldx_parts',JSON.stringify(PARTS));}
+function rParts(){
+  ['cct','lens','outer','inner','acc'].forEach(k=>{
+    const el=document.getElementById('parts-'+k);
+    if(!el)return;
+    el.innerHTML=PARTS[k].length?PARTS[k].map((v,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bdr)">
+        <input class="form-input" style="flex:1;padding:5px 8px;font-size:11px" value="${v}" onchange="PARTS['${k}'][${i}]=this.value;savePARTS()">
+        <button class="btn btn-sm btn-danger" onclick="delPartOption('${k}',${i})">刪</button>
+      </div>`).join(''):'<div style="font-size:10px;color:var(--muted);padding:8px 0">暫無項目</div>';
+  });
+}
+function addPartOption(k){
+  PARTS[k].push('新項目');savePARTS();rParts();
+}
+function delPartOption(k,i){
+  if(!confirm('確定刪除？'))return;
+  PARTS[k].splice(i,1);savePARTS();rParts();
+}
 // DISCOUNTS
 function rDiscs(){
   document.getElementById('disc-tb').innerHTML=DISCS.length?DISCS.map(d=>`<tr>
