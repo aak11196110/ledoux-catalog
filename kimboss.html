@@ -643,10 +643,8 @@ async function apiGet(action){
 }
 async function apiPost(action,data){
   try{
-    const form=new FormData();
-    form.append('action',action);
-    form.append('payload',encodeURIComponent(JSON.stringify(data)));
-    const r=await fetch(getURL(),{method:'POST',body:form});
+    const payload=encodeURIComponent(JSON.stringify(data));
+    const r=await fetch(`${getURL()}?action=${action}&payload=${payload}`);
     return await r.json();
   }
   catch(e){return{success:false,error:String(e)};}
