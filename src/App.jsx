@@ -183,7 +183,7 @@ const SYNONYMS = {
 };
 
 const HOT_KEYWORDS = ["崁燈","軌道燈","磁吸系統","鋁條燈","戶外燈","HEPBURN","EOS","48V","Ra≥95","調光","珠寶燈"];
-const COMPANY = { name:"台灣諾科照明有限公司", eng:"Ledoux Lighting Taiwan Co., Ltd.", email:"info@ledouxlight.com" };
+const COMPANY = { name:"台灣諾科照明有限公司", eng:"Ledoux Lighting Taiwan Co., Ltd.", email:"kim@ledouxlight.com.tw" };
 
 const INIT_PRODUCTS = [
   { id:1,  model:"HB.D110",     series:"HEPBURN 赫本",      category:"崁燈",    watt:"10W",    lumen:"680lm",   cct:"2700K/3000K/3500K/4000K", beam:"15°/24°/36°",     voltage:"220V",   cri:"Ra≥90", color:"白色/黑色",     cutout:"Ø95mm",  size:"Ø102×H114mm", install:"崁入式",   cert:"CE/3C", shipping:90,  stdPrice:980,  projPrice:790,  video:"", desc:"HEPBURN 系列經典崁燈，LUMINUS 光源，680lm，可選蜂窩網、布紋玻璃配件。", images:["https://www.ledouxlight.com/wp-content/uploads/2022/12/Led-Recessed-Light-HB.D110-White-300x300.png"], note:"可選配件：蜂窩網、布紋玻璃、條紋玻璃" },
@@ -3332,8 +3332,12 @@ if(urgentData){
             此為費用試算，僅供參考。實際費用以現場評估為準。<br/>
             生成 PDF 後業務將收到通知並與您確認詳情。
           </div>
-       
+          <button className="btn-gold" onClick={submitInst} disabled={!instRegion||installTypes.length===0}>送出安裝申請</button>
+          <button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button>
+        </div>
+      </div>
 
-    </ErrorBoundary>
+    </div>
+  </ErrorBoundary>
   );
 }
