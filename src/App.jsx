@@ -3341,13 +3341,6 @@ if(urgentData){
         </div>}
       </div>
 
-      {toast&&<div className="toast">{toast}</div>}
-        </div>
-    </div>
-    </>
-  );
-}
-
 // ✅ ErrorBoundary 包住整個 App，防止任何錯誤白屏
 export default function SafeApp() {
   return (
