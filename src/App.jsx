@@ -3333,19 +3333,7 @@ if(urgentData){
             生成 PDF 後業務將收到通知並與您確認詳情。
           </div>
        
-          {(installChoice===true||installChoice===null)&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成 · 下載燈具＋安裝整合報價單</button>}
-          <button className="btn-gold" disabled={!instRegion} onClick={()=>{
-            if(!instRegion){toast_("請先選擇安裝區域");return;}
-            generateInstallOnlyPDF();
-          }}>📄 生成安裝費用試算 PDF</button>
-        </div>}
-      </div>
 
-// ✅ ErrorBoundary 包住整個 App，防止任何錯誤白屏
-export default function SafeApp() {
-  return (
-    <ErrorBoundary>
-      <App />
     </ErrorBoundary>
   );
 }
