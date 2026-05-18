@@ -1398,7 +1398,7 @@ const [linearExp,  setLinearExp]  = useState(true);
   const [guestErr,   setGuestErr]   = useState({});
   // 折扣碼
   const [discountCode, setDiscountCode] = useState("");
-  const [discountRate, setDiscountRate] = useState(1); // 1=牌價, 0.6/0.7/0.8=折扣
+  const [discountRate, setDiscountRate] = useState(1);// 1=牌價, 折扣率
   const [discountLabel, setDiscountLabel] = useState("");
   // 安裝詢問 Modal
   const [installAskModal, setInstallAskModal] = useState(false);
