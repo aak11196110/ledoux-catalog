@@ -517,13 +517,17 @@
   </optgroup>
 </select
     </div>
-    <div class="form-row">
+<div class="form-row">
       <div class="form-group"><label class="form-label">分類</label><select class="form-select" id="i-cat"><option>商照燈</option><option>線型燈</option></select></div>
+    </div>
+    <div id="single-spec-fields">
+    <div class="form-row">
       <div class="form-group"><label class="form-label">色溫</label><input class="form-input" id="i-cct"></div>
+      <div class="form-group"><label class="form-label">顏色</label><input class="form-input" id="i-color"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">顏色</label><input class="form-input" id="i-color"></div>
       <div class="form-group"><label class="form-label">光束角</label><input class="form-input" id="i-beam"></div>
+    </div>
     </div>
     <div class="form-row">
      <div class="form-group"><label class="form-label">總庫存數</label><input class="form-input" id="i-qty" type="number" value="0"></div>
@@ -752,15 +756,18 @@ function setInvMode(mode){
   const single=document.getElementById('mode-btn-single');
   const modular=document.getElementById('mode-btn-modular');
   const section=document.getElementById('modular-section');
+  const specFields=document.getElementById('single-spec-fields');
   if(mode==='modular'){
     single.style.background='var(--bg2)';single.style.color='var(--muted)';
     modular.style.background='var(--blk)';modular.style.color='var(--wht)';
     section.style.display='block';
+    if(specFields)specFields.style.display='none';
     renderModularFields();
   }else{
     single.style.background='var(--blk)';single.style.color='var(--wht)';
     modular.style.background='var(--bg2)';modular.style.color='var(--muted)';
     section.style.display='none';
+    if(specFields)specFields.style.display='block';
   }
   document.getElementById('modal-inv').dataset.mode=mode;
 }
