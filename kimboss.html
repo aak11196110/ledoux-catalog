@@ -1047,14 +1047,27 @@ function rParts(){
   ['cct','lens','outer','inner','acc'].forEach(k=>{
     const el=document.getElementById('parts-'+k);
     if(!el)return;
-    el.innerHTML=p[k].length?p[k].map((v,i)=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bdr)">
-        <input class="form-input" style="flex:1;padding:5px 8px;font-size:11px" value="${v}" onchange="PARTS['${series}']['${k}'][${i}]=this.value;savePARTS()">
-        <button class="btn btn-sm btn-danger" onclick="delPartOption('${k}',${i})">刪</button>
-      </div>`).join(''):'<div style="font-size:10px;color:var(--muted);padding:8px 0">暫無項目</div>';
+    el.innerHTML=p[k].length?p[k].map((item,i)=>{
+  const nm=typeof item==='object'?item.name:item;
+  const qty=typeof item==='object'?item.qty:0;
+  return`<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid var(--bdr)">
+    <input class="form-input" style="flex:2;padding:5px 8px;font-size:11px" value="${nm}" onchange="updatePartName('${series}','${k}',${i},this.value)">
+    <input class="form-input" type="number" style="width:70px;padding:5px 8px;font-size:11px" value="${qty}" onchange="updatePartQty('${series}','${k}',${i},this.value)" placeholder="0">
+    <button class="btn btn-sm btn-danger" onclick="delPartOption('${k}',${i})">刪</button>
+  </div>`;}).join(''):'<div style="font-size:10px;color:var(--muted);padding:8px 0">暫無項目</div>';
   });
 }
-function addPartOption(k){
+function updatePartName(series,k,i,val){
+  const p=getSeriesParts(series);
+  if(typeof p[k][i]==='object')p[k][i].name=val;else p[k][i]={name:val,qty:0};
+  savePARTS();
+}
+function updatePartQty(series,k,i,val){
+  const p=getSeriesParts(series);
+  if(typeof p[k][i]==='object')p[k][i].qty=Number(val);else p[k][i]={name:p[k][i],qty:Number(val)};
+  savePARTS();
+}
+  function addPartOption(k){
   const series=v('parts-series');
   if(!series){toast('請先選擇系列');return;}
   const p=getSeriesParts(series);
