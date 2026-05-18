@@ -1511,7 +1511,7 @@ const getWeekdays = () => {
 
 const submitVisit = async () => {
   if (!visitForm.name || !visitForm.phone || !visitDate || !visitSlot) {
-    toast$("請填寫完整資料並選擇日期時段");
+    toast_("請填寫完整資料並選擇日期時段");
     return;
   }
   const rec = {
@@ -1534,7 +1534,7 @@ const submitVisit = async () => {
   );
   setVisitDone(true);
 };
-  const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
+  const toast_ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
 
   // 折扣碼驗證
   const DISCOUNT_CODES = { "LED006":0.6, "LED007":0.7, "LED008":0.8 };
@@ -1544,14 +1544,14 @@ const submitVisit = async () => {
     if (rate) {
       setDiscountRate(rate);
       setDiscountLabel(`${trimmed} · ${Math.round(rate*10)}折`);
-      toast$(`✓ 專案折扣已套用：${Math.round(rate*10)}折`);
+      toast_(`✓ 專案折扣已套用：${Math.round(rate*10)}折`);
     } else if (trimmed === "") {
       setDiscountRate(1);
       setDiscountLabel("");
     } else {
       setDiscountRate(1);
       setDiscountLabel("");
-      toast$("此代碼無效，已套用標準牌價");
+      toast_("此代碼無效，已套用標準牌價");
     }
   };
 
@@ -1596,15 +1596,15 @@ const filteredInv = inventory.filter(i=>
     } else { setLoginErr("帳號或密碼錯誤"); }
   };
 
- const addToCart = (p, spec={}) => { const key=p.id+JSON.stringify(spec); setCart(c=>{const ex=c.find(i=>i._key===key);return ex?c.map(i=>i._key===key?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1,spec,_key:key}];}); toast$(`${p.model} 已`); };
+ const addToCart = (p, spec={}) => { const key=p.id+JSON.stringify(spec); setCart(c=>{const ex=c.find(i=>i._key===key);return ex?c.map(i=>i._key===key?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1,spec,_key:key}];}); toast_(`${p.model} 已`); };
   const updateQty = (id,d) => setCart(c=>c.map(i=>i.product.id===id?{...i,qty:Math.max(1,i.qty+d)}:i));
   const removeItem = id => setCart(c=>c.filter(i=>i.product.id!==id));
-  const addToSamp  = p  => { setSampCart(c=>c.find(i=>i.id===p.id)?c:[...c,p]); toast$(`${p.model} 已加入樣品清單`); };
+  const addToSamp  = p  => { setSampCart(c=>c.find(i=>i.id===p.id)?c:[...c,p]); toast_(`${p.model} 已加入樣品清單`); };
   const removeSamp = id => setSampCart(c=>c.filter(i=>i.id!==id));
 
   // ✅ 樣品申請：寫入 Google Sheets「樣品申請」工作表，Google 端自動寄信
   const submitSamp = async () => {
-    if(!sampForm.name||!sampForm.phone){toast$("請填寫姓名和電話");return;}
+    if(!sampForm.name||!sampForm.phone){toast_("請填寫姓名和電話");return;}
     const req={
       id: "SAMP"+Date.now(),
       date: new Date().toISOString().split("T")[0],
@@ -1618,16 +1618,16 @@ const filteredInv = inventory.filter(i=>
     };
     setSampleReqs(x=>[...x,{...req,products:sampCart.map(p=>p.model),form:sampForm}]);
     setSampDone(true);
-    toast$("樣品申請已送出，業務將盡快聯繫");
+    toast_("樣品申請已送出，業務將盡快聯繫");
     if(sheetUrl){ await sheetPost("saveSampleRequest", req); }
   };
 
   // ✅ 安裝申請：寫入 Google Sheets「安裝申請」工作表，Google 端自動寄信
   const submitInst = async () => {
-    if(!instRegion){toast$("請選擇安裝區域");return;}
+    if(!instRegion){toast_("請選擇安裝區域");return;}
     const hasR = installTypes.includes("recessed");
     const hasL = installTypes.includes("linear");
-    if(!hasR && !hasL){toast$("請選擇安裝類型");return;}
+    if(!hasR && !hasL){toast_("請選擇安裝類型");return;}
     const reg = INSTALL_REGIONS.find(r=>r.id===instRegion);
     const totalLinearM = linearGroups.reduce((s,g)=>s+Number(g.meters||0),0);
     const laborCost = instCalc?.laborTotal||0;
@@ -1661,7 +1661,7 @@ const filteredInv = inventory.filter(i=>
     };
     setInstallOrd(x=>[...x,ord]);
     setInstDone(true);
-    toast$("安裝申請已送出，業務將盡快確認時間");
+    toast_("安裝申請已送出，業務將盡快確認時間");
     if(sheetUrl){ await sheetPost("saveInstallOrder", ord); }
   };
 
@@ -1669,7 +1669,7 @@ const filteredInv = inventory.filter(i=>
 
   // 生成獨立安裝費用試算 PDF（不含燈具，只有安裝費）
   const generateInstallOnlyPDF = () => {
-    if(!instRegion){toast$("請先選擇安裝區域");return;}
+    if(!instRegion){toast_("請先選擇安裝區域");return;}
     const customer = {
       name: custName || (isGuest?"訪客":user.name),
       company: custCompany || (isGuest?"":user.company)||"",
@@ -1715,7 +1715,7 @@ const filteredInv = inventory.filter(i=>
         status: "試算"
       });
     }
-    toast$("安裝費用試算 PDF 已生成，業務已收到通知");
+    toast_("安裝費用試算 PDF 已生成，業務已收到通知");
   };
 
   // ✅ 修復：PDF 下載核心函式（訪客白屏問題根本修復）
@@ -1738,14 +1738,14 @@ if(urgentData){
     "━━━━━━━━━━━━━━━━━━━━\n⚡ 閃電緊急支援訂單通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶："+customer.name+"\n公　　司："+(customer.company||"—")+"\n聯絡電話："+(customer.phone||"—")+"\n案　　名："+(projName||"—")+"\n━━━━━━━━━━━━━━━━━━━━\n配送地區："+urgentData.label+"\n急件費用：NT$ "+urgentData.fee.toLocaleString()+"\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n"+cart.map(i=>"  • "+i.product.model+"（"+i.product.series+"）× "+i.qty+" 盞").join("\n")+"\n━━━━━━━━━━━━━━━━━━━━\n⚠ 請盡快與客戶確認出勤時間\nLEDOUX 諾科照明 報價系統自動通知"
   );
 }
-    toast$("報價單已下載");
+    toast_("報價單已下載");
   };
 
   // ✅ handleGenPDF：確認後先問安裝，再下載
   const handleGenPDF = () => {
-    if(!projName.trim()){toast$("請先填寫案名");return;}
-    if(!allChecked){toast$("請先勾選確認所有注意事項");return;}
-    if(orderType==="stock" && urgentSupport && !urgentRegion){toast$("請選擇急件配送地區");return;}
+    if(!projName.trim()){toast_("請先填寫案名");return;}
+    if(!allChecked){toast_("請先勾選確認所有注意事項");return;}
+    if(orderType==="stock" && urgentSupport && !urgentRegion){toast_("請選擇急件配送地區");return;}
     // 先跳出安裝詢問 Modal
     setInstallChoice(null);
     setInstallAskModal(true);
@@ -1779,7 +1779,7 @@ if(urgentData){
     setInstallChoice(needInstall);
     if (needInstall) {
       setInstOpen(true); // 開安裝 Panel 讓客戶填
-      toast$("請填寫安裝資訊，完成後再按「下載報價單」");
+      toast_("請填寫安裝資訊，完成後再按「下載報價單」");
     } else {
       doActualDownload();
     }
@@ -1803,10 +1803,10 @@ if(urgentData){
 
   // ✅ 配燈服務申請 + Email 通知
   const submitDesignForm = async () => {
-    if(!designForm.company||!designForm.name||!designForm.phone){toast$("請填寫必填欄位");return;}
+    if(!designForm.company||!designForm.name||!designForm.phone){toast_("請填寫必填欄位");return;}
     if(sheetUrl){await sheetPost("saveOrder",{id:"DESIGN"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:designForm.name,company:designForm.company,projectName:designForm.project||"配燈服務申請",items:"照明設計配燈服務",subtotal:0,tax:0,shipping:0,total:0,isVip:"設計服務",discount:"配燈服務"});}
     setDesignDone(true);
-    toast$("申請已送出，專員將盡快聯繫");
+    toast_("申請已送出，專員將盡快聯繫");
     await sendNotifyEmail(
       `【配燈服務申請】${designForm.name}（${designForm.company}）`,
       `新照明設計配燈服務申請\n\n公司：${designForm.company}\n聯絡人：${designForm.name}\n電話：${designForm.phone}\n案名：${designForm.project||"—"}\n時間：${new Date().toLocaleString("zh-TW")}`
@@ -1815,18 +1815,18 @@ if(urgentData){
 
   // ✅ 電子型錄：改為開新分頁（修復 Google Drive iframe 被擋問題）
   const openCatalog = c => {
-    if(!c.available){toast$("型錄準備中，請稍後");return;}
+    if(!c.available){toast_("型錄準備中，請稍後");return;}
     window.open(c.previewUrl,"_blank","noopener,noreferrer");
   };
 
   const saveCatalog = (id,field,value) => setCatalogs(cs=>cs.map(c=>c.id===id?{...c,[field]:value}:c));
 
-  const doAddProd = () => { if(!newProd.model)return; const imgs=newProd.images?newProd.images.split("\n").map(s=>s.trim()).filter(Boolean):[]; const nl=[...products,{...newProd,id:Date.now(),stdPrice:Number(newProd.stdPrice)||0,projPrice:Number(newProd.projPrice)||0,shipping:Number(newProd.shipping)||90,images:imgs}]; setProducts(nl); syncProducts(nl); setShowAdd(false); toast$("產品已新增"); };
+  const doAddProd = () => { if(!newProd.model)return; const imgs=newProd.images?newProd.images.split("\n").map(s=>s.trim()).filter(Boolean):[]; const nl=[...products,{...newProd,id:Date.now(),stdPrice:Number(newProd.stdPrice)||0,projPrice:Number(newProd.projPrice)||0,shipping:Number(newProd.shipping)||90,images:imgs}]; setProducts(nl); syncProducts(nl); setShowAdd(false); toast_("產品已新增"); };
   const startEdit  = p => setEditProd({...p,images:(p.images||[]).join("\n")});
-  const saveEdit   = () => { const imgs=editProd.images?String(editProd.images).split("\n").map(s=>s.trim()).filter(Boolean):[]; const updated={...editProd,stdPrice:Number(editProd.stdPrice)||0,projPrice:Number(editProd.projPrice)||0,shipping:Number(editProd.shipping)||90,images:imgs}; const nl=products.map(p=>p.id===updated.id?updated:p); setProducts(nl); syncProducts(nl); if(selProd?.id===editProd.id)setSelProd(updated); setEditProd(null); toast$("產品已更新"); };
-  const saveInvRow = async item => { const avail=Number(item.totalQty)-Number(item.reservedQty); const updated={...item,availableQty:avail,updatedAt:new Date().toISOString().split("T")[0]}; const nl=inventory.map(i=>i.id===updated.id?updated:i); setInventory(nl); setEditInvItem(null); await syncUpsertInv(updated); toast$(`${updated.model} 庫存已儲存`); };
-  const deleteInvRow = async id => { const nl=inventory.filter(i=>i.id!==id); setInventory(nl); await syncInventory(nl); toast$("庫存項目已刪除"); };
-  const doAddInv   = async () => { if(!newInv.model)return; const avail=Number(newInv.totalQty)-Number(newInv.reservedQty); const item={...newInv,id:"inv"+Date.now(),availableQty:avail,updatedAt:new Date().toISOString().split("T")[0]}; const nl=[...inventory,item]; setInventory(nl); await syncUpsertInv(item); setShowAddInv(false); setNewInv({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""}); toast$("庫存項目已新增"); };
+  const saveEdit   = () => { const imgs=editProd.images?String(editProd.images).split("\n").map(s=>s.trim()).filter(Boolean):[]; const updated={...editProd,stdPrice:Number(editProd.stdPrice)||0,projPrice:Number(editProd.projPrice)||0,shipping:Number(editProd.shipping)||90,images:imgs}; const nl=products.map(p=>p.id===updated.id?updated:p); setProducts(nl); syncProducts(nl); if(selProd?.id===editProd.id)setSelProd(updated); setEditProd(null); toast_("產品已更新"); };
+  const saveInvRow = async item => { const avail=Number(item.totalQty)-Number(item.reservedQty); const updated={...item,availableQty:avail,updatedAt:new Date().toISOString().split("T")[0]}; const nl=inventory.map(i=>i.id===updated.id?updated:i); setInventory(nl); setEditInvItem(null); await syncUpsertInv(updated); toast_(`${updated.model} 庫存已儲存`); };
+  const deleteInvRow = async id => { const nl=inventory.filter(i=>i.id!==id); setInventory(nl); await syncInventory(nl); toast_("庫存項目已刪除"); };
+  const doAddInv   = async () => { if(!newInv.model)return; const avail=Number(newInv.totalQty)-Number(newInv.reservedQty); const item={...newInv,id:"inv"+Date.now(),availableQty:avail,updatedAt:new Date().toISOString().split("T")[0]}; const nl=[...inventory,item]; setInventory(nl); await syncUpsertInv(item); setShowAddInv(false); setNewInv({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""}); toast_("庫存項目已新增"); };
 
   const invTotal = inventory.reduce((s,i)=>s+Number(i.totalQty),0);
   const invAvail = inventory.reduce((s,i)=>s+Number(i.availableQty),0);
@@ -1834,7 +1834,7 @@ if(urgentData){
   // ── Admin Page ──
   if(page==="admin" && isAdmin) {
     const saveProduct = async (form) => {
-      if(!form.model){toast$("請填寫型號");return;}
+      if(!form.model){toast_("請填寫型號");return;}
       setProductSaving(true);
       const rec = {
         ...form,
@@ -1855,13 +1855,13 @@ if(urgentData){
       if(sheetUrl) await sheetPost("upsertProduct", rec);
       setProductSaving(false);
       setEditProduct(null);
-      toast$("✅ 已儲存並同步到 Google Sheets");
+      toast_("✅ 已儲存並同步到 Google Sheets");
     };
 
     const deleteProduct = async (p) => {
       if(!confirm(`確定要刪除 ${p.model}？`)) return;
       setProducts(ps => ps.filter(x=>x.id!==p.id));
-      toast$("已從網頁移除（請在 Google Sheets 同步刪除該行）");
+      toast_("已從網頁移除（請在 Google Sheets 同步刪除該行）");
     };
 
     const seriesList = [...COMMERCIAL_SERIES, ...LINEAR_SERIES_LIST];
@@ -2340,7 +2340,7 @@ if(urgentData){
                 <span>啟用此型錄（勾選後訪客可預覽與下載）</span>
               </label>
               <div className="form-actions" style={{marginTop:14}}>
-                <button className="btn-confirm" onClick={()=>toast$(`${c.title} 設定已儲存`)}>儲存設定</button>
+                <button className="btn-confirm" onClick={()=>toast_(`${c.title} 設定已儲存`)}>儲存設定</button>
                 <button className="btn-cancel-sm" onClick={()=>setPage("ecatalog")}>預覽效果</button>
               </div>
             </div>
@@ -2393,7 +2393,7 @@ if(urgentData){
                         </div>
                       ))}
                       <div style={{display:"flex",gap:6,marginTop:8}}>
-                        <button className="btn-save-inv" onClick={()=>{const updated={...p,...inlineData,stdPrice:Number(inlineData.stdPrice||p.stdPrice),projPrice:Number(inlineData.projPrice||p.projPrice)};const nl=products.map(x=>x.id===p.id?updated:x);setProducts(nl);syncProducts(nl);setInlineEdit(null);toast$(`${p.model} 已儲存`);}}>儲存</button>
+                        <button className="btn-save-inv" onClick={()=>{const updated={...p,...inlineData,stdPrice:Number(inlineData.stdPrice||p.stdPrice),projPrice:Number(inlineData.projPrice||p.projPrice)};const nl=products.map(x=>x.id===p.id?updated:x);setProducts(nl);syncProducts(nl);setInlineEdit(null);toast_(`${p.model} 已儲存`);}}>儲存</button>
                         <button className="btn-cancel-sm" style={{padding:"4px 9px",fontSize:9}} onClick={()=>setInlineEdit(null)}>取消</button>
                       </div>
                     </div>
@@ -2564,7 +2564,7 @@ if(urgentData){
         {first.note&&<div className="inv-note">{first.note}</div>}
         <div className="inv-card-footer">
           <div><div className="inv-location">儲位：{matched[0]?.location||first.location||"—"}</div><div className="inv-updated">更新：{first.updatedAt}</div></div>
-          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);if(prod)addToCart(prod);else toast$(`${model} 已`);}}>加入詢價</button>
+          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);if(prod)addToCart(prod);else toast_(`${model} 已`);}}>加入詢價</button>
         </div>
       </div>
     );
@@ -2643,7 +2643,7 @@ if(urgentData){
             min={new Date(Date.now()+86400000).toISOString().split("T")[0]}
             max={new Date(Date.now()+60*86400000).toISOString().split("T")[0]}
             onChange={e=>{
-              if(!isWeekday(e.target.value)){toast$("請選擇平日（週一至週五）");return;}
+              if(!isWeekday(e.target.value)){toast_("請選擇平日（週一至週五）");return;}
               setVisitDate(e.target.value);setVisitSlot("");
             }}
             style={{width:"100%",padding:"9px 0",background:"transparent",border:"none",borderBottom:"0.5px solid var(--bdr)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:13,outline:"none"}}
@@ -2933,7 +2933,7 @@ if(urgentData){
         {page==="members"&&isAdmin&&<>
           <div className="phead"><div><div className="ptitle">帳號管理</div></div></div>
           <div className="stats-row">{[["總帳號",members.length,""],["管理者",members.filter(m=>m.role==="admin").length,""],["VIP",members.filter(m=>m.role==="vip").length,""],["待審核",pending.length,"var(--red)"]].map(([l,n,c])=>(<div key={l} className="stat-box"><div className="stat-num" style={c?{color:c}:{}}>{n}</div><div className="stat-lbl">{l}</div></div>))}</div>
-          <div className="tbl-wrap"><table><thead><tr><th>姓名</th><th>公司</th><th>帳號</th><th>身份</th><th>調整</th><th>開通日</th><th></th></tr></thead><tbody>{members.map(m=>(<tr key={m.id}><td style={{fontWeight:400}}>{m.name}</td><td>{m.company}</td><td style={{fontFamily:"monospace"}}>{m.username}</td><td><span className={`rb r-${m.role==="admin"?"admin":m.role==="vip"?"vip":"std"}`}>{roleLabel(m.role)}</span></td><td><select className="role-sel" value={m.role} onChange={e=>{setMembers(x=>x.map(i=>i.id===m.id?{...i,role:e.target.value}:i));if(user.id===m.id)setUser(u=>({...u,role:e.target.value}));toast$("權限已更新");}}><option value="standard">一般</option><option value="vip">VIP</option><option value="admin">管理</option></select></td><td style={{color:"var(--muted)"}}>{m.approvedAt}</td><td>{m.id!==user.id&&<button className="btn-del2" onClick={()=>{setMembers(x=>x.filter(x=>x.id!==m.id));toast$("帳號已刪除");}}><CloseIcon/></button>}</td></tr>))}</tbody></table></div>
+          <div className="tbl-wrap"><table><thead><tr><th>姓名</th><th>公司</th><th>帳號</th><th>身份</th><th>調整</th><th>開通日</th><th></th></tr></thead><tbody>{members.map(m=>(<tr key={m.id}><td style={{fontWeight:400}}>{m.name}</td><td>{m.company}</td><td style={{fontFamily:"monospace"}}>{m.username}</td><td><span className={`rb r-${m.role==="admin"?"admin":m.role==="vip"?"vip":"std"}`}>{roleLabel(m.role)}</span></td><td><select className="role-sel" value={m.role} onChange={e=>{setMembers(x=>x.map(i=>i.id===m.id?{...i,role:e.target.value}:i));if(user.id===m.id)setUser(u=>({...u,role:e.target.value}));toast_("權限已更新");}}><option value="standard">一般</option><option value="vip">VIP</option><option value="admin">管理</option></select></td><td style={{color:"var(--muted)"}}>{m.approvedAt}</td><td>{m.id!==user.id&&<button className="btn-del2" onClick={()=>{setMembers(x=>x.filter(x=>x.id!==m.id));toast_("帳號已刪除");}}><CloseIcon/></button>}</td></tr>))}</tbody></table></div>
         </>}
 
         {/* ══ 產品管理 ══ */}
@@ -2958,7 +2958,7 @@ if(urgentData){
             </div>
             <div className="form-actions"><button className="btn-confirm" onClick={saveEdit}>儲存修改</button><button className="btn-cancel-sm" onClick={()=>setEditProd(null)}>取消</button></div>
           </div>}
-          <div className="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>標準價</th><th>專案價</th><th>操作</th></tr></thead><tbody>{products.map(p=>(<tr key={p.id}><td style={{fontWeight:400}}>{p.model}</td><td>{p.series}</td><td>{p.category}</td><td>{p.watt}</td><td>NT$ {p.stdPrice?.toLocaleString()}</td><td style={{color:"var(--gold)"}}>NT$ {p.projPrice?.toLocaleString()}</td><td style={{display:"flex",gap:6}}><button className="btn-edit2" onClick={()=>startEdit(p)}>編輯</button><button className="btn-del2" onClick={()=>{const nl=products.filter(x=>x.id!==p.id);setProducts(nl);syncProducts(nl);toast$("已刪除");}}><CloseIcon/></button></td></tr>))}</tbody></table></div>
+          <div className="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>標準價</th><th>專案價</th><th>操作</th></tr></thead><tbody>{products.map(p=>(<tr key={p.id}><td style={{fontWeight:400}}>{p.model}</td><td>{p.series}</td><td>{p.category}</td><td>{p.watt}</td><td>NT$ {p.stdPrice?.toLocaleString()}</td><td style={{color:"var(--gold)"}}>NT$ {p.projPrice?.toLocaleString()}</td><td style={{display:"flex",gap:6}}><button className="btn-edit2" onClick={()=>startEdit(p)}>編輯</button><button className="btn-del2" onClick={()=>{const nl=products.filter(x=>x.id!==p.id);setProducts(nl);syncProducts(nl);toast_("已刪除");}}><CloseIcon/></button></td></tr>))}</tbody></table></div>
         </>}
 
         {/* ══ 庫存管理 ══ */}
@@ -2997,7 +2997,7 @@ if(urgentData){
             <label style={{display:"block",fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>Google Apps Script 部署 URL</label>
             <input className="cloud-url-inp" value={urlInput} onChange={e=>setUrlInput(e.target.value)} placeholder="https://script.google.com/macros/s/xxxxx/exec"/>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              <button className="btn-confirm" onClick={()=>{setSheetUrl(urlInput);toast$("URL 已更新");}}>套用 URL</button>
+              <button className="btn-confirm" onClick={()=>{setSheetUrl(urlInput);toast_("URL 已更新");}}>套用 URL</button>
               <button className="btn-ok" style={{padding:"9px 16px"}} onClick={async()=>{setTestResult("測試中...");try{const r=await fetch(`${urlInput}?action=ping`);const j=await r.json();setTestResult(j.success?"✓ 連線成功":"✗ 連線失敗");}catch(e){setTestResult("✗ "+e.message);}}}>測試連線</button>
             </div>
             {testResult&&<div style={{marginTop:10,fontSize:11,color:testResult.includes("✓")?"var(--green)":"var(--red)",padding:"8px 12px",background:"#f4efe8",borderLeft:"2px solid currentColor"}}>{testResult}</div>}
@@ -3338,7 +3338,7 @@ if(urgentData){
           </div>}
           {(installChoice===true||installChoice===null)&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成 · 下載燈具＋安裝整合報價單</button>}
           <button className="btn-gold" disabled={!instRegion} onClick={()=>{
-            if(!instRegion){toast$("請先選擇安裝區域");return;}
+            if(!instRegion){toast_("請先選擇安裝區域");return;}
             generateInstallOnlyPDF();
           }}>📄 生成安裝費用試算 PDF</button>
         </div>}
