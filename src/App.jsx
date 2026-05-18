@@ -3339,7 +3339,7 @@ if(urgentData){
   </div>
 )}
       </div>
-    </div>
-  </ErrorBoundary>
+      </div>
+        </ErrorBoundary>
   );
-}
+      }
