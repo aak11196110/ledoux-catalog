@@ -13,7 +13,7 @@ class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error) { return { hasError: true, error }; }
   componentDidCatch(error, info) { console.error("LEDOUX App Error:", error, info); }
-  render() {、
+  render() {
     if (this.state.hasError) {
       return (
         <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#f7f4ef",flexDirection:"column",gap:16,padding:32}}>
