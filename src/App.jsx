@@ -2468,6 +2468,7 @@ if(urgentData){
     const totalAvail=matched.reduce((s,i)=>s+Number(i.availableQty||0),0);
     const totalQty  =matched.reduce((s,i)=>s+Number(i.totalQty||0),0);
     const totalRes  =matched.reduce((s,i)=>s+Number(i.reservedQty||0),0);
+   const isModular=first.mode==='modular';
     const st=totalAvail<=0?"out":totalAvail<=5?"low":"in-stock";
     const stLabel=totalAvail<=0?"無庫存":totalAvail<=5?"庫存偏低":"現貨供應";
 
@@ -2491,6 +2492,30 @@ if(urgentData){
         </div>
         <div className="inv-specs">{first.watt&&<span className="inv-spec-tag">{first.watt}</span>}</div>
 
+        {isModular&&(()=>{
+      const parts=JSON.parse(first.parts||'{}');
+      const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
+      const required=['cct','lens','outer','inner'];
+      const allReqHaveStock=required.every(k=>(parts[k]||[]).some(p=>p.qty>0));
+      if(!allReqHaveStock)return(<div style={{padding:"12px 0",fontSize:11,color:"var(--red)",letterSpacing:1}}>⚠ 零件補貨中，暫無法出貨</div>);
+      return(<div style={{marginBottom:8}}>
+        {Object.keys(parts).map(k=>{
+          const items2=parts[k]||[];
+          const hasStock=items2.some(p=>p.qty>0);
+          if(!hasStock&&k!=='acc')return(<div key={k} style={{marginBottom:6}}>
+            <div style={{fontSize:9,letterSpacing:2,color:"var(--red)",marginBottom:4}}>{labels[k]} · 補貨中</div>
+          </div>);
+          return(<div key={k} style={{marginBottom:6}}>
+            <div style={{fontSize:9,letterSpacing:2,color:"var(--muted)",marginBottom:4}}>{labels[k]}{required.includes(k)?<span style={{color:"var(--red)"}}>*</span>:""}</div>
+            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+              {items2.map((p,pi)=>p.qty>0&&(<button key={pi} style={{padding:"3px 9px",border:"0.5px solid var(--gold)",fontSize:11,cursor:"pointer",background:"transparent",color:"var(--blk)"}}>
+                {p.name} <span style={{fontSize:10,color:"var(--inv-green)"}}>({p.qty})</span>
+              </button>))}
+            </div>
+          </div>);
+        })}
+      </div>);
+    })()}
         {ccts.length>1&&<div style={{marginBottom:8}}>
           <div style={{fontSize:9,letterSpacing:2,color:"var(--muted)",marginBottom:4}}>色溫</div>
           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
