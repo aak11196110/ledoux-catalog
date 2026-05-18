@@ -3162,8 +3162,6 @@ if(urgentData){
     </>);
   })()}
   <button className={`btn-samp ${sampCart.find(i=>i.id===selProd.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===selProd.id)?removeSamp(selProd.id):addToSamp(selProd)}>{sampCart.find(i=>i.id===selProd.id)?"已申請樣品":"申請樣品"}</button>
-</div>
-</div>
           </div>
         </div>
       </div>}
