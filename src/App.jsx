@@ -3038,10 +3038,7 @@ if(urgentData){
             <div className="spec-grid">
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
-
             {selProd.note&&<div className="drawer-note">{selProd.note}</div>}
-            <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
- <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
 
   {selProd.cct&&(selProd.cct.includes("/")||selProd.cct==="色溫可生產")?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>色溫 <span style={{color:"var(--red)",fontSize:9}}>*必選</span></div>
@@ -3129,7 +3126,6 @@ if(urgentData){
       </div>
     </div>
   </div>):null}
-{selProd.note&&<div className="drawer-note">{selProd.note}</div>}
             {addons.filter(a=>a.category==="全部"||a.category===selProd.category).length>0&&(
   <div style={{marginBottom:10}}>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>配件加購</div>
