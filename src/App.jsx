@@ -3326,19 +3326,19 @@ if(urgentData){
               <div style={{marginTop:14}}><div className="ip-sec-title">備註</div><textarea style={{width:"100%",padding:9,border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",resize:"vertical",minHeight:56}} value={instNote} onChange={e=>setInstNote(e.target.value)} placeholder="安裝地址、偏好時段、現場說明等"/></div>
             </>
           )}
-        </div>
-        {!instDone&&<div className="sp-foot">
-          <div style={{fontSize:10,color:"var(--muted)",marginBottom:10,padding:"8px 12px",background:"#f4efe8",borderLeft:"2px solid var(--gold)",lineHeight:1.7}}>
-            📐 <strong style={{color:"var(--blk)"}}>安裝費用試算表</strong><br/>
-            此為費用試算，僅供參考。實際費用以現場評估為準。<br/>
-            生成 PDF 後業務將收到通知並與您確認詳情。
           </div>
-          <button className="btn-gold" onClick={submitInst} disabled={!instRegion||installTypes.length===0}>送出安裝申請</button>
-          <button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button>
+          {!instDone&&<div className="sp-foot">
+            <div style={{fontSize:10,color:"var(--muted)",marginBottom:10,padding:"8px 12px",background:"#f4efe8",borderLeft:"2px solid var(--gold)",lineHeight:1.7}}>
+           <strong style={{color:"var(--blk)"}}>安裝費用試算表</strong><br/>
+              此為費用試算，僅供參考。實際費用以現場評估為準。<br/>
+              生成 PDF 後業務將收到通知並與您確認詳情。
+            </div>
+            <button className="btn-gold" onClick={submitInst} disabled={!instRegion||installTypes.length===0}>送出安裝申請</button>
+            <button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button>
+          </div>
         </div>
+  
       </div>
-
-    </div>
-  </ErrorBoundary>
-  );
-}
+    </ErrorBoundary>
+    );
+  }
