@@ -262,43 +262,73 @@
 <!-- PARTS -->
 <div class="page" id="page-parts">
   <div class="section-head"><div class="section-title">庫存零件管理</div></div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-bottom:24px">
-    <div class="tbl-wrap" style="padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">色溫選項</div>
-        <button class="btn btn-sm btn-gold" onclick="addPartOption('cct')">＋ 新增</button>
+  <div class="filter-bar" style="margin-bottom:16px">
+    <select class="f-select" id="parts-series" onchange="rParts()" style="min-width:200px">
+      <option value="">── 請選擇系列 ──</option>
+      <optgroup label="── 商照燈系列 ──">
+        <option>HEPBURN 赫本</option>
+        <option>BLADE 刀鋒</option>
+        <option>METIS 美緹絲</option>
+        <option>ARC 弧光</option>
+        <option>ZOOM 變焦</option>
+        <option>YODA 1代</option>
+        <option>YODA 2代</option>
+        <option>磁吸系列</option>
+        <option>軌道燈系列</option>
+        <option>吸頂燈系列</option>
+        <option>商照燈－特殊款／其他</option>
+      </optgroup>
+      <optgroup label="── 線型燈系列 ──">
+        <option>LINEAR 麗娜</option>
+        <option>CABINET LINEAR LIGHT 高端線條燈</option>
+        <option>鋁擠洗牆燈</option>
+        <option>鋁條燈</option>
+        <option>LED STRIP LIGHT 低壓燈帶</option>
+        <option>矽膠燈帶</option>
+        <option>線型燈－特殊款／其他</option>
+      </optgroup>
+    </select>
+  </div>
+  <div id="parts-content" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-bottom:24px">
+      <div class="tbl-wrap" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">色溫選項</div>
+          <button class="btn btn-sm btn-gold" onclick="addPartOption('cct')">＋ 新增</button>
+        </div>
+        <div id="parts-cct"></div>
       </div>
-      <div id="parts-cct"></div>
-    </div>
-    <div class="tbl-wrap" style="padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">透鏡角度</div>
-        <button class="btn btn-sm btn-gold" onclick="addPartOption('lens')">＋ 新增</button>
+      <div class="tbl-wrap" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">透鏡角度</div>
+          <button class="btn btn-sm btn-gold" onclick="addPartOption('lens')">＋ 新增</button>
+        </div>
+        <div id="parts-lens"></div>
       </div>
-      <div id="parts-lens"></div>
-    </div>
-    <div class="tbl-wrap" style="padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">外框顏色</div>
-        <button class="btn btn-sm btn-gold" onclick="addPartOption('outer')">＋ 新增</button>
+      <div class="tbl-wrap" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">外框顏色</div>
+          <button class="btn btn-sm btn-gold" onclick="addPartOption('outer')">＋ 新增</button>
+        </div>
+        <div id="parts-outer"></div>
       </div>
-      <div id="parts-outer"></div>
-    </div>
-    <div class="tbl-wrap" style="padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">內框顏色</div>
-        <button class="btn btn-sm btn-gold" onclick="addPartOption('inner')">＋ 新增</button>
+      <div class="tbl-wrap" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">內框顏色</div>
+          <button class="btn btn-sm btn-gold" onclick="addPartOption('inner')">＋ 新增</button>
+        </div>
+        <div id="parts-inner"></div>
       </div>
-      <div id="parts-inner"></div>
-    </div>
-    <div class="tbl-wrap" style="padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">配件</div>
-        <button class="btn btn-sm btn-gold" onclick="addPartOption('acc')">＋ 新增</button>
+      <div class="tbl-wrap" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px">配件</div>
+          <button class="btn btn-sm btn-gold" onclick="addPartOption('acc')">＋ 新增</button>
+        </div>
+        <div id="parts-acc"></div>
       </div>
-      <div id="parts-acc"></div>
     </div>
   </div>
+  <div id="parts-empty" style="color:var(--muted);font-size:12px;letter-spacing:1px;padding:24px 0">請先選擇系列</div>
 </div>
 
 <!-- ORDERS -->
@@ -737,17 +767,19 @@ function setInvMode(mode){
 function renderModularFields(){
   const fields=document.getElementById('modular-fields');
   if(!fields)return;
+  const series=v('i-series');
+  if(!series){fields.innerHTML='<span style="color:var(--muted);font-size:11px;grid-column:1/-1">請先選擇系列</span>';return;}
+  const p=getSeriesParts(series);
   let html='';
-  const cats=['cct','lens','outer','inner','acc'];
   const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
-  cats.forEach(k=>{
-    if(!PARTS[k]||!PARTS[k].length)return;
-    PARTS[k].forEach((v,i)=>{
-      html+=`<span style="color:var(--muted)">${labels[k]}・${v}</span>
+  ['cct','lens','outer','inner','acc'].forEach(k=>{
+    if(!p[k]||!p[k].length)return;
+    p[k].forEach((val,i)=>{
+      html+=`<span style="color:var(--muted)">${labels[k]}・${val}</span>
       <input class="form-input" style="padding:4px 8px;font-size:11px" type="number" value="0" id="mod-${k}-${i}" placeholder="0">`;
     });
   });
-  fields.innerHTML=html||'<span style="color:var(--muted);font-size:11px;grid-column:1/-1">請先在庫存零件管理新增選項</span>';
+  fields.innerHTML=html||'<span style="color:var(--muted);font-size:11px;grid-column:1/-1">此系列尚未設定零件，請先至庫存零件管理新增</span>';
 }
   function onInvCatChange(which){
   if(which==='comm')document.getElementById('icat-line').value='';
@@ -984,31 +1016,40 @@ async function delRec(){
   hideM('modal-rec');await apiPost('deleteRecord',{sheetName:sheet,id});toast('✓ 已刪除');
 }
 // PARTS
-let PARTS = JSON.parse(localStorage.getItem('ldx_parts')||JSON.stringify({
-  cct:['2700K','3000K','4000K','5000K','6500K'],
-  lens:['10°','24°','36°','60°'],
-  outer:['白色','黑色','銀色'],
-  inner:['白色','黑色'],
-  acc:[]
-}));
+  let PARTS = JSON.parse(localStorage.getItem('ldx_parts')||'{}');
 function savePARTS(){localStorage.setItem('ldx_parts',JSON.stringify(PARTS));}
+function getSeriesParts(series){
+  if(!PARTS[series])PARTS[series]={cct:[],lens:[],outer:[],inner:[],acc:[]};
+  return PARTS[series];
+}
 function rParts(){
+  const series=v('parts-series');
+  const content=document.getElementById('parts-content');
+  const empty=document.getElementById('parts-empty');
+  if(!series){content.style.display='none';empty.style.display='block';return;}
+  content.style.display='block';empty.style.display='none';
+  const p=getSeriesParts(series);
   ['cct','lens','outer','inner','acc'].forEach(k=>{
     const el=document.getElementById('parts-'+k);
     if(!el)return;
-    el.innerHTML=PARTS[k].length?PARTS[k].map((v,i)=>`
+    el.innerHTML=p[k].length?p[k].map((v,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bdr)">
-        <input class="form-input" style="flex:1;padding:5px 8px;font-size:11px" value="${v}" onchange="PARTS['${k}'][${i}]=this.value;savePARTS()">
+        <input class="form-input" style="flex:1;padding:5px 8px;font-size:11px" value="${v}" onchange="PARTS['${series}']['${k}'][${i}]=this.value;savePARTS()">
         <button class="btn btn-sm btn-danger" onclick="delPartOption('${k}',${i})">刪</button>
       </div>`).join(''):'<div style="font-size:10px;color:var(--muted);padding:8px 0">暫無項目</div>';
   });
 }
 function addPartOption(k){
-  PARTS[k].push('新項目');savePARTS();rParts();
+  const series=v('parts-series');
+  if(!series){toast('請先選擇系列');return;}
+  const p=getSeriesParts(series);
+  p[k].push('新項目');savePARTS();rParts();
 }
 function delPartOption(k,i){
+  const series=v('parts-series');
   if(!confirm('確定刪除？'))return;
-  PARTS[k].splice(i,1);savePARTS();rParts();
+  const p=getSeriesParts(series);
+  p[k].splice(i,1);savePARTS();rParts();
 }
 // DISCOUNTS
 function rDiscs(){
