@@ -496,8 +496,19 @@
       <div class="form-group"><label class="form-label">光束角</label><input class="form-input" id="i-beam"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">總庫存數</label><input class="form-input" id="i-qty" type="number" value="0"></div>
+     <div class="form-group"><label class="form-label">總庫存數</label><input class="form-input" id="i-qty" type="number" value="0"></div>
       <div class="form-group"><label class="form-label">可用數量</label><input class="form-input" id="i-avail" type="number" value="0"></div>
+    </div>
+    <div class="form-group" style="margin-top:4px">
+      <label class="form-label">庫存模式</label>
+      <div style="display:flex;gap:0;margin-top:4px">
+        <button type="button" id="mode-btn-single" onclick="setInvMode('single')" style="flex:1;padding:8px;border:0.5px solid var(--bdr);border-radius:4px 0 0 4px;background:var(--blk);color:var(--wht);font-size:10px;letter-spacing:1px;cursor:pointer">一體式</button>
+        <button type="button" id="mode-btn-modular" onclick="setInvMode('modular')" style="flex:1;padding:8px;border:0.5px solid var(--bdr);border-radius:0 4px 4px 0;background:var(--bg2);color:var(--muted);font-size:10px;letter-spacing:1px;cursor:pointer">模組化</button>
+      </div>
+    </div>
+    <div id="modular-section" style="display:none;margin-top:8px;border:0.5px solid var(--bdr);border-radius:4px;overflow:hidden">
+      <div style="background:var(--blk);color:var(--gold);font-size:10px;letter-spacing:2px;padding:8px 12px">零件庫存設定</div>
+      <div id="modular-fields" style="padding:12px;display:grid;grid-template-columns:1fr 90px;gap:8px;align-items:center;font-size:11px"></div>
     </div>
     <div class="form-actions">
       <button class="btn btn-outline" onclick="hideM('modal-inv')">取消</button>
@@ -707,7 +718,38 @@ function rInv(){
     <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editInv('${esc(i.id||i.model)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delInv('${esc(i.id||i.model)}','${esc(i.model)}')">刪除</button></td>
   </tr>`).join(''):'<tr><td colspan="8" class="no-data">暫無庫存資料</td></tr>';
 }
-function onInvCatChange(which){
+function setInvMode(mode){
+  const single=document.getElementById('mode-btn-single');
+  const modular=document.getElementById('mode-btn-modular');
+  const section=document.getElementById('modular-section');
+  if(mode==='modular'){
+    single.style.background='var(--bg2)';single.style.color='var(--muted)';
+    modular.style.background='var(--blk)';modular.style.color='var(--wht)';
+    section.style.display='block';
+    renderModularFields();
+  }else{
+    single.style.background='var(--blk)';single.style.color='var(--wht)';
+    modular.style.background='var(--bg2)';modular.style.color='var(--muted)';
+    section.style.display='none';
+  }
+  document.getElementById('modal-inv').dataset.mode=mode;
+}
+function renderModularFields(){
+  const fields=document.getElementById('modular-fields');
+  if(!fields)return;
+  let html='';
+  const cats=['cct','lens','outer','inner','acc'];
+  const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
+  cats.forEach(k=>{
+    if(!PARTS[k]||!PARTS[k].length)return;
+    PARTS[k].forEach((v,i)=>{
+      html+=`<span style="color:var(--muted)">${labels[k]}・${v}</span>
+      <input class="form-input" style="padding:4px 8px;font-size:11px" type="number" value="0" id="mod-${k}-${i}" placeholder="0">`;
+    });
+  });
+  fields.innerHTML=html||'<span style="color:var(--muted);font-size:11px;grid-column:1/-1">請先在庫存零件管理新增選項</span>';
+}
+  function onInvCatChange(which){
   if(which==='comm')document.getElementById('icat-line').value='';
   else document.getElementById('icat-comm').value='';
   rInv();
