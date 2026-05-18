@@ -3334,10 +3334,10 @@ if(urgentData){
             生成 PDF 後業務將收到通知並與您確認詳情。
           </div>
           <button className="btn-gold" onClick={submitInst} disabled={!instRegion||installTypes.length===0}>送出安裝申請</button>
-<button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button>
+          <button className="btn-ghost" onClick={()=>setInstOpen(false)}>稍後再說</button>
         </div>
+      </div>
     </div>
-  </div>
   </ErrorBoundary>
   );
 }
