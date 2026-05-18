@@ -491,7 +491,7 @@
     <input type="hidden" id="i-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="i-model"></div>
-      <div class="form-group"><label class="form-label">系列</label><select class="form-select" id="i-series">
+      <div class="form-group"><label class="form-label">系列</label><select class="form-select" id="i-series" onchange="if(document.getElementById('modal-inv').dataset.mode==='modular')renderModularFields()">
   <option value="">請選擇系列</option>
   <optgroup label="── 商照燈系列 ──">
     <option>HEPBURN 赫本</option>
@@ -805,12 +805,27 @@ function editInv(id){
 async function saveInv(){
   const model=v('i-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('i-id')||'INV'+Date.now();
-  const rec={id,model,series:v('i-series'),category:g('i-cat').value,cct:v('i-cct'),color:v('i-color'),beam:v('i-beam'),totalQty:Number(v('i-qty'))||0,availableQty:Number(v('i-avail'))||0};
+  const mode=document.getElementById('modal-inv').dataset.mode||'single';
+  let parts={};
+  if(mode==='modular'){
+    const series=v('i-series');
+    const p=getSeriesParts(series);
+    const labels={cct:'色溫',lens:'透鏡角度',outer:'外框顏色',inner:'內框顏色',acc:'配件'};
+    ['cct','lens','outer','inner','acc'].forEach(k=>{
+      if(!p[k])return;
+      p[k].forEach((val,i)=>{
+        const qty=Number(document.getElementById('mod-'+k+'-'+i)?.value||0);
+        if(!parts[k])parts[k]=[];
+        parts[k].push({name:val,qty});
+      });
+    });
+  }
+  const rec={id,model,series:v('i-series'),category:g('i-cat').value,cct:v('i-cct'),color:v('i-color'),beam:v('i-beam'),totalQty:Number(v('i-qty'))||0,availableQty:Number(v('i-avail'))||0,mode,parts:JSON.stringify(parts)};
   const idx=D.inventory.findIndex(x=>String(x.id||x.model)===String(id));
   if(idx>=0)D.inventory[idx]=rec;else D.inventory.unshift(rec);
   rInv();hideM('modal-inv');toast('同步中...');
   const res=await apiPost('upsertInventory',rec);
-  toast(res&&res.success?'✓ 庫存已同步':'⚠ 本地更新，同步失敗');
+  toast(res&&res.success?'✓ 庫存已同步':'△ 本地更新，同步失敗');
 }
 async function delInv(id,name){
   if(!confirm(`確定刪除 ${name} 庫存？`))return;
