@@ -3212,7 +3212,7 @@ if(urgentData){
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
             <div className="spec-grid">
-              {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+              {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
