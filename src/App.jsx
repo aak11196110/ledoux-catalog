@@ -374,14 +374,14 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .pcard-img{height:175px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f0ebe2}
 .pcard-img img{max-height:150px;max-width:80%;object-fit:contain;transition:transform .5s ease}
 .pcard-body{padding:17px 19px 21px;flex:1;display:flex;flex-direction:column}
-.pcard-series{font-size:7px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
-.pcard-model{font-size:16px;font-family:'Cormorant Garamond',serif;font-weight:400;color:var(--blk);margin-bottom:5px}
+.pcard-series{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.pcard-model{font-size:18px;font-family:'Noto Sans TC',sans-serif;font-weight:500;letter-spacing:1px;color:var(--blk);margin-bottom:6px}
 .pcard-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;flex:1}
 .pcard-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
 .ptag{font-size:8px;padding:2px 7px;border:0.5px solid var(--bdr);color:var(--muted);letter-spacing:.5px}
 .ptag.stag{color:#3a6b4a;border-color:rgba(58,107,74,.4)}
 .pcard-price{border-top:0.5px solid var(--bdr2);padding-top:11px}
-.price-val{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--blk)}
+.price-val{font-family:'Noto Sans TC',sans-serif;font-size:17px;font-weight:500;letter-spacing:1px;color:var(--blk)}
 .price-val.gold{color:var(--gold)}
 .price-nq{font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
 .drawer-overlay{position:fixed;inset:0;background:rgba(14,13,12,.5);z-index:200;display:flex;justify-content:flex-end}
@@ -399,7 +399,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .cdot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer}
 .cdot.on{background:#fff}
 .drawer-body{padding:26px;flex:1}
-.drawer-model{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:5px;letter-spacing:.5px}
+.drawer-model{font-family:'Noto Sans TC',sans-serif;font-size:24px;font-weight:500;margin-bottom:5px;letter-spacing:1.5px}
 .drawer-desc{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:16px}
 .inv-badge-drawer{display:inline-flex;align-items:center;gap:6px;background:#edf6f0;border:0.5px solid #3a6b4a;padding:5px 12px;margin-bottom:14px;font-size:9px;color:#2d5a3d;letter-spacing:2px;text-transform:uppercase}
 .inv-badge-dot{width:6px;height:6px;border-radius:50%;background:#3a6b4a;animation:pulse 2s infinite}
@@ -410,7 +410,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .drawer-note{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px}
 .price-block{border-top:0.5px solid var(--bdr2);padding-top:16px;margin-bottom:16px}
 .pb-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.pb-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300}
+.pb-val{font-family:'Noto Sans TC',sans-serif;font-size:26px;font-weight:500;letter-spacing:1px}
 .pb-val.gold{color:var(--gold)}
 .pb-nq{font-size:11px;color:var(--muted)}
 .drawer-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -1343,8 +1343,9 @@ function App() {
   const [productSaving,setProductSaving]= useState(false); // indoor | outdoor
   const [hoveredLight,  setHoveredLight]  = useState(null);
   const [cat,        setCat]        = useState("全部");
-  const [seriesF,    setSeriesF]    = useState(null);
+  const [invSeriesF, setInvSeriesF] = useState(null);
   const [invCat,     setInvCat]     = useState("全部");
+  const [invSeriesF, setInvSeriesF] = useState(null);
   const [invCct,   setInvCct]   = useState("全部");
 const [invColor, setInvColor] = useState("全部");
 const [invBeam,  setInvBeam]  = useState("全部");
@@ -1582,7 +1583,8 @@ const filteredInv = inventory.filter(i=>
   (invCat==="全部"||i.category===invCat)&&
   (invCct==="全部"||i.cct===invCct)&&
   (invColor==="全部"||i.color===invColor)&&
-  (invBeam==="全部"||i.beam===invBeam)
+  (invBeam==="全部"||i.beam===invBeam)&&
+  (!invSeriesF||i.series===invSeriesF)
 );
   const suggs = getSuggestions(products, searchQ);
   const instCalc = calcInstall(instRegion, instGroups, linearGroups);
@@ -2354,7 +2356,7 @@ if(urgentData){
           </div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
-          {!seriesF&&!searchQ&&(<div className="catbar">{["全部",...allCats.filter(c=>c&&c.trim()).filter((c,i,a)=>!(c==="軟條燈"&&a.includes("鋁條燈")))].map(c=>{const label=c==="磁吸系統"?"磁吸軌道":c==="鋁條燈"?"鋁條燈／軟條燈":c;return(<button key={c} className={"catbtn"+(cat===c?" on":"")} onClick={()=>{setCat(c);setActiveTags([]);}}>{label}</button>);})}</div>)}
+          {!searchQ&&(<div className="catbar"><button className={"catbtn"+(cat==="全部"&&!seriesF?" on":"")} onClick={()=>{setCat("全部");setSeriesF(null);setActiveTags([]);}}>全部</button>{COMMERCIAL_SERIES.map(s=><button key={s} className={"catbtn"+(seriesF===s?" on":"")} onClick={()=>{setSeriesF(s);setCat("全部");setActiveTags([]);}}>{s}</button>)}{LINEAR_SERIES_LIST.map(s=><button key={s} className={"catbtn"+(seriesF===s?" on":"")} onClick={()=>{setSeriesF(s);setCat("全部");setActiveTags([]);}}>{s}</button>)}</div>)}
           <div className="filter-area">
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">色溫</span>{allCcts.map(c=><button key={c} className={`filter-tag ${hasTag("cct",c)?"on":""}`} onClick={()=>toggleTag("cct",c)}>{c}</button>)}</div>
@@ -2422,7 +2424,7 @@ if(urgentData){
             <div className="inv-stat"><div className="inv-stat-num">{invAvail.toLocaleString()}</div><div className="inv-stat-lbl">可調貨數量</div></div>
             <div className="inv-stat"><div className="inv-stat-num">{inventory.length}</div><div className="inv-stat-lbl">品項數 SKU</div></div>
           </div>
-          <div className="inv-catbar">{allInvCats.map(c=><button key={c} className={`inv-catbtn ${invCat===c?"on":""}`} onClick={()=>setInvCat(c)}>{c}</button>)}</div>
+          <div className="inv-catbar"><button className={`inv-catbtn ${invCat==="全部"&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat("全部");setInvSeriesF(null);}}>全部</button>{allInvCats.filter(c=>c!=="全部").map(c=><button key={c} className={`inv-catbtn ${invCat===c&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat(c);setInvSeriesF(null);}}>{c}</button>)}{[...new Set(inventory.map(i=>i.series).filter(Boolean))].map(s=><button key={s} className={`inv-catbtn ${invSeriesF===s?"on":""}`} onClick={()=>{setInvSeriesF(s);setInvCat("全部");}} style={{color:"var(--gold)"}}>{s}</button>)}</div>
 <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"10px 0 16px",alignItems:"center"}}>
   <span style={{fontSize:9,letterSpacing:2,color:"var(--muted)",textTransform:"uppercase"}}>篩選</span>
   <select value={invCct} onChange={e=>setInvCct(e.target.value)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,color:"var(--blk)",outline:"none"}}>
