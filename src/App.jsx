@@ -478,18 +478,18 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .region-card.on::after{content:'✓';position:absolute;top:5px;right:7px;color:var(--gold);font-size:10px}
 .rc-label{font-size:10px;font-weight:400;margin-bottom:1px}
 .rc-km{font-size:8px;color:var(--muted);letter-spacing:.5px;margin-bottom:2px}
-.rc-fee{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--gold);margin-top:2px}
+.rc-fee{font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:500;color:var(--gold);margin-top:2px}
 .rc-free{font-size:9px;color:var(--green);margin-top:1px}
 .group-row{display:flex;align-items:center;gap:7px;margin-bottom:7px;padding:8px 9px;background:#f4efe8;border:0.5px solid var(--bdr2)}
 .gr-sel{flex:1;padding:5px;border:0.5px solid var(--bdr);background:transparent;font-family:'Noto Sans TC',sans-serif;font-size:10px;outline:none}
 .gr-qty{width:52px;padding:5px;border:0.5px solid var(--bdr);background:transparent;font-family:'Noto Sans TC',sans-serif;font-size:12px;text-align:center;outline:none}
 .calc-box{background:var(--blk);color:var(--ivory);padding:16px;margin-top:14px}
 .calc-row{display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:0.5px solid #2a2520;letter-spacing:.3px}
-.calc-row.total{border-bottom:none;font-size:14px;color:var(--gold);margin-top:4px;padding-top:7px}
+.calc-row.total{border-bottom:none;font-size:14px;font-family:'Noto Sans TC',sans-serif;font-weight:600;color:var(--gold);margin-top:4px;padding-top:7px}
 .calc-warn{font-size:10px;color:#c45a5a;margin-top:5px;line-height:1.6}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr2);border:0.5px solid var(--bdr2);margin-bottom:28px}
 .stat-box{background:var(--ivory);padding:20px 22px}
-.stat-num{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300}
+.stat-num{font-family:'Noto Sans TC',sans-serif;font-size:30px;font-weight:600;letter-spacing:0}
 .stat-lbl{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:3px}
 .tbl-wrap{border:0.5px solid var(--bdr2);overflow:auto;margin-bottom:18px}
 table{width:100%;border-collapse:collapse;min-width:500px}
@@ -545,7 +545,7 @@ tr:hover td{background:#f7f2eb}
 .inv-hero-desc strong{color:#8acc8a}
 .inv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(58,107,74,.2);border:0.5px solid rgba(58,107,74,.2);margin:28px 0}
 .inv-stat{background:var(--ivory);padding:18px 20px}
-.inv-stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--inv-green)}
+.inv-stat-num{font-family:'Noto Sans TC',sans-serif;font-size:28px;font-weight:500;color:var(--inv-green);letter-spacing:0}
 .inv-stat-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blk);opacity:0.55;margin-top:4px}
 .inv-catbar{display:flex;margin-bottom:24px;border-bottom:0.5px solid var(--bdr2);overflow-x:auto}
 .inv-catbtn{padding:10px 18px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
@@ -565,7 +565,7 @@ tr:hover td{background:#f7f2eb}
 .inv-spec-tag{font-size:8px;padding:2px 7px;border:0.5px solid var(--bdr);color:var(--muted)}
 .inv-qty-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:0.5px solid var(--bdr2);padding:10px}
 .inv-qty-cell{text-align:center}
-.inv-qty-num{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--blk)}
+.inv-qty-num{font-family:'Noto Sans TC',sans-serif;font-size:18px;font-weight:500;color:var(--blk);font-variant-numeric:tabular-nums}
 .inv-qty-num.avail{color:var(--inv-green)}
 .inv-qty-lbl{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
 .inv-card-footer{display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--bdr2);padding-top:10px}
@@ -612,7 +612,7 @@ tr:hover td{background:#f7f2eb}
 .cat-meta{display:flex;gap:16px;border-top:0.5px solid var(--bdr2);padding-top:12px}
 .cat-meta-item{display:flex;flex-direction:column;gap:2px}
 .cat-meta-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blk);opacity:0.55}
-.cat-meta-val{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--blk)}
+.cat-meta-val{font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:500;color:var(--blk);letter-spacing:0}
 .cat-actions{padding:16px 24px;border-top:0.5px solid var(--bdr2);display:flex;gap:8px}
 .btn-cat-preview{flex:1;padding:10px;background:var(--blk);border:none;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-cat-preview:hover{background:var(--blk2)}
@@ -2867,7 +2867,7 @@ if(urgentData){
             {[["最低出勤費","NT$ 2,000","單次出勤未達此標，以 NT$2,000 計收"],["標準安裝（3m 以下）","NT$ 200 / 盞","含定位、安裝固定與功能測試"],["挑高施工（3.1–4.5m）","+NT$ 80 / 盞","需 A 型梯輔助，視現場評估"],["4.5m 以上","不含安裝費","需鷹架或高空作業車，另案報價"]].map(([t,v,d])=>(
               <div key={t} style={{background:"var(--ivory)",padding:"16px 18px"}}>
                 <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:4}}>{t}</div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:t.includes("4.5m")?"var(--red)":"var(--blk)",marginBottom:3}}>{v}</div>
+                <div style={{fontFamily:"'Noto Sans TC',sans-serif",fontSize:15,fontWeight:500,color:t.includes("4.5m")?"var(--red)":"var(--blk)",marginBottom:3,letterSpacing:0}}>{v}</div>
                 <div style={{fontSize:10,color:"var(--muted)"}}>{d}</div>
               </div>
             ))}
