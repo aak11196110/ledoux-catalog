@@ -1345,8 +1345,7 @@ function App() {
   const [cat,        setCat]        = useState("全部");
   const [invSeriesF, setInvSeriesF] = useState(null);
   const [invCat,     setInvCat]     = useState("全部");
-  const [invSeriesF, setInvSeriesF] = useState(null);
-  const [invCct,   setInvCct]   = useState("全部");
+const [invCct,   setInvCct]   = useState("全部");
 const [invColor, setInvColor] = useState("全部");
 const [invBeam,  setInvBeam]  = useState("全部");
 const [selInvModel, setSelInvModel] = useState(null);
