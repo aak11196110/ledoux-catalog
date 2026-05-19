@@ -1117,7 +1117,7 @@ function SampleInvPage({sampleInv,setSampleInv,sheetUrl}){
     {showAdd&&<div className="form-panel" style={{marginBottom:16}}>
       <div className="fp-title">{editing?"編輯樣品":"新增樣品"}</div>
       <div className="fgrid">
-        {[["型號 *","model"],["色溫","cct"],["光束角","beam"],["外框顏色","outerColor"],["內框顏色","innerColor"],["備註","note"]].map(([l,k])=>(
+        {[["型號 *","model"],["光束角","beam"],["外框顏色","outerColor"],["內框顏色","innerColor"],["備註","note"]].map(([l,k])=>(
           <div key={k} className="ff"><label>{l}</label><input value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))} style={{width:"100%",padding:"6px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none"}}/></div>
         ))}
         <div className="ff"><label>狀態</label><select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))} style={{width:"100%",padding:"6px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11}}>
@@ -1951,7 +1951,13 @@ if(urgentData){
         stdPrice: Number(form.stdPrice)||0,
         projPrice: Number(form.projPrice)||0,
         shipping: Number(form.shipping)||90,
-        catalog: COMMERCIAL_SERIES.includes(form.series) ? "商照燈" : "線型燈"
+       catalog: COMMERCIAL_SERIES.includes(form.series) ? "商照燈" : "線型燈",
+color: (form.specOptions?.color||[]).filter(v=>v!=="其他").join("/") || form.color || "",
+beam: (form.specOptions?.beam||[]).filter(v=>v!=="其他").join("/") || form.beam || "",
+cct: (form.specOptions?.cct||[]).filter(v=>v!=="其他").join("/") || form.cct || "",
+voltage: (form.specOptions?.voltage||[]).filter(v=>v!=="其他").join("/") || form.voltage || "",
+outerColor: (form.specOptions?.outerColor||[]).filter(v=>v!=="其他").join("/") || form.outerColor || "",
+innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/") || form.innerColor || "",
       };
       // 更新本地
       setProducts(ps => {
@@ -2506,7 +2512,7 @@ if(urgentData){
                   <div className="pcard-model">{p.model}</div>
                   {isEditing?(
                     <div onClick={e=>e.stopPropagation()} style={{marginBottom:8}}>
-                      {[["瓦數","watt"],["色溫","cct"],["開孔","cutout"],["建議牌價","stdPrice"],["備註","note"]].map(([l,k])=>(
+                      {[["瓦數","watt"],["開孔","cutout"],["建議牌價","stdPrice"],["備註","note"]].map(([l,k])=>(
                         <div key={k} style={{marginBottom:6}}>
                           <div style={{fontSize:"7px",letterSpacing:"2px",textTransform:"uppercase",color:"var(--muted)",marginBottom:2}}>{l}</div>
                           <input type={k==="stdPrice"?"number":"text"} value={d[k]||""} onChange={e=>setInlineData(x=>({...x,[k]:e.target.value}))} style={{width:"100%",padding:"5px 7px",border:"0.5px solid var(--gold)",background:"#fffef9",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none"}}/>
@@ -3095,7 +3101,7 @@ if(urgentData){
           </div>
           {showAdd&&<div className="form-panel"><div className="fp-title">新增產品</div>
             <div className="fgrid">
-              {[["型號","model"],["系列","series"],["瓦數","watt"],["色溫","cct"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["認證","cert"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={newProd[k]} onChange={e=>setNewProd(p=>({...p,[k]:e.target.value}))}/></div>))}
+              {[["型號","model"],["系列","series"],["瓦數","watt"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={newProd[k]} onChange={e=>setNewProd(p=>({...p,[k]:e.target.value}))}/></div>))}
               <div className="ff"><label>分類</label><select value={newProd.category} onChange={e=>setNewProd(p=>({...p,category:e.target.value}))}><option>崁燈</option><option>軌道燈</option><option>磁吸系統</option><option>吸頂燈</option><option>壁燈</option><option>戶外燈</option><option>鋁條燈</option></select></div>
               <div className="ff full"><label>產品描述</label><input value={newProd.desc} onChange={e=>setNewProd(p=>({...p,desc:e.target.value}))}/></div>
               <div className="ff full"><label>圖片網址（每行一個）</label><textarea rows={2} value={newProd.images} onChange={e=>setNewProd(p=>({...p,images:e.target.value}))} placeholder="https://..."/></div>
@@ -3105,7 +3111,7 @@ if(urgentData){
           </div>}
           {editProd&&<div className="form-panel" style={{background:"#f0ebe2"}}><div className="fp-title">編輯：{editProd.model}</div>
             <div className="fgrid">
-              {[["型號","model"],["系列","series"],["瓦數","watt"],["色溫","cct"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["認證","cert"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={editProd[k]||""} onChange={e=>setEditProd(p=>({...p,[k]:e.target.value}))}/></div>))}
+              {[["型號","model"],["系列","series"],["瓦數","watt"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={editProd[k]||""} onChange={e=>setEditProd(p=>({...p,[k]:e.target.value}))}/></div>))}
               <div className="ff full"><label>產品描述</label><input value={editProd.desc||""} onChange={e=>setEditProd(p=>({...p,desc:e.target.value}))}/></div>
               <div className="ff full"><label>圖片網址（每行一個）</label><textarea rows={2} value={typeof editProd.images==="string"?editProd.images:(editProd.images||[]).join("\n")} onChange={e=>setEditProd(p=>({...p,images:e.target.value}))}/></div>
               <div className="ff full"><label>備註</label><input value={editProd.note||""} onChange={e=>setEditProd(p=>({...p,note:e.target.value}))}/></div>
@@ -3120,7 +3126,7 @@ if(urgentData){
           <div className="phead"><div><div className="ptitle">庫存管理</div><div className="psub">{inventory.length} 筆 · 修改即時同步雲端</div></div><button className="btn-add2" onClick={()=>setShowAddInv(v=>!v)}>新增庫存</button></div>
           {showAddInv&&<div className="form-panel"><div className="fp-title">新增庫存項目</div>
             <div className="fgrid">
-              {[["型號","model"],["系列","series"],["瓦數","watt"],["色溫","cct"],["顏色","color"],["儲位","location"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input value={newInv[k]} onChange={e=>setNewInv(p=>({...p,[k]:e.target.value}))}/></div>))}
+              {[["型號","model"],["系列","series"],["瓦數","watt"],["顏色","color"],["儲位","location"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input value={newInv[k]} onChange={e=>setNewInv(p=>({...p,[k]:e.target.value}))}/></div>))}
               <div className="ff"><label>分類</label><select value={newInv.category} onChange={e=>setNewInv(p=>({...p,category:e.target.value}))}><option>崁燈</option><option>軌道燈</option><option>磁吸系統</option><option>吸頂燈</option><option>戶外燈</option><option>鋁條燈</option></select></div>
               {[["總庫存","totalQty"],["已保留","reservedQty"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type="number" min="0" value={newInv[k]} onChange={e=>setNewInv(p=>({...p,[k]:e.target.value}))}/></div>))}
               <div className="ff full"><label>備註</label><input value={newInv.note} onChange={e=>setNewInv(p=>({...p,note:e.target.value}))}/></div>
@@ -3217,7 +3223,7 @@ if(urgentData){
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
             <div className="spec-grid">
-              {[["瓦數",selProd.watt],["流明",selProd.lumen],["色溫",selProd.cct],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+              {[["瓦數",selProd.watt],["流明",selProd.lumen],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
