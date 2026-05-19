@@ -473,7 +473,7 @@
       <div class="form-group"><label class="form-label">認證 Cert</label><input class="form-input" id="p-cert" placeholder="CNS,CE"></div>
     </div>
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
-   <div class="form-group"><label class="form-label">圖片網址</label><div style="display:flex;gap:8px;align-items:center"><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()"><label style="padding:8px 14px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;white-space:nowrap;border:none">上傳圖片<input type="file" accept="image/*" style="display:none" onchange="uploadImgBB(this,'p-img')"></label></div>
+ <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()"><div style="margin-top:6px"><label style="display:inline-block;padding:8px 18px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;border:none">📷 上傳圖片到 ImgBB<input type="file" accept="image/*" style="display:none" onchange="uploadImgBB(this,'p-img')"></label></div><div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div></div> 
       <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
     </div>
     <div class="form-actions">
