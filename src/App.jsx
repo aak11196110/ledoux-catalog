@@ -729,7 +729,7 @@ function generatePDF({cart, projectName, customer, installCalc=null, isVip, disc
   const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`;
   const discSuffix = discountRate < 1 ? String(Math.round(discountRate*10)).padStart(3,"0") : String(Math.floor(Math.random()*900)+100);
   const qn = `C${dateStr}-${discSuffix}`;
-  const priceLabel = discountRate < 1 ? `專案折扣價` : isVip ? "專案價" : "建議牌價";
+const priceLabel = discountRate < 1 ? `折扣價` : "建議牌價";
 
   const rows = cart.map((item, i) => {
     const p = item.product;
@@ -1437,7 +1437,7 @@ const [visitDone,    setVisitDone]    = useState(false);
     if(i.product.category==="鋁條燈") return s + i.qty;
     return s;
   }, 0);
-  const cartTotal  = cart.reduce((s,i)=>s+(Number(isVip?i.product.projPrice:i.product.stdPrice)||0)*i.qty,0);
+  const cartTotal  = cart.reduce((s,i)=>s+(Number(i.product.stdPrice)||0)*i.qty,0);
   const allChecked = Object.values(checks).every(Boolean);
   const allSeries  = [...new Set(products.map(p=>p.series))];
   const allCats    = [...new Set(products.map(p=>p.category))];
@@ -2723,8 +2723,8 @@ if(urgentData){
           <ProjBanner onContact={()=>setContactModal(true)}/>
           {cart.length===0?<div className="empty">請至產品目錄加入品項</div>:<>
             <div className="tbl-wrap"><table>
-              <thead><tr><th>型號</th><th>系列</th><th>瓦數</th><th>數量</th><th>{isVip?"專案價":"標準價"}</th><th>小計</th><th></th></tr></thead>
-              <tbody>{cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;return(<tr key={item.product.id}><td style={{fontWeight:400}}>{item.product.model}</td><td>{item.product.series}</td><td>{item.product.watt}</td><td><div style={{display:"flex",alignItems:"center",gap:6}}><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button></div></td><td style={{color:isVip?"var(--gold)":"inherit"}}>{price>0?`NT$ ${price.toLocaleString()}`:"洽業務"}</td><td>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</td><td><button className="btn-del2" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></td></tr>);})}</tbody>
+              <thead><tr><th>型號</th><th>系列</th><th>瓦數</th><th>數量</th><th>牌價</th><th>小計</th><th></th></tr></thead>
+              <tbody>{cart.map(item=>{const price=Number(item.product.stdPrice)||0;return(<tr key={item.product.id}><td style={{fontWeight:400}}>{item.product.model}</td><td>{item.product.series}</td><td>{item.product.watt}</td><td><div style={{display:"flex",alignItems:"center",gap:6}}><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button></div></td><td style={{color:isVip?"var(--gold)":"inherit"}}>{price>0?`NT$ ${price.toLocaleString()}`:"洽業務"}</td><td>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</td><td><button className="btn-del2" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></td></tr>);})}</tbody>
             </table></div>
             <div style={{maxWidth:460}}>
               <div style={{marginBottom:14,paddingBottom:12,borderBottom:"0.5px solid var(--bdr2)"}}>
@@ -2771,7 +2771,7 @@ if(urgentData){
                   onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)}
                   maxLength={8}
                 />
-                {discountLabel&&<span style={{fontSize:"9px",color:"var(--gold)",letterSpacing:"2px",whiteSpace:"nowrap",border:"0.5px solid var(--gold)",padding:"3px 9px"}}>✓ 專案價</span>}
+                {false&&<span></span>}
               </div>
               {/* ── 下單類型 ── */}
 <div style={{marginBottom:14}}>
@@ -3143,8 +3143,8 @@ if(urgentData){
   {selSpec.addon?.length>0&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:4}}>
   配件：{selSpec.addon.map(a=>a.name).join("、")} ＋NT$ {selSpec.addon.reduce((s,a)=>s+a.price,0).toLocaleString()}
 </div>}
-              <div className="pb-label">{isVip?"專案價":"售價"}</div>
-              {isVip?<div className="pb-val gold">NT$ {selProd.projPrice?.toLocaleString()}</div>:(selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>)}
+              <div className="pb-label">牌價</div>
+              {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
             <div className="drawer-actions">
               <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
@@ -3161,7 +3161,7 @@ if(urgentData){
           <div style={{background:"#f9f5ee",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"9px 12px",marginBottom:14,fontSize:10,color:"var(--gold)",lineHeight:1.7}}>
             ✦ 設計公司享有專案折扣，<span style={{textDecoration:"underline",cursor:"pointer"}} onClick={()=>{setCartOpen(false);setContactModal(true);}}>點此聯繫業務</span>
           </div>
-          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(isVip?item.product.projPrice:item.product.stdPrice)||0;
+          {cart.length===0?<div className="empty" style={{paddingTop:48}}>尚未加入任何產品</div>:cart.map(item=>{const price=Number(item.product.stdPrice)||0;
             const sp=item.spec||{};
             const cctDisplay=sp.cct==="其他"?(sp.customCct||"特殊色溫"):sp.cct;
             const beamDisplay=sp.beam==="其他"?(sp.customBeam||"特殊角度"):sp.beam;
@@ -3177,7 +3177,7 @@ if(urgentData){
           <div className="cp-project"><label>案名 *</label><input value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/></div>
           <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:10}}>
             <input style={{flex:1,padding:"6px 9px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)"}} placeholder="— — —" value={discountCode} onChange={e=>setDiscountCode(e.target.value)} onBlur={()=>applyDiscountCode(discountCode)} onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)} maxLength={8}/>
-            {discountLabel&&<span style={{fontSize:"8px",color:"var(--gold)",border:"0.5px solid var(--gold)",padding:"2px 7px",whiteSpace:"nowrap"}}>✓ 專案價</span>}
+            {false&&<span></span>}
             {discountLabel&&<div style={{fontSize:10,color:"#7a5a2a",background:"#fdf5e8",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"8px 10px",marginTop:6,lineHeight:1.8}}>⚠ 專案報價僅提供設計公司、建築師事務所自行接案使用。本報價不適用於標案、統包轉包或代購用途，如有上述需求請洽業務另行報價。</div>}
           </div>
           <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
