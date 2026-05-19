@@ -1170,11 +1170,11 @@ function AdminProductEditor({ product, onSave, onClose, series_list }) {
     {key:"status",    label:"狀態",    type:"select", options:["銷售中","停產","規格更新","即將上市"]},
     {key:"watt",      label:"瓦數",    type:"text"},
     {key:"lumen",     label:"流明",    type:"text"},
-    {key:"cct",       label:"色溫",    type:"text"},
-    {key:"beam",      label:"光束角",  type:"text"},
-    {key:"voltage",   label:"電壓",    type:"text"},
+  {key:"cct",     label:"色溫（多選項用 / 分隔，例：2700K/3000K/4000K）",  type:"text"},
+{key:"beam",    label:"光束角（多選項用 / 分隔，例：15°/24°/36°）",       type:"text"},
+{key:"voltage", label:"電壓（多選項用 / 分隔，例：AC110V/AC220V）",       type:"text"},
     {key:"cri",       label:"演色性",  type:"text"},
-    {key:"color",     label:"顏色",    type:"text"},
+{key:"color",   label:"顏色（多選項用 / 分隔，例：黑色/白色）",           type:"text"},
     {key:"cutout",    label:"開孔尺寸",type:"text"},
     {key:"size",      label:"產品尺寸",type:"text"},
     {key:"install",   label:"安裝方式",type:"text"},
@@ -1185,7 +1185,6 @@ function AdminProductEditor({ product, onSave, onClose, series_list }) {
     {key:"desc",      label:"產品描述",type:"textarea"},
     {key:"note",      label:"備註",    type:"textarea"},
     {key:"images",    label:"圖片網址",type:"text"},
-    {key:"specOptions", label:"自訂規格選項（格式：名稱:選項1/選項2，每行一組）", type:"textarea"},
   ];
 
   const [form, setForm] = React.useState(() => {
@@ -1460,7 +1459,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [searchFocus,setSearchFocus]= useState(false);
   const [searchHist, setSearchHist] = useState([]);
   const [selProd,    setSelProd]    = useState(null);
- const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[], customSpecs:{}});
+const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", voltage:"", customCct:"", customColor:"", addon:[], customSpecs:{}, custom_cct:"", custom_beam:"", custom_color:"", custom_voltage:""});
   const [addons, setAddons] = useState([]);
   const [allParts,   setAllParts]   = useState([]);
   const [editProd,   setEditProd]   = useState(null);
@@ -1952,12 +1951,6 @@ if(urgentData){
         projPrice: Number(form.projPrice)||0,
         shipping: Number(form.shipping)||90,
        catalog: COMMERCIAL_SERIES.includes(form.series) ? "商照燈" : "線型燈",
-color: (form.specOptions?.color||[]).filter(v=>v!=="其他").join("/") || form.color || "",
-beam: (form.specOptions?.beam||[]).filter(v=>v!=="其他").join("/") || form.beam || "",
-cct: (form.specOptions?.cct||[]).filter(v=>v!=="其他").join("/") || form.cct || "",
-voltage: (form.specOptions?.voltage||[]).filter(v=>v!=="其他").join("/") || form.voltage || "",
-outerColor: (form.specOptions?.outerColor||[]).filter(v=>v!=="其他").join("/") || form.outerColor || "",
-innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/") || form.innerColor || "",
       };
       // 更新本地
       setProducts(ps => {
@@ -2504,7 +2497,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               const isEditing=isAdmin&&inlineEdit===p.id;
               const d=isEditing?inlineData:p;
               return(
-              <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[],customSpecs:{}});}}}>
+              <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",voltage:"",customCct:"",customColor:"",addon:[],customSpecs:{},custom_cct:"",custom_beam:"",custom_color:"",custom_voltage:""});}}}>
                 {hasStock(p.model)&&<div className="pcard-stock-badge"><span className="pcard-stock-dot"/>台灣現貨</div>}
                 <div className="pcard-img">{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div>
                 <div className="pcard-body">
@@ -3222,9 +3215,63 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div className="drawer-model">{selProd.model}</div>
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
-            <div className="spec-grid">
-              {[["瓦數",selProd.watt],["流明",selProd.lumen],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+       <div className="spec-grid">
+              {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].map(([l,v])=>(
+                <div key={l} className="spec-item">
+                  <div className="spec-label">{l}</div>
+                  <div className="spec-val">{v&&v!=="—"?v:"—"}</div>
+                </div>
+              ))}
             </div>
+            {/* 可選規格按鈕區 */}
+            {[
+              {key:"cct",     label:"色溫",  field:selProd.cct},
+              {key:"beam",    label:"光束角", field:selProd.beam},
+              {key:"color",   label:"顏色",  field:selProd.color},
+              {key:"voltage", label:"電壓",  field:selProd.voltage},
+            ].map(({key,label,field})=>{
+              const opts = field&&field!=="—" ? field.split("/").map(s=>s.trim()).filter(Boolean) : [];
+              return (
+                <div key={key} style={{marginBottom:14}}>
+                  <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>{label}</div>
+                  {opts.length>0 ? (
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                      {opts.map(opt=>(
+                        <button key={opt}
+                          onClick={()=>setSelSpec(s=>({...s,[key]:opt,[`custom_${key}`]:""}))}
+                          style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",
+                            background:selSpec[key]===opt?"var(--blk)":"transparent",
+                            color:selSpec[key]===opt?"var(--ivory)":"var(--blk)",
+                            borderColor:selSpec[key]===opt?"var(--blk)":"var(--bdr)"}}>
+                          {opt}
+                        </button>
+                      ))}
+                      <button
+                        onClick={()=>setSelSpec(s=>({...s,[key]:"其他"}))}
+                        style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",
+                          background:selSpec[key]==="其他"?"var(--gold)":"transparent",
+                          color:selSpec[key]==="其他"?"var(--blk)":"var(--muted)",
+                          borderColor:selSpec[key]==="其他"?"var(--gold)":"var(--bdr)"}}>
+                        其他
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{fontSize:12,color:"var(--muted)"}}>—</div>
+                  )}
+                  {selSpec[key]==="其他"&&(
+                    <input
+                      placeholder={`請輸入${label}，業務確認後回覆`}
+                      value={selSpec[`custom_${key}`]||""}
+                      onChange={e=>setSelSpec(s=>({...s,[`custom_${key}`]:e.target.value}))}
+                      style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",
+                        background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",
+                        fontSize:12,outline:"none",color:"var(--blk)"}}
+                      maxLength={50}
+                    />
+                  )}
+                </div>
+              );
+            })}
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
   const s = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(x=>x.trim());
