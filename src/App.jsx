@@ -255,7 +255,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .lf input::placeholder{color:var(--bdr)}
 .ferr{font-size:10px;color:var(--red);margin-top:4px}
 .req{color:var(--gold);margin-left:2px}
-.sec-lbl{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);text-align:center;margin:22px 0 18px;position:relative}
+.sec-lbl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);text-align:center;margin:22px 0 18px;position:relative}
 .sec-lbl::before,.sec-lbl::after{content:'';position:absolute;top:50%;width:28%;height:0.5px;background:var(--bdr2)}
 .sec-lbl::before{left:0}.sec-lbl::after{right:0}
 .btn-primary{width:100%;padding:13px;background:var(--blk);border:none;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:6px}
@@ -317,7 +317,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .sm-ucomp{font-size:11px;color:#a09080;margin-top:2px}
 .sm-ubadge{font-size:7px;padding:2px 8px;border:0.5px solid;letter-spacing:2px;text-transform:uppercase;display:inline-block;margin-top:7px}
 .sm-nav{flex:1;padding:10px 0;overflow-y:auto}
-.sm-sec{padding:9px 22px 3px;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#7a6a5a}
+.sm-sec{padding:9px 22px 3px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7a6a5a}
 .sm-item{display:flex;align-items:center;justify-content:space-between;padding:10px 22px;font-size:15px;letter-spacing:0px;text-transform:none;color:#d0c0b0;cursor:pointer;transition:all .15s;border-left:1px solid transparent}
 .sm-item:hover{color:var(--ivory);background:#181614}
 .sm-item.on{color:var(--gold);border-left-color:var(--gold);background:rgba(184,147,90,.05)}
@@ -1281,7 +1281,7 @@ const bgUrl = scene === "indoor"
 
       {/* 右下角品牌浮水印 */}
       <div style={{position:"absolute",bottom:20,right:24,zIndex:5,opacity:0.4}}>
-        <div style={{fontSize:11,letterSpacing:"4px",color:"rgba(255,255,255,0.6)"}}>LEDOUX LIGHTING</div>
+        <div style={{fontSize:14,letterSpacing:"4px",color:"rgba(255,255,255,0.6)"}}>LEDOUX LIGHTING</div>
       </div>
 
       {/* 進入產品目錄按鈕 */}
