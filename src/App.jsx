@@ -1061,6 +1061,106 @@ function _generateInstallOnlyPDF({projectName, customer, instCalc, instRegion, i
 // ══════════════════════════════════════════
 //  管理員產品管理頁面
 // ══════════════════════════════════════════
+function SampleInvPage({sampleInv,setSampleInv,sheetUrl}){
+  const EMPTY={id:"",model:"",cct:"",beam:"",outerColor:"",innerColor:"",status:"在庫",lendDate:"",returnDate:"",note:""};
+  const [form,setForm]=React.useState(EMPTY);
+  const [editing,setEditing]=React.useState(null);
+  const [showAdd,setShowAdd]=React.useState(false);
+  const [extDays,setExtDays]=React.useState({});
+
+  const addDays=(dateStr,days)=>{
+    const d=new Date(dateStr);
+    d.setDate(d.getDate()+days);
+    return d.toISOString().split("T")[0];
+  };
+
+  const saveRow=()=>{
+    if(!form.model){alert("請填寫型號");return;}
+    if(editing){
+      setSampleInv(x=>x.map(i=>i.id===editing?{...form,id:editing}:i));
+      setEditing(null);
+    } else {
+      setSampleInv(x=>[...x,{...form,id:"SI"+Date.now()}]);
+    }
+    setForm(EMPTY);
+    setShowAdd(false);
+  };
+
+  const lendRow=(id)=>{
+    const today=new Date().toISOString().split("T")[0];
+    const ret=addDays(today,14);
+    setSampleInv(x=>x.map(i=>i.id===id?{...i,status:"已借出",lendDate:today,returnDate:ret}:i));
+  };
+
+  const extendRow=(id)=>{
+    const days=Number(extDays[id]||14);
+    setSampleInv(x=>x.map(i=>{
+      if(i.id!==id)return i;
+      const base=i.returnDate||new Date().toISOString().split("T")[0];
+      return {...i,returnDate:addDays(base,days)};
+    }));
+    setExtDays(p=>({...p,[id]:""}));
+  };
+
+  const returnRow=(id)=>{
+    setSampleInv(x=>x.map(i=>i.id===id?{...i,status:"已歸還",lendDate:"",returnDate:""}:i));
+  };
+
+  const deleteRow=(id)=>setSampleInv(x=>x.filter(i=>i.id!==id));
+
+  const statusColor=s=>s==="在庫"?"var(--green)":s==="已借出"?"var(--gold)":"var(--muted)";
+
+  return(<>
+    <div className="phead"><div><div className="ptitle">樣品管理</div><div className="psub">內部記錄，客戶不可見</div></div><button className="btn-add2" onClick={()=>{setShowAdd(v=>!v);setEditing(null);setForm(EMPTY);}}>新增樣品</button></div>
+
+    {showAdd&&<div className="form-panel" style={{marginBottom:16}}>
+      <div className="fp-title">{editing?"編輯樣品":"新增樣品"}</div>
+      <div className="fgrid">
+        {[["型號 *","model"],["色溫","cct"],["光束角","beam"],["外框顏色","outerColor"],["內框顏色","innerColor"],["備註","note"]].map(([l,k])=>(
+          <div key={k} className="ff"><label>{l}</label><input value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))} style={{width:"100%",padding:"6px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none"}}/></div>
+        ))}
+        <div className="ff"><label>狀態</label><select value={form.status} onChange={e=>setForm(p=>({...p,status:e.target.value}))} style={{width:"100%",padding:"6px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11}}>
+          <option>在庫</option><option>已借出</option><option>已歸還</option>
+        </select></div>
+      </div>
+      <div style={{display:"flex",gap:8,marginTop:10}}>
+        <button className="btn-confirm" onClick={saveRow}>儲存</button>
+        <button className="btn-cancel-sm" onClick={()=>{setShowAdd(false);setEditing(null);setForm(EMPTY);}}>取消</button>
+      </div>
+    </div>}
+
+    {sampleInv.length===0?<div className="empty">尚未新增任何樣品記錄</div>:
+    <div className="tbl-wrap"><table><thead><tr>
+      <th>型號</th><th>色溫</th><th>光束角</th><th>外框</th><th>內框</th><th>狀態</th><th>借出日</th><th>歸還日</th><th>備註</th><th>操作</th>
+    </tr></thead><tbody>
+    {sampleInv.map(r=>(
+      <tr key={r.id}>
+        <td style={{fontWeight:500}}>{r.model}</td>
+        <td style={{fontSize:10}}>{r.cct||"—"}</td>
+        <td style={{fontSize:10}}>{r.beam||"—"}</td>
+        <td style={{fontSize:10}}>{r.outerColor||"—"}</td>
+        <td style={{fontSize:10}}>{r.innerColor||"—"}</td>
+        <td><span style={{fontSize:10,color:statusColor(r.status),fontWeight:500}}>{r.status}</span></td>
+        <td style={{fontSize:10,color:"var(--muted)"}}>{r.lendDate||"—"}</td>
+        <td style={{fontSize:10,color:r.status==="已借出"?"var(--gold)":"var(--muted)"}}>{r.returnDate||"—"}</td>
+        <td style={{fontSize:10,color:"var(--muted)"}}>{r.note||"—"}</td>
+        <td>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",alignItems:"center"}}>
+            {r.status==="在庫"&&<button className="btn-ok" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>lendRow(r.id)}>借出+14天</button>}
+            {r.status==="已借出"&&<>
+              <input type="number" min="1" placeholder="天數" value={extDays[r.id]||""} onChange={e=>setExtDays(p=>({...p,[r.id]:e.target.value}))} style={{width:52,padding:"3px 5px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,outline:"none"}}/>
+              <button className="btn-ok" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>extendRow(r.id)}>延長</button>
+              <button className="btn-cancel-sm" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>returnRow(r.id)}>歸還</button>
+            </>}
+            <button className="btn-edit2" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>{setEditing(r.id);setForm({...r});setShowAdd(true);}}>編輯</button>
+            <button className="btn-del2" onClick={()=>deleteRow(r.id)}><CloseIcon/></button>
+          </div>
+        </td>
+      </tr>
+    ))}
+    </tbody></table></div>}
+  </>);
+}
 function AdminProductEditor({ product, onSave, onClose, series_list }) {
   const FIELDS = [
     {key:"series",    label:"系列",    type:"select", options: series_list},
@@ -1333,6 +1433,7 @@ function App() {
   const [products,   setProducts]   = useState(INIT_PRODUCTS);
   const [inventory,  setInventory]  = useState(INIT_INVENTORY);
   const [sampleReqs, setSampleReqs] = useState([]);
+  const [sampleInv, setSampleInv] = useState([]);
   const [installOrd, setInstallOrd] = useState([]);
   const [catalogs,   setCatalogs]   = useState(DEFAULT_CATALOGS);
   const [user,       setUser]       = useState(null);
@@ -2093,7 +2194,7 @@ if(urgentData){
             <div className={`sm-sub ${page==="admin"?"on":""}`} onClick={()=>{setPage("admin");setMenuOpen(false);}}>
               <span className="sm-dot"/>產品管理
             </div>
-            {[{id:"members",label:"帳號管理"},{id:"products",label:"產品管理"},{id:"inv_admin",label:"庫存管理"},{id:"cat_admin",label:"型錄管理"},{id:"cloud_settings",label:"雲端設定"},{id:"sample_admin",label:"樣品申請",badge:sampleReqs.filter(r=>r.status==="pending").length},{id:"install_admin",label:"安裝申請",badge:installOrd.filter(o=>o.status==="pending").length}].map(n=>(
+            {[{id:"members",label:"帳號管理"},{id:"products",label:"產品管理"},{id:"inv_admin",label:"庫存管理"},{id:"cat_admin",label:"型錄管理"},{id:"cloud_settings",label:"雲端設定"},{id:"sample_admin",label:"樣品申請",badge:sampleReqs.filter(r=>r.status==="pending").length},{id:"install_admin",label:"安裝申請",badge:installOrd.filter(o=>o.status==="pending").length},{id:"sample_inv",label:"樣品管理"}].map(n=>(
               <div key={n.id} className={`sm-item ${page===n.id?"on":""}`} onClick={()=>{setPage(n.id);setMenuOpen(false);}}>
                 <span>{n.label}</span>{n.badge>0&&<span className="sm-badge">{n.badge}</span>}
               </div>
@@ -3057,12 +3158,39 @@ if(urgentData){
           </div>
         </>}
 
-        {/* ══ 樣品申請管理 ══ */}
+{/* ══ 樣品申請管理 ══ */}
         {page==="sample_admin"&&isAdmin&&<>
           <div className="phead"><div><div className="ptitle">樣品申請管理</div></div></div>
-          {sampleReqs.length===0?<div className="empty">目前沒有樣品申請</div>:<div className="tbl-wrap"><table><thead><tr><th>日期</th><th>聯絡人</th><th>公司</th><th>電話</th><th>品項</th><th>狀態</th><th>操作</th></tr></thead><tbody>{sampleReqs.map(r=>(<tr key={r.id}><td style={{color:"var(--muted)"}}>{r.date}</td><td style={{fontWeight:400}}>{r.form.name}</td><td>{r.form.company}</td><td style={{color:"var(--muted)"}}>{r.form.phone}</td><td style={{fontSize:10}}>{r.products.join("、")}</td><td><span className={`rb ${r.status==="pending"?"r-std":"r-vip"}`}>{r.status==="pending"?"待處理":"已處理"}</span></td><td><button className="btn-ok" onClick={()=>setSampleReqs(x=>x.map(i=>i.id===r.id?{...i,status:"done"}:i))}>完成</button></td></tr>))}</tbody></table></div>}
+          {sampleReqs.length===0?<div className="empty">目前沒有樣品申請</div>:
+          <div className="tbl-wrap"><table><thead><tr>
+            <th>日期</th><th>聯絡人</th><th>公司</th><th>電話</th><th>品項</th><th>狀態</th><th>借出日</th><th>歸還日</th><th>操作</th>
+          </tr></thead><tbody>
+          {sampleReqs.map(r=>{
+            const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().split("T")[0];};
+            return(<tr key={r.id}>
+              <td><input type="date" value={r.date} onChange={e=>setSampleReqs(x=>x.map(i=>i.id===r.id?{...i,date:e.target.value}:i))} style={{border:"none",background:"transparent",fontSize:10,color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",outline:"none"}}/></td>
+              <td style={{fontWeight:400}}>{r.form?.name||r.contactName||"—"}</td>
+              <td>{r.form?.company||r.company||"—"}</td>
+              <td style={{color:"var(--muted)",fontSize:10}}>{r.form?.phone||r.phone||"—"}</td>
+              <td style={{fontSize:10}}>{(r.products||r.items||[]).join("、")}</td>
+              <td><span className={`rb ${r.status==="pending"||r.status==="待處理"?"r-std":r.status==="lent"||r.status==="已借出"?"r-vip":"r-std"}`}>{r.status==="pending"||r.status==="待處理"?"待處理":r.status==="lent"||r.status==="已借出"?"已借出":"已處理"}</span></td>
+              <td style={{fontSize:10,color:"var(--muted)"}}>{r.lendDate||"—"}</td>
+              <td style={{fontSize:10,color:r.status==="lent"||r.status==="已借出"?"var(--gold)":"var(--muted)"}}>{r.returnDate||"—"}</td>
+              <td><div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                {(r.status==="pending"||r.status==="待處理")&&<button className="btn-ok" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>{const today=new Date().toISOString().split("T")[0];setSampleReqs(x=>x.map(i=>i.id===r.id?{...i,status:"已借出",lendDate:today,returnDate:addD(today,14)}:i));}}>借出+14天</button>}
+                {(r.status==="lent"||r.status==="已借出")&&<>
+                  <button className="btn-ok" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>setSampleReqs(x=>x.map(i=>i.id===r.id?{...i,returnDate:addD(i.returnDate||new Date().toISOString().split("T")[0],14)}:i))}>延長14天</button>
+                  <button className="btn-cancel-sm" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>setSampleReqs(x=>x.map(i=>i.id===r.id?{...i,status:"已處理",lendDate:"",returnDate:""}:i))}>歸還</button>
+                </>}
+                <button className="btn-del2" onClick={()=>setSampleReqs(x=>x.filter(i=>i.id!==r.id))}><CloseIcon/></button>
+              </div></td>
+            </tr>);
+          })}
+          </tbody></table></div>}
         </>}
 
+      {/* ══ 樣品管理 ══ */}
+        {page==="sample_inv"&&isAdmin&&<SampleInvPage sampleInv={sampleInv} setSampleInv={setSampleInv} sheetUrl={sheetUrl}/>}
         {/* ══ 安裝申請管理 ══ */}
         {page==="install_admin"&&isAdmin&&<>
           <div className="phead"><div><div className="ptitle">安裝申請管理</div></div></div>
