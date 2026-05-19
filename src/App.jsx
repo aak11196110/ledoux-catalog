@@ -2557,7 +2557,7 @@ if(urgentData){
         {first.note&&<div className="inv-note">{first.note}</div>}
         <div className="inv-card-footer">
           <div><div className="inv-location">儲位：{matched[0]?.location||first.location||"—"}</div><div className="inv-updated">更新：{first.updatedAt}</div></div>
-          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);if(prod)addToCart(prod,{cct:selCct||"",beam:selBeam||"",outerColor:selInvColor||"",innerColor:selInvInner||""});else toast$(`${model} 已加入詢價單`);}}>加入詢價</button>
+          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);const invSpec={cct:selCct||"",beam:selBeam||"",outerColor:selInvColor||"",innerColor:selInvInner||""};if(prod)addToCart(prod,invSpec);else addToCart({id:"inv-"+model,model,series:first.series||"",category:first.category||"",stdPrice:0,projPrice:0},invSpec);}}>加入詢價</button>
         </div>
       </div>
     );
