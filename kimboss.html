@@ -181,6 +181,7 @@
       <div class="sb-item" onclick="nav('sample_inv')" id="nav-sample_inv"><span class="sb-icon">🗂</span>樣品管理</div>
       <div class="sb-item" onclick="nav('installs')" id="nav-installs"><span class="sb-icon">🔧</span>安裝申請<span class="sb-badge" id="b-installs" style="display:none">0</span></div>
       <div class="sb-item" onclick="nav('visits')" id="nav-visits"><span class="sb-icon">📅</span>預約申請<span class="sb-badge" id="b-visits" style="display:none">0</span></div>
+      <div class="sb-item" onclick="nav('addons')" id="nav-addons"><span class="sb-icon">🔌</span>配件管理</div>
       <div class="sb-section">系統</div>
       <div class="sb-item" onclick="nav('members')" id="nav-members"><span class="sb-icon">👥</span>會員管理</div>
       <div class="sb-item" onclick="nav('discounts')" id="nav-discounts"><span class="sb-icon">🏷️</span>折扣碼</div>
@@ -431,6 +432,24 @@
       </div>
     </div>
 
+<!-- ADDONS -->
+<div class="page" id="page-addons">
+  <div class="section-head"><div class="section-title">配件管理</div><button class="btn btn-gold" onclick="openAddonM()">＋ 新增配件</button></div>
+  <div class="tbl-wrap"><table><thead><tr><th>名稱</th><th>適用分類</th><th>加購價格</th><th>說明</th><th>狀態</th><th>操作</th></tr></thead><tbody id="addon-tb"><tr><td colspan="6" class="no-data">載入中...</td></tr></tbody></table></div>
+</div>
+
+<div class="modal-wrap" id="modal-addon" style="display:none" onclick="if(event.target===this)hideM('modal-addon')">
+<div class="modal-box">
+  <div class="modal-head"><div class="modal-title" id="am-title">新增配件</div><button class="modal-close" onclick="hideM('modal-addon')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="a-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">配件名稱 *</label><input class="form-input" id="a-name" placeholder="例：遙控器"></div>
+      <div class="form-group"><label class="form-label">加購價格 NT$</label><input class="form-input" id="a-price" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">適用分類</label><select class="form-select" id="a-cat"><option value="全部">全部</option><option>崁燈</option><option>軌道燈</option><option>磁吸系統</option><option>壁燈</option><option>地腳燈</option><option>戶外燈</option><option>鋁條燈</option><option>燈帶</option></select></div>
+      <di
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="section-head"><div class="section-title">系統設定</div></div>
@@ -700,13 +719,13 @@
 
 const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
 
-let D = {products:[],inventory:[],orders:[],samples:[],installs:[],visits:[],members:[]};
+let D = {products:[],inventory:[],orders:[],samples:[],installs:[],visits:[],members:[],addons:[]};
 let DISCS = JSON.parse(localStorage.getItem('ldx_discs')||JSON.stringify([
   {code:"LED006",rate:0.6,note:"設計師客戶"},
   {code:"LED007",rate:0.7,note:"一般專案"},
   {code:"LED008",rate:0.8,note:"大量採購"},
 ]));
-const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',parts:'庫存零件管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定'};
+const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',parts:'庫存零件管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定',addons:'配件管理'};
 
 // API
 function getURL(){return localStorage.getItem('ldx_url')||DEFAULT_URL;}
@@ -727,13 +746,13 @@ async function apiPost(action,data){
 async function loadAll(){
   setSS('loading');
   try{
-    const[pr,iv,or,sa,ins,vi,me]=await Promise.all([apiGet('getProducts'),apiGet('getInventory'),apiGet('getOrders'),apiGet('getSampleRequests'),apiGet('getInstallOrders'),apiGet('getVisitRequests'),apiGet('getMembers')]);
-    D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(ins);D.visits=a(vi);D.members=a(me);
+    const[pr,iv,or,sa,ins,vi,me,ad]=await Promise.all([apiGet('getProducts'),apiGet('getInventory'),apiGet('getOrders'),apiGet('getSampleRequests'),apiGet('getInstallOrders'),apiGet('getVisitRequests'),apiGet('getMembers'),apiGet('getAddons')]);
+   D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(ins);D.visits=a(vi);D.members=a(me);D.addons=a(ad);
     renderAll();setBadges();setSS('ok');toast('✓ 資料已同步');
   }catch(e){setSS('err');toast('⚠ 同步失敗');}
 }
 function a(x){return Array.isArray(x)?x:[];}
-function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();}
+function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();}
 
 // NAV
 function nav(id){
@@ -1244,6 +1263,52 @@ function delDisc(code){
   rDiscs();toast('✓ 已刪除');
 }
 
+  // ADDONS
+function rAddons(){
+  const tb=document.getElementById('addon-tb');if(!tb)return;
+  const list=D.addons||[];
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" class="no-data">尚無配件資料</td></tr>';return;}
+  tb.innerHTML=list.map(a=>`<tr>
+    <td style="font-weight:500">${esc(a.name)}</td>
+    <td>${esc(a.category)}</td>
+    <td style="color:var(--gold)">NT$ ${Number(a.price).toLocaleString()}</td>
+    <td style="font-size:11px;color:var(--muted)">${esc(a.desc||'—')}</td>
+    <td><span style="color:${a.status==='上架'?'var(--green)':'var(--muted)'}">${esc(a.status)}</span></td>
+    <td><button class="btn btn-sm btn-outline" onclick="editAddon('${esc(a.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delAddon('${esc(a.id)}','${esc(a.name)}')">刪除</button></td>
+  </tr>`).join('');
+}
+function openAddonM(){
+  document.getElementById('am-title').textContent='新增配件';
+  ['a-id','a-name','a-price','a-desc'].forEach(k=>fv(k,''));
+  document.getElementById('a-cat').value='全部';
+  document.getElementById('a-status').value='上架';
+  showM('modal-addon');
+}
+function editAddon(id){
+  const a=(D.addons||[]).find(x=>String(x.id)===String(id));if(!a)return;
+  document.getElementById('am-title').textContent='編輯配件';
+  fv('a-id',a.id);fv('a-name',a.name);fv('a-price',a.price);fv('a-desc',a.desc||'');
+  document.getElementById('a-cat').value=a.category||'全部';
+  document.getElementById('a-status').value=a.status||'上架';
+  showM('modal-addon');
+}
+async function saveAddon(){
+  const name=v('a-name').trim();if(!name){toast('請填寫配件名稱');return;}
+  const rec={id:v('a-id')||'ADDON'+Date.now(),name,category:g('a-cat').value,price:Number(v('a-price'))||0,desc:v('a-desc'),status:g('a-status').value};
+  const idx=(D.addons||[]).findIndex(x=>String(x.id)===String(rec.id));
+  if(!D.addons)D.addons=[];
+  if(idx>=0)D.addons[idx]=rec;else D.addons.unshift(rec);
+  rAddons();hideM('modal-addon');toast('同步中...');
+  const res=await apiPost('saveAddon',rec);
+  toast(res&&res.success?'✓ 配件已儲存':'⚠ 儲存失敗');
+}
+async function delAddon(id,name){
+  if(!confirm(`確定刪除「${name}」？`))return;
+  D.addons=(D.addons||[]).filter(x=>String(x.id)!==String(id));
+  rAddons();toast('同步中...');
+  const res=await apiPost('deleteAddon',{id});
+  toast(res&&res.success?'✓ 已刪除':'⚠ 刪除失敗');
+}
 // SETTINGS
 function initCfg(){
   fv('cfg-url',localStorage.getItem('ldx_url')||DEFAULT_URL);
