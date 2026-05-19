@@ -1342,7 +1342,8 @@ function App() {
   const [editInv,      setEditInv]      = useState(null);
   const [productSaving,setProductSaving]= useState(false); // indoor | outdoor
   const [hoveredLight,  setHoveredLight]  = useState(null);
-  const [cat,        setCat]        = useState("全部");
+const [cat,        setCat]        = useState("全部");
+  const [seriesF,    setSeriesF]    = useState(null);
   const [invSeriesF, setInvSeriesF] = useState(null);
   const [invCat,     setInvCat]     = useState("全部");
 const [invCct,   setInvCct]   = useState("全部");
