@@ -523,7 +523,8 @@
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
  <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()"><div style="margin-top:6px"><label style="display:inline-block;padding:8px 18px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;border:none">📷 上傳圖片到 ImgBB<input type="file" accept="image/*" style="display:none" onchange="uploadImgBB(this,'p-img')"></label></div><div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div></div> 
       <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
-    </div>
+  <div class="form-group"><label class="form-label">自訂規格選項 <span style="font-size:10px;color:var(--muted)">(格式：名稱:選項1/選項2，每行一組，例：色溫:3000K/4000K)</span></label><textarea class="form-textarea" id="p-specOptions" rows="4" placeholder="色溫:3000K/4000K/6500K&#10;光束角:24°/36°/60°&#10;外框顏色:白色/黑色&#10;顏色:白色/黑色"></textarea></div>
+  </div>
     <div class="form-actions">
       <button class="btn btn-outline" onclick="hideM('modal-prod')">取消</button>
       <button class="btn btn-gold" onclick="saveProd()">儲存並同步到 Sheets</button>
@@ -772,7 +773,7 @@ function editProd(id){
   fv('p-id',p.id);fv('p-model',p.model);sel('p-series',p.series||'');
   sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
   fv('p-watt',p.watt||'');fv('p-cct',p.cct||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
-  fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');
+  fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');fv('p-specOptions',p.specOptions||'');
   fv('p-img',(p.images&&p.images[0])||'');prevImg();showM('modal-prod');
 }
 function clearPF(){['p-id','p-model','p-series','p-watt','p-cct','p-price','p-proj','p-cri','p-cert','p-desc','p-img'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
@@ -781,7 +782,7 @@ async function saveProd(){
   const id=v('p-id')||'P'+Date.now();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
     watt:v('p-watt'),cct:v('p-cct'),stdPrice:Number(v('p-price'))||0,projPrice:0,
-    cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],
+    cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:v('p-specOptions'),
     catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈'};
   const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
