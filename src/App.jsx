@@ -3303,24 +3303,23 @@ if(urgentData){
     <div style={{fontSize:9,color:"var(--muted)",marginTop:4,lineHeight:1.6}}>若需特殊色溫請選「其他色溫」填入，業務確認後回覆可行性</div>
   </div>):null}
 </div>
-           {selProd.specOptions&&(typeof selProd.specOptions==="object"?Object.entries(selProd.specOptions):String(selProd.specOptions).trim().split("\n").filter(Boolean).map(line=>{const[k,v]=line.split(":").map(s=>s.trim());return[k,v?.split("/").map(s=>s.trim()).filter(Boolean)||[]]; })).filter(([k,v])=>Array.isArray(v)&&v.length>0).map(([label,options])=>(<div key={label} style={{marginBottom:12}}><div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>{label}</div><div style={{position:"relative"}}><select value={selSpec.customSpecs?.[label]||""} onChange={e=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label]:e.target.value}}))} style={{width:"100%",padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"var(--ivory2)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)",cursor:"pointer",appearance:"none"}}><option value="">請選擇{label}</option>{options.map(opt=>(<option key={opt} value={opt}>{opt}</option>))}{!options.includes("其他")&&<option value="其他">其他（自行填寫）</option>}</select></div>{selSpec.customSpecs?.[label]==="其他"&&<input placeholder={`請輸入${label}`} value={selSpec.customSpecs?.[label+"_custom"]||""} onChange={e=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label+"_custom"]:e.target.value}}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}</div>))}
-  <div style={{marginBottom:10}}>
-    <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>配件加購</div>
-    <div style={{display:"flex",flexDirection:"column",gap:5}}>
-      {addons.filter(a=>a.category==="全部"||a.category===selProd.category).map(a=>{
-        const isOn=selSpec.addon?.find(x=>x.id===a.id);
-        return(
-          <button key={a.id} onClick={()=>setSelSpec(s=>({...s,addon:isOn?s.addon.filter(x=>x.id!==a.id):[...(s.addon||[]),a]}))}
-            style={{padding:"7px 12px",border:"0.5px solid",fontSize:11,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",
-              background:isOn?"var(--blk)":"transparent",borderColor:isOn?"var(--blk)":"var(--bdr)",color:isOn?"var(--ivory)":"var(--blk)"}}>
-            <span>{a.name}{a.desc&&<span style={{fontSize:9,opacity:.7,marginLeft:6}}>{a.desc}</span>}</span>
-            <span style={{fontSize:11,color:isOn?"var(--ivory)":"var(--gold)"}}>+NT$ {a.price.toLocaleString()}</span>
-          </button>
-        );
-      })}
-    </div>
-  </div>
-)}
+{selProd.specOptions&&(typeof selProd.specOptions==="object"?Object.entries(selProd.specOptions):String(selProd.specOptions).trim().split("\n").filter(Boolean).map(line=>{const[k,v]=line.split(":").map(s=>s.trim());return[k,v?.split("/").map(s=>s.trim()).filter(Boolean)||[]]; })).filter(([k,v])=>Array.isArray(v)&&v.length>0).map(([label,options])=>(<div key={label} style={{marginBottom:12}}><div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>{label}</div><div style={{position:"relative"}}><select value={selSpec.customSpecs?.[label]||""} onChange={e=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label]:e.target.value}}))} style={{width:"100%",padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"var(--ivory2)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)",cursor:"pointer",appearance:"none"}}><option value="">請選擇{label}</option>{options.map(opt=>(<option key={opt} value={opt}>{opt}</option>))}{!options.includes("其他")&&<option value="其他">其他（自行填寫）</option>}</select></div>{selSpec.customSpecs?.[label]==="其他"&&<input placeholder={`請輸入${label}`} value={selSpec.customSpecs?.[label+"_custom"]||""} onChange={e=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label+"_custom"]:e.target.value}}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}</div>))}
+            <div style={{marginBottom:10}}>
+              <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>配件加購</div>
+              <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                {addons.filter(a=>a.category==="全部"||a.category===selProd.category).map(a=>{
+                  const isOn=selSpec.addon?.find(x=>x.id===a.id);
+                  return(
+                    <button key={a.id} onClick={()=>setSelSpec(s=>({...s,addon:isOn?s.addon.filter(x=>x.id!==a.id):[...(s.addon||[]),a]}))}
+                      style={{padding:"7px 12px",border:"0.5px solid",fontSize:11,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",
+                        background:isOn?"var(--blk)":"transparent",borderColor:isOn?"var(--blk)":"var(--bdr)",color:isOn?"var(--ivory)":"var(--blk)"}}>
+                      <span>{a.name}{a.desc&&<span style={{fontSize:9,opacity:.7,marginLeft:6}}>{a.desc}</span>}</span>
+                      <span style={{fontSize:11,color:isOn?"var(--ivory)":"var(--gold)"}}>+NT$ {a.price.toLocaleString()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 <div className="price-block">
 
   {selSpec.addon?.length>0&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:4}}>
