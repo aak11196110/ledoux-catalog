@@ -532,8 +532,10 @@ function initSpecBuilder(data){
   const wrap=document.getElementById('spec-builder');
   wrap.innerHTML='';
   SPEC_TYPES.forEach(t=>{
-    const vals=(data&&data[t.key])||[];
-    const enabled=vals.length>0;
+   const rawVals=(data&&data[t.key])||[];
+      const hasOtherVal=rawVals.includes('其他');
+      const vals=rawVals.filter(v=>v!=='其他');
+   const enabled=rawVals.length>0;
     const div=document.createElement('div');
     div.style.cssText='margin-bottom:12px;padding:10px;background:#f9f5ef;border:0.5px solid var(--bdr)';
     div.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -547,6 +549,7 @@ function initSpecBuilder(data){
       <div style="display:flex;gap:6px">
         <input id="si-${t.key}" class="form-input" style="flex:1;padding:5px 8px;font-size:11px" placeholder="輸入選項後按新增">
         <button type="button" class="btn btn-primary" style="padding:5px 12px;font-size:11px" onclick="addSpecVal('${t.key}')">新增</button>
+        <div style="margin-top:6px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="so-${t.key}" ${hasOtherVal?'checked':''}><label for="so-${t.key}" style="font-size:11px;color:var(--muted)">加入「其他」選項（客戶可自行填寫）</label></div>
       </div>
     </div>`;
     wrap.appendChild(div);
@@ -575,7 +578,8 @@ function getSpecData(){
   SPEC_TYPES.forEach(t=>{
     if(!document.getElementById('sc-'+t.key).checked){result[t.key]=[];return;}
     const tags=[...document.getElementById('st-'+t.key).children];
-    result[t.key]=tags.map(t=>t.textContent.replace('×','').trim()).filter(Boolean);
+   const hasOther=document.getElementById('so-'+t.key)?.checked;
+      result[t.key]=[...tags.map(t=>t.textContent.replace('×','').trim()).filter(Boolean),...(hasOther?['其他']:[])];
   });
   return result;
 }
