@@ -849,7 +849,13 @@ async function saveProd(){
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
     watt:v('p-watt'),cct:v('p-cct'),stdPrice:Number(v('p-price'))||0,projPrice:0,
    cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:getSpecData(),
-    catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈'};
+   catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
+color:(getSpecData().color||[]).filter(v=>v!=='其他').join('/')||'',
+beam:(getSpecData().beam||[]).filter(v=>v!=='其他').join('/')||'',
+cct:(getSpecData().cct||[]).filter(v=>v!=='其他').join('/')||'',
+voltage:(getSpecData().voltage||[]).filter(v=>v!=='其他').join('/')||'',
+outerColor:(getSpecData().outerColor||[]).filter(v=>v!=='其他').join('/')||'',
+innerColor:(getSpecData().innerColor||[]).filter(v=>v!=='其他').join('/')||''};
   const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
   rProd();hideM('modal-prod');toast('同步中...');
