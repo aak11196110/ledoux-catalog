@@ -635,6 +635,7 @@ tr:hover td{background:#f7f2eb}
 
 // ── SVG Icons ──
 const BagIcon    = ({size=18}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="6" width="13" height="10" rx="0.5"/><path d="M6 6V5a3 3 0 0 1 6 0v1"/></svg>;
+const CartIcon = ({size=18}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="7" cy="15.5" r="1"/><circle cx="13" cy="15.5" r="1"/><path d="M1 1h2.5l2 9h8l2-7H5"/></svg>;
 const FlaskIcon  = ({size=18}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 2h4M6.5 8.5 3.5 15.5h11l-3-7V2h-4v6.5z"/><circle cx="8" cy="12" r="0.7" fill="currentColor"/><circle cx="10.5" cy="13.5" r="0.5" fill="currentColor"/></svg>;
 const ToolIcon   = ({size=18}) => <svg width={size} height={size} viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3c.3 1.5-.7 3-2.2 3.5L6 13.5A1.4 1.4 0 0 1 4 11.5l7-7.5C12.5 3.5 13.8 2.7 15 3Z"/><circle cx="5" cy="13" r="1.2"/></svg>;
 const SearchIcon = ({size=14}) => <svg width={size} height={size} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"><circle cx="6" cy="6" r="4.5"/><line x1="9.5" y1="9.5" x2="13" y2="13"/></svg>;
@@ -2235,15 +2236,19 @@ if(urgentData){
           <button className="tn-icon" title="電子型錄" style={{color:"#8a7040"}} onClick={()=>{setPage("ecatalog");setCartOpen(false);setSampOpen(false);setInstOpen(false);}}>
             <BookIcon/>
           </button>
-          <button className="tn-icon inv-icon" title="台灣現貨庫存" onClick={()=>{setPage("inventory");setCartOpen(false);setSampOpen(false);setInstOpen(false);}}>
-            <BoxIcon/>{inventory.filter(i=>Number(i.availableQty)>0).length>0&&<span className="tn-ibadge green">{inventory.filter(i=>Number(i.availableQty)>0).length}</span>}
-          </button>
+<button className="tn-icon inv-icon" title="台灣現貨庫存" onClick={()=>{setPage("inventory");setCartOpen(false);setSampOpen(false);setInstOpen(false);}} style={{position:"relative",background:"transparent",border:"1.5px solid var(--bdr)",borderRadius:4,padding:"4px 10px",display:"flex",alignItems:"center",gap:5,color:"var(--muted)",fontSize:11,letterSpacing:1,transition:"all .2s"}}>
+  <BoxIcon/><span style={{fontWeight:600}}>現貨庫存</span>{inventory.filter(i=>Number(i.availableQty)>0).length>0&&<span className="tn-ibadge green" style={{top:-6,right:-6}}>{inventory.filter(i=>Number(i.availableQty)>0).length}</span>}
+</button>
           <button className="tn-icon" title="安裝服務" onClick={()=>{setInstOpen(v=>!v);setCartOpen(false);setSampOpen(false);}}>
             <ToolIcon/>
           </button>
-          <button className="tn-icon" title="借樣品" onClick={()=>{setSampOpen(v=>!v);setCartOpen(false);setInstOpen(false);}}>
-            <FlaskIcon/>{sampCart.length>0&&<span className="tn-ibadge red">{sampCart.length}</span>}
-          </button>
+          <button className="tn-icon" title="詢價單" onClick={()=>{setCartOpen(v=>!v);setSampOpen(false);setInstOpen(false);}} style={{position:"relative",background:cartCount>0?"var(--gold)":"transparent",border:cartCount>0?"1.5px solid var(--gold)":"1.5px solid var(--bdr)",borderRadius:4,padding:"4px 10px",display:"flex",alignItems:"center",gap:5,color:cartCount>0?"var(--blk)":"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,transition:"all .2s"}}>
+  <CartIcon/><span style={{fontWeight:600}}>{cartCount>0?`詢價單 ${cartCount}`:"詢價單"}</span>
+  {cartCount>0&&<span className="tn-ibadge" style={{background:"var(--blk)",color:"var(--gold)",top:-6,right:-6}}>{cartCount}</span>}
+</button>
+<button className="tn-icon" title="借樣品" onClick={()=>{setSampOpen(v=>!v);setCartOpen(false);setInstOpen(false);}} style={{position:"relative",background:sampCart.length>0?"#5a2d2d":"transparent",border:sampCart.length>0?"1.5px solid #c06060":"1.5px solid var(--bdr)",borderRadius:4,padding:"4px 10px",display:"flex",alignItems:"center",gap:5,color:sampCart.length>0?"#fff":"var(--muted)",fontSize:11,letterSpacing:1,transition:"all .2s"}}>
+  <FlaskIcon/><span style={{fontWeight:600}}>樣品{sampCart.length>0?` ${sampCart.length}`:""}</span>
+</button>
 
           <div className="tn-user-info"><div className="tn-uname">{user.name}</div><div className="tn-ucomp">{user.company}</div></div>
           <span className={`tn-badge ${user.role==="admin"?"tb-admin":user.role==="vip"?"tb-vip":"tb-std"}`}>{roleLabel(user.role)}</span>
@@ -3248,7 +3253,7 @@ if(urgentData){
             {selProd.note&&<div className="drawer-note">{selProd.note}</div>}
             <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
   {/* 光束角選擇 + 其他 */}
-  {selProd.beam&&selProd.beam.includes("/")?(<div>
+  {selProd.beam&&selProd.beam.trim()?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>光束角</div>
     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
      {selProd.beam.split("/").map(b=>b.trim()).map(b=>{
@@ -3264,7 +3269,7 @@ if(urgentData){
   </div>):null}
 
   {/* 顏色選擇：外框色 + 內框色（若產品有色選項） */}
-  {selProd.color&&selProd.color.includes("/")?(<div>
+  {selProd.color&&selProd.color.trim()?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>燈體顏色</div>
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       {/* 外框顏色 */}
