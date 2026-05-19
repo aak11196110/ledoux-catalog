@@ -757,6 +757,27 @@ async function uploadImgBB(input, targetId) {
     toast('上傳錯誤：' + e.message);
   }
 }
+  async function uploadImgBB(input, targetId) {
+  const file = input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('image', file);
+  fd.append('key', 'e839f19ca87063763e8e6b4699d9f83f');
+  toast('圖片上傳中...');
+  try {
+    const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById(targetId).value = data.data.url;
+      prevImg();
+      toast('✓ 圖片上傳成功');
+    } else {
+      toast('上傳失敗，請重試');
+    }
+  } catch(e) {
+    toast('上傳錯誤：' + e.message);
+  }
+}
   function prevImg(){const u=v('p-img');const prev=g('p-prev');if(u){g('p-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
 
 // INVENTORY
