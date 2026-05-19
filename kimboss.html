@@ -847,7 +847,7 @@ async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
-    watt:v('p-watt'),cct:v('p-cct'),stdPrice:Number(v('p-price'))||0,projPrice:0,
+    watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,
    cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:getSpecData(),
    catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
 color:(getSpecData().color||[]).filter(v=>v!=='其他').join('/')||'',
