@@ -848,12 +848,12 @@ async function saveProd(){
     watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,
    cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:getSpecData(),
    catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
-color:(getSpecData().color||[]).filter(v=>v!=='其他').join('/')||'',
-beam:(getSpecData().beam||[]).filter(v=>v!=='其他').join('/')||'',
-cct:(getSpecData().cct||[]).filter(v=>v!=='其他').join('/')||'',
-voltage:(getSpecData().voltage||[]).filter(v=>v!=='其他').join('/')||'',
-outerColor:(getSpecData().outerColor||[]).filter(v=>v!=='其他').join('/')||'',
-innerColor:(getSpecData().innerColor||[]).filter(v=>v!=='其他').join('/')||''};
+color:(getSpecData().color||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.color||''),
+beam:(getSpecData().beam||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.beam||''),
+cct:(getSpecData().cct||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.cct||''),
+voltage:(getSpecData().voltage||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.voltage||''),
+outerColor:(getSpecData().outerColor||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.outerColor||''),
+innerColor:(getSpecData().innerColor||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.innerColor||'')};
   const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
   rProd();hideM('modal-prod');toast('同步中...');
