@@ -348,7 +348,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .ptitle{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--blk);line-height:1;letter-spacing:.5px}
 .psub{font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:7px}
 .catbar{display:flex;margin-bottom:0;border-bottom:0.5px solid var(--bdr2);overflow-x:auto}
-.catbtn{padding:10px 20px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
+.catbtn{padding:10px 20px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
 .catbtn:hover{color:var(--blk)}
 .catbtn.on{color:var(--blk);border-bottom-color:var(--gold)}
 .filter-area{padding:14px 0 18px;margin-bottom:18px;border-bottom:0.5px solid var(--bdr2)}
@@ -530,7 +530,7 @@ tr:hover td{background:#f7f2eb}
 @keyframes lightPulse{0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
 .hint-box{background:#f4efe8;border-left:1px solid var(--gold);padding:9px 12px;font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
 .install-tbl{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px}
-.install-tbl th{background:#f4efe8;padding:7px 10px;text-align:left;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:0.5px solid var(--bdr2);font-weight:400}
+.install-tbl th{background:#f4efe8;padding:9px 10px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blk);opacity:0.6;border-bottom:0.5px solid var(--bdr2);font-weight:400}
 .install-tbl td{padding:9px 10px;border-bottom:0.5px solid var(--bdr2);vertical-align:top}
 .install-tbl tr:last-child td{border-bottom:none}
 .toast{position:fixed;bottom:26px;right:26px;background:var(--blk);color:var(--ivory);padding:11px 18px;font-size:10px;letter-spacing:2px;z-index:999;border-left:1px solid var(--gold);pointer-events:none}
@@ -546,9 +546,9 @@ tr:hover td{background:#f7f2eb}
 .inv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(58,107,74,.2);border:0.5px solid rgba(58,107,74,.2);margin:28px 0}
 .inv-stat{background:var(--ivory);padding:18px 20px}
 .inv-stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--inv-green)}
-.inv-stat-lbl{font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.inv-stat-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blk);opacity:0.55;margin-top:4px}
 .inv-catbar{display:flex;margin-bottom:24px;border-bottom:0.5px solid var(--bdr2);overflow-x:auto}
-.inv-catbtn{padding:8px 18px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--muted);font-family:'Noto Sans TC',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
+.inv-catbtn{padding:10px 18px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--blk);font-family:'Noto Sans TC',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;white-space:nowrap;margin-bottom:-0.5px;transition:all .2s}
 .inv-catbtn:hover{color:var(--inv-green)}
 .inv-catbtn.on{color:var(--inv-green);border-bottom-color:var(--inv-green)}
 .inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--bdr2);border:0.5px solid var(--bdr2);margin-bottom:28px}
@@ -611,8 +611,8 @@ tr:hover td{background:#f7f2eb}
 .cat-tag{font-size:8px;padding:3px 9px;border:0.5px solid var(--bdr);color:var(--muted);letter-spacing:.5px}
 .cat-meta{display:flex;gap:16px;border-top:0.5px solid var(--bdr2);padding-top:12px}
 .cat-meta-item{display:flex;flex-direction:column;gap:2px}
-.cat-meta-lbl{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-.cat-meta-val{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--blk)}
+.cat-meta-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blk);opacity:0.55}
+.cat-meta-val{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--blk)}
 .cat-actions{padding:16px 24px;border-top:0.5px solid var(--bdr2);display:flex;gap:8px}
 .btn-cat-preview{flex:1;padding:10px;background:var(--blk);border:none;color:var(--ivory);font-family:'Noto Sans TC',sans-serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-cat-preview:hover{background:var(--blk2)}
@@ -2862,7 +2862,7 @@ if(urgentData){
             特殊安裝需求（戶外、弧形、多層次造型等），請另與業務聯繫評估。
           </div>
 
-          <div style={{fontSize:"8px",letterSpacing:"4px",textTransform:"uppercase",color:"var(--muted)",marginBottom:12,paddingBottom:7,borderBottom:"0.5px solid var(--bdr2)"}}>一、崁燈安裝服務</div>
+          <div style={{fontSize:"11px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--blk)",opacity:0.7,marginBottom:12,paddingBottom:7,borderBottom:"0.5px solid var(--bdr2)",fontWeight:500}}>一、崁燈安裝服務</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:16}}>
             {[["最低出勤費","NT$ 2,000","單次出勤未達此標，以 NT$2,000 計收"],["標準安裝（3m 以下）","NT$ 200 / 盞","含定位、安裝固定與功能測試"],["挑高施工（3.1–4.5m）","+NT$ 80 / 盞","需 A 型梯輔助，視現場評估"],["4.5m 以上","不含安裝費","需鷹架或高空作業車，另案報價"]].map(([t,v,d])=>(
               <div key={t} style={{background:"var(--ivory)",padding:"16px 18px"}}>
