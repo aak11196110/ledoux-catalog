@@ -1309,7 +1309,7 @@ const bgUrl = scene === "indoor"
         </div>
         {lights.slice(0,5).map((l,i)=>(
           <div key={l.id} onClick={()=>{setSeriesF(l.series);setPage("catalog");}}
-            style={{fontSize:11,color:"rgba(255,255,255,0.6)",padding:"3px 0",cursor:"pointer",
+            style={{fontSize:14,color:"rgba(255,255,255,1)",padding:"3px 0",cursor:"pointer",
               borderBottom:"0.5px solid rgba(255,255,255,0.05)",display:"flex",gap:8,alignItems:"center"}}
             onMouseEnter={()=>setHoveredLight(l.id)} onMouseLeave={()=>setHoveredLight(null)}>
             <span style={{color:"var(--gold)",minWidth:14}}>{i+1}</span>
@@ -2557,7 +2557,7 @@ if(urgentData){
         {first.note&&<div className="inv-note">{first.note}</div>}
         <div className="inv-card-footer">
           <div><div className="inv-location">儲位：{matched[0]?.location||first.location||"—"}</div><div className="inv-updated">更新：{first.updatedAt}</div></div>
-          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);if(prod)addToCart(prod);else toast$(`${model} 已加入詢價單`);}}>加入詢價</button>
+          <button className="btn-inv-cart" disabled={totalAvail<=0} onClick={()=>{const prod=products.find(p=>p.model===model);if(prod)addToCart(prod,{cct:selCct||"",beam:selBeam||"",outerColor:selInvColor||"",innerColor:selInvInner||""});else toast$(`${model} 已加入詢價單`);}}>加入詢價</button>
         </div>
       </div>
     );
