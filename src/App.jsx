@@ -2059,7 +2059,7 @@ if(urgentData){
           </div>
           <div className="sm-divider"/>
           <div className="sm-group-hd" onClick={()=>setSeriesExp(v=>!v)}>
-            <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>商照燈系列</span>
+            <span style={{fontSize:"11px",letterSpacing:"4px",textTransform:"uppercase"}}>商照燈系列</span>
             <span className={`sm-group-arrow ${seriesExp?"open":""}`}>›</span>
           </div>
           {seriesExp&&COMMERCIAL_SERIES.map(s=>(
@@ -2068,7 +2068,7 @@ if(urgentData){
             </div>
           ))}
          <div className="sm-group-hd" onClick={()=>setLinearExp(v=>!v)}>
-            <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>線型燈系列</span>
+            <span style={{fontSize:"11px",letterSpacing:"4px",textTransform:"uppercase"}}>線型燈系列</span>
             <span className={`sm-group-arrow ${linearExp?"open":""}`}>›</span>
           </div>
           {linearExp&&LINEAR_SERIES_LIST.map(s=>(
@@ -2078,7 +2078,7 @@ if(urgentData){
           ))}
           <div className="sm-divider"/>
           <div className="sm-group-hd" onClick={()=>setCatExp(v=>!v)}>
-            <span style={{fontSize:"7px",letterSpacing:"4px",textTransform:"uppercase"}}>依分類</span>
+            <span style={{fontSize:"11px",letterSpacing:"4px",textTransform:"uppercase"}}>依分類</span>
             <span className={`sm-group-arrow ${catExp?"open":""}`}>›</span>
           </div>
          {catExp&&allCats.filter(c=>c&&c.trim()).map(c=>(
