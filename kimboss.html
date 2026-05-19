@@ -522,71 +522,22 @@
  <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()"><div style="margin-top:6px"><label style="display:inline-block;padding:8px 18px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;border:none">📷 上傳圖片到 ImgBB<input type="file" accept="image/*" style="display:none" onchange="uploadImgBB(this,'p-img')"></label></div><div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div></div> 
       <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
 <div style="border:0.5px solid var(--bdr);padding:16px;margin-bottom:8px">
-<div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">規格選項設定</div>
-<div id="spec-builder"></div>
-<script>
-const SPEC_TYPES=[{key:"cct",label:"色溫"},{key:"beam",label:"光束角"},{key:"outerColor",label:"外框顏色"},{key:"innerColor",label:"內框顏色"},{key:"color",label:"顏色"},{key:"voltage",label:"電壓"},{key:"addon",label:"配件"}];
-function initSpecBuilder(data){
-  const wrap=document.getElementById('spec-builder');
-  wrap.innerHTML='';
-  SPEC_TYPES.forEach(t=>{
-   const rawVals=(data&&data[t.key])||[];
-      const hasOtherVal=rawVals.includes('其他');
-      const vals=rawVals.filter(v=>v!=='其他');
-   const enabled=rawVals.length>0;
-    const div=document.createElement('div');
-    div.style.cssText='margin-bottom:12px;padding:10px;background:#f9f5ef;border:0.5px solid var(--bdr)';
-    div.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-      <input type="checkbox" id="sc-${t.key}" ${enabled?'checked':''} onchange="toggleSpec('${t.key}')">
-      <label for="sc-${t.key}" style="font-size:11px;font-weight:500">${t.label}</label>
-    </div>
-    <div id="sv-${t.key}" style="display:${enabled?'block':'none'}">
-      <div id="st-${t.key}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
-        ${vals.map(v=>`<span style="padding:3px 10px;background:var(--wht);border:0.5px solid var(--bdr);font-size:11px;display:flex;align-items:center;gap:4px">${v}<span onclick="removeSpecVal('${t.key}','${v}')" style="cursor:pointer;color:var(--muted)">×</span></span>`).join('')}
-      </div>
-      <div style="display:flex;gap:6px">
-        <input id="si-${t.key}" class="form-input" style="flex:1;padding:5px 8px;font-size:11px" placeholder="輸入選項後按新增">
-        <button type="button" class="btn btn-primary" style="padding:5px 12px;font-size:11px" onclick="addSpecVal('${t.key}')">新增</button>
-        <div style="margin-top:6px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="so-${t.key}" ${hasOtherVal?'checked':''}><label for="so-${t.key}" style="font-size:11px;color:var(--muted)">加入「其他」選項（客戶可自行填寫）</label></div>
-      </div>
-    </div>`;
-    wrap.appendChild(div);
-  });
-}
-function toggleSpec(key){
-  const checked=document.getElementById('sc-'+key).checked;
-  document.getElementById('sv-'+key).style.display=checked?'block':'none';
-}
-function addSpecVal(key){
-  const inp=document.getElementById('si-'+key);
-  const val=inp.value.trim();
-  if(!val)return;
-  const tag=document.createElement('span');
-  tag.style.cssText='padding:3px 10px;background:var(--wht);border:0.5px solid var(--bdr);font-size:11px;display:flex;align-items:center;gap:4px';
-  tag.innerHTML=`${val}<span onclick="removeSpecVal('${key}','${val}')" style="cursor:pointer;color:var(--muted)">×</span>`;
-  document.getElementById('st-'+key).appendChild(tag);
-  inp.value='';
-}
-function removeSpecVal(key,val){
-  const tags=[...document.getElementById('st-'+key).children];
-  tags.forEach(t=>{if(t.textContent.replace('×','').trim()===val)t.remove();});
-}
-function getSpecData(){
-  const result={};
-  SPEC_TYPES.forEach(t=>{
-    if(!document.getElementById('sc-'+t.key).checked){result[t.key]=[];return;}
-    const tags=[...document.getElementById('st-'+t.key).children];
-   const hasOther=document.getElementById('so-'+t.key)?.checked;
-      result[t.key]=[...tags.map(t=>t.textContent.replace('×','').trim()).filter(Boolean),...(hasOther?['其他']:[])];
-  });
-  return result;
-}
-window.initSpecBuilder=initSpecBuilder;
-window.getSpecData=getSpecData;
-window.toggleSpec=toggleSpec;
-window.addSpecVal=addSpecVal;
-window.removeSpecVal=removeSpecVal;
-</script>
+  <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">規格選項（多個選項用 / 分隔）</div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">色溫（例：2700K/3000K/4000K）</label><input class="form-input" id="p-cct" placeholder="2700K/3000K/4000K"></div>
+    <div class="form-group"><label class="form-label">光束角（例：15°/24°/36°）</label><input class="form-input" id="p-beam" placeholder="15°/24°/36°"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">外框顏色（例：黑色/白色）</label><input class="form-input" id="p-outerColor" placeholder="黑色/白色"></div>
+    <div class="form-group"><label class="form-label">內框顏色（例：黑色/白色）</label><input class="form-input" id="p-innerColor" placeholder="黑色/白色"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">顏色（例：黑色/白色）</label><input class="form-input" id="p-color" placeholder="黑色/白色"></div>
+    <div class="form-group"><label class="form-label">電壓（例：AC110V/AC220V）</label><input class="form-input" id="p-voltage" placeholder="AC110V/AC220V"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">配件（例：遙控器/變壓器）</label><input class="form-input" id="p-addon" placeholder="遙控器/變壓器"></div>
+  </div>
 </div>
   </div>
     <div class="form-actions">
@@ -830,31 +781,33 @@ function rProd(){
     <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button></td>
   </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無產品資料</td></tr>';
 }
-function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';initSpecBuilder({});showM('modal-prod');}
+function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';showM('modal-prod');}
 function editProd(id){
   const p=D.products.find(x=>String(x.id)===String(id));if(!p)return;
   document.getElementById('pm-title').textContent='編輯產品';
   fv('p-id',p.id);fv('p-model',p.model);sel('p-series',p.series||'');
   sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
  fv('p-watt',p.watt||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
- fv('p-cri',p.cri||'');fv('p-desc',p.desc||'');fv('p-specOptions',p.specOptions||'');
- fv('p-img',(p.images&&p.images[0])||'');prevImg();initSpecBuilder(p.specOptions||{});showM('modal-prod');
+fv('p-cri',p.cri||'');fv('p-desc',p.desc||'');
+fv('p-img',(p.images&&p.images[0])||'');
+fv('p-cct',p.cct||'');fv('p-beam',p.beam||'');fv('p-outerColor',p.outerColor||'');fv('p-innerColor',p.innerColor||'');fv('p-color',p.color||'');fv('p-voltage',p.voltage||'');fv('p-addon',Array.isArray(p.addon)?p.addon.join('/'):p.addon||'');
+prevImg();showM('modal-prod');
 }
-  function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-specOptions'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
+ function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
     watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,
-   cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:getSpecData(),
-   catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
-color:(getSpecData().color||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.color||''),
-beam:(getSpecData().beam||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.beam||''),
-cct:(getSpecData().cct||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.cct||''),
-voltage:(getSpecData().voltage||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.voltage||''),
-outerColor:(getSpecData().outerColor||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.outerColor||''),
-innerColor:(getSpecData().innerColor||[]).filter(v=>v!=='其他').join('/')||(D.products.find(x=>String(x.id)===String(id))?.innerColor||'')};
-  const idx=D.products.findIndex(x=>String(x.id)===String(id));
+cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],
+catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
+cct:v('p-cct'),
+beam:v('p-beam'),
+outerColor:v('p-outerColor'),
+innerColor:v('p-innerColor'),
+color:v('p-color'),
+voltage:v('p-voltage'),
+addon:v('p-addon')};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
   rProd();hideM('modal-prod');toast('同步中...');
   const res=await apiPost('upsertProduct',rec);
