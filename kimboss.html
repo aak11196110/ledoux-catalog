@@ -776,7 +776,7 @@ function editProd(id){
   fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');fv('p-specOptions',p.specOptions||'');
   fv('p-img',(p.images&&p.images[0])||'');prevImg();showM('modal-prod');
 }
-function clearPF(){['p-id','p-model','p-series','p-watt','p-cct','p-price','p-proj','p-cri','p-cert','p-desc','p-img'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
+  function clearPF(){['p-id','p-model','p-series','p-watt','p-cct','p-price','p-proj','p-cri','p-cert','p-desc','p-img','p-specOptions'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
