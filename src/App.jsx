@@ -2356,6 +2356,16 @@ if(urgentData){
           </div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 12px",alignItems:"center"}}>
+            <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+              <option value="">所有系列</option>
+              {allSeries.filter(Boolean).map(s=><option key={s} value={s}>{s}</option>)}
+            </select>
+            <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+              <option value="全部">所有分類</option>
+              {allCats.filter(Boolean).map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
           {!searchQ&&(<div className="catbar"><button className={"catbtn"+(cat==="全部"&&!seriesF?" on":"")} onClick={()=>{setCat("全部");setSeriesF(null);setActiveTags([]);}}>全部</button>{COMMERCIAL_SERIES.map(s=><button key={s} className={"catbtn"+(seriesF===s?" on":"")} onClick={()=>{setSeriesF(s);setCat("全部");setActiveTags([]);}}>{s}</button>)}{LINEAR_SERIES_LIST.map(s=><button key={s} className={"catbtn"+(seriesF===s?" on":"")} onClick={()=>{setSeriesF(s);setCat("全部");setActiveTags([]);}}>{s}</button>)}</div>)}
           <div className="filter-area">
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
@@ -2426,6 +2436,10 @@ if(urgentData){
           </div>
           <div className="inv-catbar"><button className={`inv-catbtn ${invCat==="全部"&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat("全部");setInvSeriesF(null);}}>全部</button>{allInvCats.filter(c=>c!=="全部").map(c=><button key={c} className={`inv-catbtn ${invCat===c&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat(c);setInvSeriesF(null);}}>{c}</button>)}{[...new Set(inventory.map(i=>i.series).filter(Boolean))].map(s=><button key={s} className={`inv-catbtn ${invSeriesF===s?"on":""}`} onClick={()=>{setInvSeriesF(s);setInvCat("全部");}} style={{color:"var(--gold)"}}>{s}</button>)}</div>
 <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"10px 0 16px",alignItems:"center"}}>
+  <select value={invSeriesF||""} onChange={e=>setInvSeriesF(e.target.value||null)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",cursor:"pointer"}}>
+    <option value="">所有系列</option>
+    {allSeries.filter(Boolean).map(s=><option key={s} value={s}>{s}</option>)}
+  </select>
   <span style={{fontSize:9,letterSpacing:2,color:"var(--muted)",textTransform:"uppercase"}}>篩選</span>
   <select value={invCct} onChange={e=>setInvCct(e.target.value)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,color:"var(--blk)",outline:"none"}}>
     <option value="全部">全部色溫</option>
@@ -2934,6 +2948,20 @@ if(urgentData){
         {/* ══ 產品管理 ══ */}
         {page==="products"&&isAdmin&&<>
           <div className="phead"><div><div className="ptitle">產品管理</div><div className="psub">{products.length} 件商品</div></div><button className="btn-add2" onClick={()=>setShowAdd(v=>!v)}>新增產品</button></div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"8px 0 12px",alignItems:"center"}}>
+            <select onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",cursor:"pointer"}}>
+              <option value="">所有系列</option>
+              {allSeries.filter(Boolean).map(s=><option key={s} value={s}>{s}</option>)}
+            </select>
+            <select onChange={e=>setCatF(e.target.value||null)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",cursor:"pointer"}}>
+              <option value="">所有分類</option>
+              {allCats.filter(Boolean).map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+            <select onChange={e=>setStatusF(e.target.value||null)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",cursor:"pointer"}}>
+              <option value="">所有狀態</option>
+              {["銷售中","停產","規格更新","即將上市"].map(s=><option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
           {showAdd&&<div className="form-panel"><div className="fp-title">新增產品</div>
             <div className="fgrid">
               {[["型號","model"],["系列","series"],["瓦數","watt"],["色溫","cct"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["認證","cert"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={newProd[k]} onChange={e=>setNewProd(p=>({...p,[k]:e.target.value}))}/></div>))}
