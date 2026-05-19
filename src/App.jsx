@@ -1084,12 +1084,13 @@ function AdminProductEditor({ product, onSave, onClose, series_list }) {
     {key:"desc",      label:"產品描述",type:"textarea"},
     {key:"note",      label:"備註",    type:"textarea"},
     {key:"images",    label:"圖片網址",type:"text"},
-    {key:"video",     label:"影片連結",type:"text"},
+    {key:"specOptions", label:"自訂規格選項（格式：名稱:選項1/選項2，每行一組）", type:"textarea"},
   ];
 
   const [form, setForm] = React.useState(() => {
     const base = {};
     FIELDS.forEach(f => { base[f.key] = product?.[f.key] ?? ""; });
+if (Array.isArray(base.specOptions)) base.specOptions = base.specOptions.join("\n");
     if (Array.isArray(base.images)) base.images = base.images[0] || "";
     return base;
   });
@@ -1357,7 +1358,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [searchFocus,setSearchFocus]= useState(false);
   const [searchHist, setSearchHist] = useState([]);
   const [selProd,    setSelProd]    = useState(null);
-  const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[]});
+ const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[], customSpecs:{}});
   const [addons, setAddons] = useState([]);
   const [allParts,   setAllParts]   = useState([]);
   const [editProd,   setEditProd]   = useState(null);
@@ -1470,7 +1471,7 @@ if (partsData?.length > 0) setAllParts(partsData);
     })();
   }, [sheetUrl]);
 useEffect(()=>{
-  if(selProd) setSelSpec({beam:"", color:"", cct:"", addon:[]});
+  if(selProd) setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}});
 }, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
@@ -2388,7 +2389,7 @@ if(urgentData){
               const isEditing=isAdmin&&inlineEdit===p.id;
               const d=isEditing?inlineData:p;
               return(
-              <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[]});}}}>
+              <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[],customSpecs:{}});}}}>
                 {hasStock(p.model)&&<div className="pcard-stock-badge"><span className="pcard-stock-dot"/>台灣現貨</div>}
                 <div className="pcard-img">{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div>
                 <div className="pcard-body">
@@ -3171,7 +3172,7 @@ if(urgentData){
     <div style={{fontSize:9,color:"var(--muted)",marginTop:4,lineHeight:1.6}}>若需特殊色溫請選「其他色溫」填入，業務確認後回覆可行性</div>
   </div>):null}
 </div>
-            {addons.filter(a=>a.category==="全部"||a.category===selProd.category).length>0&&(
+            {selProd.specOptions&&String(selProd.specOptions).trim().split("\n").filter(Boolean).map(line=>{const[label,vals]=line.split(":").map(s=>s.trim());if(!label||!vals)return null;const options=vals.split("/").map(s=>s.trim()).filter(Boolean);return(<div key={label}><div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>{label}</div><div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>{options.map(opt=>(<button key={opt} onClick={()=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label]:opt}}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.customSpecs?.[label]===opt?"var(--blk)":"transparent",color:selSpec.customSpecs?.[label]===opt?"var(--ivory)":"var(--blk)",borderColor:selSpec.customSpecs?.[label]===opt?"var(--blk)":"var(--bdr)"}}>{opt}</button>))}</div></div>);})}
   <div style={{marginBottom:10}}>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>配件加購</div>
     <div style={{display:"flex",flexDirection:"column",gap:5}}>
