@@ -224,11 +224,45 @@
     <!-- PRODUCTS -->
     <div class="page" id="page-products">
       <div class="section-head"><div class="section-title">燈具產品管理</div><button class="btn btn-gold" onclick="openProdM()">＋ 新增產品</button></div>
-      <div class="filter-bar">
-        <input class="f-input" id="pq" placeholder="🔍 搜尋型號、系列..." oninput="rProd()">
-        <select class="f-select" id="pcat" onchange="rProd()"><option value="">所有分類</option><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select>
-        <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
-      </div>
+     <div class="filter-bar">
+  <input class="f-input" id="pq" placeholder="🔍 搜尋型號、系列..." oninput="rProd()">
+  <select class="f-select" id="pseries" onchange="rProd()">
+    <option value="">所有系列</option>
+    <optgroup label="── 商照燈系列 ──">
+      <option>DC48V 磁吸軌道</option>
+      <option>EOS 奧斯</option>
+      <option>SLOT 希洛特</option>
+      <option>COSY 寇斯</option>
+      <option>YODA 優打1代</option>
+      <option>YODA 優打2代</option>
+      <option>YOMAX 優麥斯</option>
+      <option>HEPBURN 赫本</option>
+      <option>METIS 墨提斯</option>
+      <option>MINI 珠寶</option>
+      <option>BLADE 帕雷德</option>
+      <option>軌道燈系列</option>
+      <option>吸頂燈系列</option>
+      <option>商照燈－特殊款／其他</option>
+    </optgroup>
+    <optgroup label="── 線型燈系列 ──">
+      <option>LINEAR 麗娜</option>
+      <option>POLA 泊拉</option>
+      <option>WALL LIGHT 壁燈</option>
+      <option>STEP LIGHT 地腳燈</option>
+      <option>CABINET LINEAR LIGHT 高端線條燈</option>
+      <option>LED STRIP LIGHT 低壓燈帶</option>
+      <option>OUTDOOR LIGHT 戶外燈具</option>
+      <option>VELA</option>
+      <option>鋁擠洗牆燈</option>
+      <option>鋁條燈</option>
+      <option>燈帶</option>
+      <option>軟條燈</option>
+      <option>線型燈－特殊款／其他</option>
+    </optgroup>
+  </select>
+  <select class="f-select" id="pcat" onchange="rProd()"><option value="">所有分類</option><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select>
+  <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
+</div>
       <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
 
@@ -706,9 +740,10 @@ function rDash(){
 
 // PRODUCTS
 function rProd(){
-  const q=v('pq'),cat=v('pcat'),st=v('pst');
+ const q=v('pq'),series=v('pseries'),cat=v('pcat'),st=v('pst');
   let list=D.products;
   if(q)list=list.filter(p=>(p.model+p.series+p.category).toLowerCase().includes(q.toLowerCase()));
+ if(series)list=list.filter(p=>p.series===series);
   if(cat)list=list.filter(p=>p.category===cat);
   if(st)list=list.filter(p=>p.status===st);
   document.getElementById('prod-tb').innerHTML=list.length?list.map(p=>`<tr>
