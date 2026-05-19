@@ -331,7 +331,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .sm-group-hd:hover{color:#9a8a7a}
 .sm-group-arrow{font-size:9px;transition:transform .2s;display:inline-block}
 .sm-group-arrow.open{transform:rotate(90deg)}
-.sm-sub{display:flex;align-items:center;padding:7px 22px 7px 34px;font-size:9px;letter-spacing:1px;color:#6a5a4a;cursor:pointer;transition:all .15s}
+.sm-sub{display:flex;align-items:center;padding:7px 22px 7px 34px;font-size:13px;letter-spacing:1px;color:#ffffff;cursor:pointer;transition:all .15s}
 .sm-sub:hover{color:#b8a890}
 .sm-sub.on{color:var(--gold)}
 .sm-dot{width:3px;height:3px;border-radius:50%;background:currentColor;margin-right:9px;opacity:.5;flex-shrink:0}
