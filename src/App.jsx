@@ -2849,7 +2849,7 @@ if(urgentData){
   <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 16px",alignItems:"center"}}>
     <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
       <option value="">所有系列</option>
-      {allSeries.filter(Boolean).map(s=><option key={s} value={s}>{s}</option>)}
+      <optgroup label="── 商照燈系列 ──">{COMMERCIAL_SERIES.map(s=><option key={s} value={s}>{s}</option>)}</optgroup><optgroup label="── 線型燈系列 ──">{LINEAR_SERIES_LIST.map(s=><option key={s} value={s}>{s}</option>)}</optgroup>
     </select>
     <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
       <option value="全部">所有分類</option>
