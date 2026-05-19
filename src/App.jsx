@@ -555,8 +555,8 @@ tr:hover td{background:#f7f2eb}
 .inv-card{background:var(--ivory);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
 .inv-card:hover{background:#f2ece3}
 .inv-card-top{display:flex;justify-content:space-between;align-items:flex-start}
-.inv-card-model{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400}
-.inv-card-series{font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-top:2px}
+.inv-card-model{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400}
+.inv-card-series{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-top:2px}
 .inv-status{font-size:7px;padding:2px 8px;letter-spacing:2px;text-transform:uppercase;border:0.5px solid}
 .inv-status.in-stock{color:#3a6b4a;border-color:rgba(58,107,74,.4);background:#edf6f0}
 .inv-status.low{color:#8a6a2a;border-color:rgba(138,106,42,.4);background:#fdf7ed}
@@ -602,11 +602,11 @@ tr:hover td{background:#f7f2eb}
 .cat-cover-deco2{position:absolute;top:32px;right:32px;width:40px;height:40px;border:0.5px solid;border-radius:50%;opacity:.08}
 .cat-cover-lines{position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 40px,rgba(255,255,255,.015) 40px,rgba(255,255,255,.015) 41px)}
 .cat-cover-content{position:relative;z-index:1}
-.cat-cover-edition{font-size:7px;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
-.cat-cover-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;letter-spacing:1px;color:#e8e0d4;line-height:1.2;margin-bottom:2px}
+.cat-cover-edition{font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
+.cat-cover-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;letter-spacing:1px;color:#e8e0d4;line-height:1.2;margin-bottom:2px}
 .cat-cover-sub{font-size:7px;letter-spacing:5px;text-transform:uppercase;color:rgba(232,224,212,.4)}
 .cat-body{padding:22px 24px;flex:1;display:flex;flex-direction:column;gap:12px}
-.cat-desc{font-size:12px;color:var(--muted);line-height:1.8}
+.cat-desc{font-size:13px;color:var(--muted);line-height:1.8}
 .cat-tags{display:flex;gap:5px;flex-wrap:wrap}
 .cat-tag{font-size:8px;padding:3px 9px;border:0.5px solid var(--bdr);color:var(--muted);letter-spacing:.5px}
 .cat-meta{display:flex;gap:16px;border-top:0.5px solid var(--bdr2);padding-top:12px}
