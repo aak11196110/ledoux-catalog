@@ -2357,10 +2357,15 @@ if(urgentData){
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 12px",alignItems:"center"}}>
-            <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
-              <option value="">所有系列</option>
-              {allSeries.filter(Boolean).map(s=><option key={s} value={s}>{s}</option>)}
-            </select>
+           <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+  <option value="">所有系列</option>
+  <optgroup label="── 商照燈系列 ──">
+    {COMMERCIAL_SERIES.map(s=><option key={s} value={s}>{s}</option>)}
+  </optgroup>
+  <optgroup label="── 線型燈系列 ──">
+    {LINEAR_SERIES_LIST.map(s=><option key={s} value={s}>{s}</option>)}
+  </optgroup>
+</select>
             <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
               <option value="全部">所有分類</option>
               {allCats.filter(Boolean).map(c=><option key={c} value={c}>{c}</option>)}
@@ -2838,10 +2843,26 @@ if(urgentData){
         </>}
 
         {/* ══ 借樣品 ══ */}
-        {page==="sample"&&<>
-          <div className="phead"><div><div className="ptitle">借樣品</div><div className="psub">申請試用 — 2 週內歸還可折抵購買</div></div><button className="btn-add2" onClick={()=>setSampOpen(true)}>申請清單 ({sampCart.length})</button></div>
-          <div className="hint-box">從下方產品點選「申請樣品」加入清單後提交。</div>
-          <div className="pgrid">{products.map(p=>(<div key={p.id} className="pcard"><div className="pcard-img" onClick={()=>setSelProd(p)} style={{cursor:"pointer"}}>{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div><div className="pcard-body"><div className="pcard-series">{p.series}</div><div className="pcard-model">{p.model}</div><div className="pcard-tags">{p.watt&&<span className="ptag">{p.watt}</span>}{p.beam&&<span className="ptag">{p.beam}</span>}</div><button className={`btn-samp ${sampCart.find(i=>i.id===p.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===p.id)?removeSamp(p.id):addToSamp(p)}>{sampCart.find(i=>i.id===p.id)?"已加入":"申請樣品"}</button></div></div>))}</div>
+{page==="sample"&&<>
+  <div className="phead"><div><div className="ptitle">借樣品</div><div className="psub">申請試用 — 2 週內歸還可折抵購買</div></div><button className="btn-add2" onClick={()=>setSampOpen(true)}>申請清單 ({sampCart.length})</button></div>
+  <div className="hint-box">從下方產品點選「申請樣品」加入清單後提交。</div>
+  <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 16px",alignItems:"center"}}>
+    <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+      <option value="">所有系列</option>
+      {allSeries.filter(Boolean).map(s=><option key={s} value={s}>{s}</option>)}
+    </select>
+    <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+      <option value="全部">所有分類</option>
+      {allCats.filter(Boolean).map(c=><option key={c} value={c}>{c}</option>)}
+    </select>
+    <select onChange={e=>{const q=e.target.value;setSearchQ(q||"");}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+      <option value="">所有狀態</option>
+      <option value="銷售中">銷售中</option>
+      <option value="停產">停產</option>
+    </select>
+    {(seriesF||cat!=="全部")&&<button onClick={()=>{setSeriesF(null);setCat("全部");}} style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:10,color:"var(--muted)",cursor:"pointer"}}>清除篩選</button>}
+  </div>
+  <div className="pgrid">{products.filter(p=>(!seriesF||p.series===seriesF)&&(cat==="全部"||p.category===cat)).map(p=>(<div key={p.id} className="pcard"><div className="pcard-img" onClick={()=>setSelProd(p)} style={{cursor:"pointer"}}>{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div><div className="pcard-body"><div className="pcard-series">{p.series}</div><div className="pcard-model">{p.model}</div><div className="pcard-tags">{p.watt&&<span className="ptag">{p.watt}</span>}{p.beam&&<span className="ptag">{p.beam}</span>}</div><button className={`btn-samp ${sampCart.find(i=>i.id===p.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===p.id)?removeSamp(p.id):addToSamp(p)}>{sampCart.find(i=>i.id===p.id)?"已加入":"申請樣品"}</button></div></div>))}</div>
         </>}
 
         {/* ══ 安裝服務 ══ */}
