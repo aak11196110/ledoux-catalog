@@ -229,7 +229,7 @@
         <select class="f-select" id="pcat" onchange="rProd()"><option value="">所有分類</option><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select>
         <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th>專案價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
 
     <!-- INVENTORY -->
@@ -470,7 +470,7 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">牌價 NT$</label><input class="form-input" id="p-price" type="number" placeholder="0"></div>
-      <div class="form-group"><label class="form-label">專案價 NT$</label><input class="form-input" id="p-proj" type="number" placeholder="0"></div>
+     <div style="display:none"><input id="p-proj" type="number" value="0"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">演色性 CRI</label><input class="form-input" id="p-cri" placeholder="Ra90,Ra95"></div>
@@ -715,7 +715,7 @@ function rProd(){
     <td><b>${p.model||'—'}</b></td><td style="color:var(--muted)">${p.series||'—'}</td><td>${p.category||'—'}</td>
     <td>${p.watt?p.watt+'W':'—'}</td><td style="color:var(--muted)">${p.cct||'—'}</td>
     <td style="font-family:'Space Mono',monospace">NT$ ${fmt(p.stdPrice||p.price||0)}</td>
-    <td style="font-family:'Space Mono',monospace;color:var(--gold)">NT$ ${fmt(p.projPrice||0)}</td>
+   <td style="display:none"></td>
     <td>${bdg(p.status||'上架')}</td>
     <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button></td>
   </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無產品資料</td></tr>';
@@ -726,7 +726,7 @@ function editProd(id){
   document.getElementById('pm-title').textContent='編輯產品';
   fv('p-id',p.id);fv('p-model',p.model);sel('p-series',p.series||'');
   sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
-  fv('p-watt',p.watt||'');fv('p-cct',p.cct||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',p.projPrice||0);
+  fv('p-watt',p.watt||'');fv('p-cct',p.cct||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
   fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');
   fv('p-img',(p.images&&p.images[0])||'');prevImg();showM('modal-prod');
 }
@@ -735,7 +735,7 @@ async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
-    watt:v('p-watt'),cct:v('p-cct'),stdPrice:Number(v('p-price'))||0,projPrice:Number(v('p-proj'))||0,
+    watt:v('p-watt'),cct:v('p-cct'),stdPrice:Number(v('p-price'))||0,projPrice:0,
     cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],
     catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈'};
   const idx=D.products.findIndex(x=>String(x.id)===String(id));
