@@ -1553,17 +1553,20 @@ useEffect(() => {
     (async () => {
       setSyncStatus("loading");
       try {
-const [prods, invs, addonData, partsData] = await Promise.all([
+const [prods, invs, addonData, partsData, sinvData] = await Promise.all([
   sheetGet("getProducts"),
   sheetGet("getInventory"),
   sheetGet("getAddons"),
-  sheetGet("getParts")
+  sheetGet("getParts"),
+    sheetGet("getSampleInventory")
 ]);
 if (prods?.length > 0) setProducts(prods);
 if (invs?.length > 0) setInventory(invs);
 if (addonData?.length > 0) setAddons(addonData);
+        if (sinvData?.length > 0) setSampleInv(sinvData);
 if (partsData?.length > 0) setAllParts(partsData);
         setSyncStatus("ok");
+        await sheetPost("checkSampleReturns", {});
       } catch(e) {
         setSyncStatus("off");
       } finally {
