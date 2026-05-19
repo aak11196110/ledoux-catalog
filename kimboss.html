@@ -510,7 +510,6 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">瓦數 (W)</label><input class="form-input" id="p-watt" placeholder="10"></div>
-      <div class="form-group"><label class="form-label">色溫（逗號分隔）</label><input class="form-input" id="p-cct" placeholder="3000,4000"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">牌價 NT$</label><input class="form-input" id="p-price" type="number" placeholder="0"></div>
@@ -518,7 +517,6 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">演色性 CRI</label><input class="form-input" id="p-cri" placeholder="Ra90,Ra95"></div>
-      <div class="form-group"><label class="form-label">認證 Cert</label><input class="form-input" id="p-cert" placeholder="CNS,CE"></div>
     </div>
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
  <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()"><div style="margin-top:6px"><label style="display:inline-block;padding:8px 18px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;border:none">📷 上傳圖片到 ImgBB<input type="file" accept="image/*" style="display:none" onchange="uploadImgBB(this,'p-img')"></label></div><div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div></div> 
@@ -838,17 +836,17 @@ function editProd(id){
   document.getElementById('pm-title').textContent='編輯產品';
   fv('p-id',p.id);fv('p-model',p.model);sel('p-series',p.series||'');
   sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
-  fv('p-watt',p.watt||'');fv('p-cct',p.cct||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
-  fv('p-cri',p.cri||'');fv('p-cert',p.cert||'');fv('p-desc',p.desc||'');fv('p-specOptions',p.specOptions||'');
+ fv('p-watt',p.watt||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
+ fv('p-cri',p.cri||'');fv('p-desc',p.desc||'');fv('p-specOptions',p.specOptions||'');
  fv('p-img',(p.images&&p.images[0])||'');prevImg();initSpecBuilder(p.specOptions||{});showM('modal-prod');
 }
-  function clearPF(){['p-id','p-model','p-series','p-watt','p-cct','p-price','p-proj','p-cri','p-cert','p-desc','p-img','p-specOptions'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
+  function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-specOptions'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
     watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,
-   cri:v('p-cri'),cert:v('p-cert'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:getSpecData(),
+   cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],specOptions:getSpecData(),
    catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
 color:(getSpecData().color||[]).filter(v=>v!=='其他').join('/')||'',
 beam:(getSpecData().beam||[]).filter(v=>v!=='其他').join('/')||'',
