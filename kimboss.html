@@ -449,7 +449,7 @@
   </div>
   <div class="tbl-wrap">
     <table>
-      <thead><tr><th>型號</th><th>色溫</th><th>光束角</th><th>外框</th><th>內框</th><th>狀態</th><th>借出日</th><th>歸還日</th><th>備註</th><th>操作</th></tr></thead>
+     <thead><tr><th>系列</th><th>型號</th><th>有無樣品</th><th>色溫選項</th><th>光束角選項</th><th>狀態</th><th>備註</th><th>操作</th></tr></thead>
       <tbody id="sinv-tb"><tr><td colspan="10" class="no-data">載入中...</td></tr></tbody>
     </table>
   </div>
@@ -1365,19 +1365,17 @@ function rSampInv(){
   const tb=document.getElementById('sinv-tb');if(!tb)return;
   const q=v('sinv-q')||'', st=v('sinv-st')||'';
   let list=[...(D.sampleInv||[])].reverse();
-  if(q)list=list.filter(r=>(r.model||'').toLowerCase().includes(q.toLowerCase()));
+  if(q)list=list.filter(r=>((r.model||'')+(r.series||'')).toLowerCase().includes(q.toLowerCase()));
   if(st)list=list.filter(r=>r.status===st);
   if(!list.length){tb.innerHTML='<tr><td colspan="10" class="no-data">尚無樣品記錄</td></tr>';return;}
   const sc=s=>s==='在庫'?'var(--green)':s==='已借出'?'var(--gold)':'var(--muted)';
-  tb.innerHTML=list.map(r=>`<tr>
+ tb.innerHTML=list.map(r=>`<tr>
+    <td style="font-size:11px;color:var(--muted)">${esc(r.series||'—')}</td>
     <td style="font-weight:500">${esc(r.model||'—')}</td>
-    <td>${esc(r.cct||'—')}</td>
-    <td>${esc(r.beam||'—')}</td>
-    <td>${esc(r.outerColor||'—')}</td>
-    <td>${esc(r.innerColor||'—')}</td>
+    <td><span style="color:${r.hasSample==='有'?'var(--green)':'var(--gold)'};font-weight:500">${esc(r.hasSample||'—')}</span></td>
+    <td style="font-size:11px">${esc(r.cctOptions||'—')}</td>
+    <td style="font-size:11px">${esc(r.beamOptions||'—')}</td>
     <td><span style="color:${sc(r.status)};font-weight:500">${esc(r.status||'—')}</span></td>
-    <td style="font-size:11px;color:var(--muted)">${esc(r.lendDate||'—')}</td>
-    <td style="font-size:11px;color:var(--muted)">${esc(r.returnDate||'—')}</td>
     <td style="font-size:11px;color:var(--muted)">${esc(r.note||'—')}</td>
     <td>
       <button class="btn btn-sm btn-outline" onclick="editSampInv('${esc(r.id)}')">編輯</button>
@@ -1420,9 +1418,10 @@ function openSampInvM(){
 function editSampInv(id){
   const series2=[...new Set(D.products.map(p=>p.series).filter(Boolean))];
   document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series2.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-  document.getElementById('si-series').value=r.series||'';
-  const r=(D.sampleInv||[]).find(x=>String(x.id)===String(id));if(!r)return;
-  document.getElementById('sinv-title').textContent='編輯樣品';
+const r=(D.sampleInv||[]).find(x=>String(x.id)===String(id));if(!r)return;
+document.getElementById('si-series').value=r.series||'';
+filterSiModels();
+document.getElementById('sinv-title').textContent='編輯樣品';
   fv('si-id',r.id);
   document.getElementById('si-model').value=r.model||'';
   document.getElementById('si-hasSample').value=r.hasSample||'有';
@@ -1441,7 +1440,8 @@ async function saveSampInv(){
   const model=document.getElementById('si-model').value;if(!model){toast('請選擇型號');return;}
   const rec={
     id:v('si-id')||'SI'+Date.now(),
-    model,
+   model,
+    series:document.getElementById('si-series').value,
     hasSample:document.getElementById('si-hasSample').value,
     status:document.getElementById('si-status').value,
     cctOptions:SI_OPTS.cct.join(','),
