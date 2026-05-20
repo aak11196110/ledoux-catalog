@@ -457,33 +457,69 @@
 
 <!-- SAMPLE INV Modal -->
 <div class="modal-wrap" id="modal-sinv" style="display:none" onclick="if(event.target===this)hideM('modal-sinv')">
-<div class="modal-box">
+<div class="modal-box" style="max-width:740px">
   <div class="modal-head"><div class="modal-title" id="sinv-title">新增樣品</div><button class="modal-close" onclick="hideM('modal-sinv')">✕</button></div>
   <div class="modal-body">
     <input type="hidden" id="si-id">
     <div class="form-row">
-      <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="si-model" placeholder="例：DC-MD2"></div>
-      <div class="form-group"><label class="form-label">色溫</label><input class="form-input" id="si-cct" placeholder="例：3000K"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">光束角</label><input class="form-input" id="si-beam" placeholder="例：24°"></div>
-      <div class="form-group"><label class="form-label">外框顏色</label><input class="form-input" id="si-outerColor" placeholder="例：黑色"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">內框顏色</label><input class="form-input" id="si-innerColor" placeholder="例：黑色"></div>
-      <div class="form-group"><label class="form-label">狀態</label>
-        <select class="form-select" id="si-status">
-          <option>在庫</option>
-          <option>已借出</option>
-          <option>已歸還</option>
+      <div class="form-group"><label class="form-label">型號 *（從產品選）</label>
+        <select class="form-select" id="si-model"><option value="">請選擇型號</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">有無台灣樣品</label>
+        <select class="form-select" id="si-hasSample">
+          <option value="有">有樣品</option>
+          <option value="無">無樣品</option>
         </select>
       </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">狀態</label>
+        <select class="form-select" id="si-status"><option>在庫</option><option>已借出</option><option>已歸還</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="si-note" placeholder="選填"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">借出日</label><input class="form-input" id="si-lendDate" type="date"></div>
       <div class="form-group"><label class="form-label">歸還日</label><input class="form-input" id="si-returnDate" type="date"></div>
     </div>
-    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="si-note" placeholder="選填"></div>
+    <hr style="border:none;border-top:0.5px solid var(--bdr);margin:12px 0">
+    <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:10px">規格選項設定（每行一個，客戶可多選）</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">色溫選項</label>
+        <div id="si-cctOptions-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="si-cct-input" placeholder="例：3000K" style="flex:1">
+          <button class="btn btn-sm btn-gold" onclick="addSiOption('cct')">＋</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">光束角選項</label>
+        <div id="si-beamOptions-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="si-beam-input" placeholder="例：24°" style="flex:1">
+          <button class="btn btn-sm btn-gold" onclick="addSiOption('beam')">＋</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">顏色選項</label>
+        <div id="si-colorOptions-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="si-color-input" placeholder="例：黑色" style="flex:1">
+          <button class="btn btn-sm btn-gold" onclick="addSiOption('color')">＋</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">電壓選項</label>
+        <div id="si-voltageOptions-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="si-voltage-input" placeholder="例：AC110V" style="flex:1">
+          <button class="btn btn-sm btn-gold" onclick="addSiOption('voltage')">＋</button>
+        </div>
+      </div>
+    </div>
     <div class="form-actions">
       <button class="btn btn-outline" onclick="hideM('modal-sinv')">取消</button>
       <button class="btn btn-gold" onclick="saveSampInv()">儲存並同步</button>
@@ -1346,24 +1382,65 @@ function rSampInv(){
     </td>
   </tr>`).join('');
 }
+let SI_OPTS = {cct:[], beam:[], color:[], voltage:[]};
+
+function renderSiOptions(key){
+  const list=document.getElementById(`si-${key}Options-list`);if(!list)return;
+  list.innerHTML=SI_OPTS[key].map(v=>`<span style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--bdr);font-size:11px;display:flex;align-items:center;gap:4px">${esc(v)}<span onclick="removeSiOption('${key}','${esc(v)}')" style="cursor:pointer;color:var(--muted)">✕</span></span>`).join('');
+}
+function addSiOption(key){
+  const inp=document.getElementById(`si-${key}-input`);
+  const val=inp.value.trim();if(!val)return;
+  if(!SI_OPTS[key].includes(val))SI_OPTS[key].push(val);
+  inp.value='';renderSiOptions(key);
+}
+function removeSiOption(key,val){
+  SI_OPTS[key]=SI_OPTS[key].filter(v=>v!==val);renderSiOptions(key);
+}
 function openSampInvM(){
   document.getElementById('sinv-title').textContent='新增樣品';
-  ['si-id','si-model','si-cct','si-beam','si-outerColor','si-innerColor','si-lendDate','si-returnDate','si-note'].forEach(k=>fv(k,''));
+  ['si-id','si-note','si-lendDate','si-returnDate','si-cct-input','si-beam-input','si-color-input','si-voltage-input'].forEach(k=>fv(k,''));
+  document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+D.products.map(p=>`<option value="${esc(p.model)}">${esc(p.model)} — ${esc(p.series||'')}</option>`).join('');
+  document.getElementById('si-hasSample').value='有';
   document.getElementById('si-status').value='在庫';
+  SI_OPTS={cct:[],beam:[],color:[],voltage:[]};
+  ['cct','beam','color','voltage'].forEach(k=>renderSiOptions(k));
   showM('modal-sinv');
 }
 function editSampInv(id){
   const r=(D.sampleInv||[]).find(x=>String(x.id)===String(id));if(!r)return;
   document.getElementById('sinv-title').textContent='編輯樣品';
-  fv('si-id',r.id);fv('si-model',r.model||'');fv('si-cct',r.cct||'');fv('si-beam',r.beam||'');
-  fv('si-outerColor',r.outerColor||'');fv('si-innerColor',r.innerColor||'');
-  fv('si-lendDate',r.lendDate||'');fv('si-returnDate',r.returnDate||'');fv('si-note',r.note||'');
+  document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+D.products.map(p=>`<option value="${esc(p.model)}">${esc(p.model)} — ${esc(p.series||'')}</option>`).join('');
+  fv('si-id',r.id);
+  document.getElementById('si-model').value=r.model||'';
+  document.getElementById('si-hasSample').value=r.hasSample||'有';
   document.getElementById('si-status').value=r.status||'在庫';
+  fv('si-note',r.note||'');fv('si-lendDate',r.lendDate||'');fv('si-returnDate',r.returnDate||'');
+  SI_OPTS={
+    cct: r.cctOptions?r.cctOptions.split(',').filter(Boolean):[],
+    beam: r.beamOptions?r.beamOptions.split(',').filter(Boolean):[],
+    color: r.colorOptions?r.colorOptions.split(',').filter(Boolean):[],
+    voltage: r.voltageOptions?r.voltageOptions.split(',').filter(Boolean):[]
+  };
+  ['cct','beam','color','voltage'].forEach(k=>renderSiOptions(k));
   showM('modal-sinv');
 }
 async function saveSampInv(){
-  const model=v('si-model').trim();if(!model){toast('請填寫型號');return;}
-  const rec={id:v('si-id')||'SI'+Date.now(),model,cct:v('si-cct'),beam:v('si-beam'),outerColor:v('si-outerColor'),innerColor:v('si-innerColor'),status:document.getElementById('si-status').value,lendDate:v('si-lendDate'),returnDate:v('si-returnDate'),note:v('si-note')};
+  const model=document.getElementById('si-model').value;if(!model){toast('請選擇型號');return;}
+  const rec={
+    id:v('si-id')||'SI'+Date.now(),
+    model,
+    hasSample:document.getElementById('si-hasSample').value,
+    status:document.getElementById('si-status').value,
+    cctOptions:SI_OPTS.cct.join(','),
+    beamOptions:SI_OPTS.beam.join(','),
+    colorOptions:SI_OPTS.color.join(','),
+    voltageOptions:SI_OPTS.voltage.join(','),
+    lendDate:v('si-lendDate'),
+    returnDate:v('si-returnDate'),
+    note:v('si-note'),
+    cct:'',beam:'',outerColor:'',innerColor:'',color:'',voltage:''
+  };
   if(!D.sampleInv)D.sampleInv=[];
   const idx=D.sampleInv.findIndex(x=>String(x.id)===String(rec.id));
   if(idx>=0)D.sampleInv[idx]=rec;else D.sampleInv.unshift(rec);
