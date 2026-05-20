@@ -462,9 +462,12 @@
   <div class="modal-body">
     <input type="hidden" id="si-id">
     <div class="form-row">
-      <div class="form-group"><label class="form-label">型號 *（從產品選）</label>
-        <select class="form-select" id="si-model"><option value="">請選擇型號</option></select>
-      </div>
+<div class="form-group"><label class="form-label">系列</label>
+  <select class="form-select" id="si-series" onchange="filterSiModels()"><option value="">請選擇系列</option></select>
+</div>
+<div class="form-group"><label class="form-label">型號 * （從產品選）</label>
+  <select class="form-select" id="si-model"><option value="">請先選系列</option></select>
+</div>
       <div class="form-group"><label class="form-label">有無台灣樣品</label>
         <select class="form-select" id="si-hasSample">
           <option value="有">有樣品</option>
@@ -1398,9 +1401,16 @@ function removeSiOption(key,val){
   SI_OPTS[key]=SI_OPTS[key].filter(v=>v!==val);renderSiOptions(key);
 }
 function openSampInvM(){
+  const series=[...new Set(D.products.map(p=>p.series).filter(Boolean))];
+  document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  document.getElementById('si-model').innerHTML='<option value="">請先選系列</option>';
+  const series=document.getElementById('si-series').value;
+  const filtered=D.products.filter(p=>p.series===series);
+  document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+filtered.map(p=>`<option value="${esc(p.model)}">${esc(p.model)}</option>`).join('');
+}
+  function openSampInvM(){
   document.getElementById('sinv-title').textContent='新增樣品';
   ['si-id','si-note','si-lendDate','si-returnDate','si-cct-input','si-beam-input','si-color-input','si-voltage-input'].forEach(k=>fv(k,''));
-  document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+D.products.map(p=>`<option value="${esc(p.model)}">${esc(p.model)} — ${esc(p.series||'')}</option>`).join('');
   document.getElementById('si-hasSample').value='有';
   document.getElementById('si-status').value='在庫';
   SI_OPTS={cct:[],beam:[],color:[],voltage:[]};
@@ -1408,9 +1418,11 @@ function openSampInvM(){
   showM('modal-sinv');
 }
 function editSampInv(id){
+  const series2=[...new Set(D.products.map(p=>p.series).filter(Boolean))];
+  document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series2.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  document.getElementById('si-series').value=r.series||'';
   const r=(D.sampleInv||[]).find(x=>String(x.id)===String(id));if(!r)return;
   document.getElementById('sinv-title').textContent='編輯樣品';
-  document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+D.products.map(p=>`<option value="${esc(p.model)}">${esc(p.model)} — ${esc(p.series||'')}</option>`).join('');
   fv('si-id',r.id);
   document.getElementById('si-model').value=r.model||'';
   document.getElementById('si-hasSample').value=r.hasSample||'有';
