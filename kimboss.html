@@ -439,7 +439,11 @@
     <button class="btn btn-gold" onclick="openSampInvM()">＋ 新增樣品</button>
   </div>
   <div class="filter-bar">
-    <input class="f-input" id="sinv-q" placeholder="🔍 搜尋型號..." oninput="rSampInv()">
+<input class="f-input" id="sinv-q" placeholder="🔍 搜尋型號..." oninput="rSampInv()">
+    <select class="f-select" id="sinv-sr" onchange="rSampInv()">
+      <option value="">所有系列</option>
+      <option>DC48V 磁吸軌道</option><option>EOS 奧斯</option><option>SLOT 希洛特</option><option>COSY 寇斯</option><option>YODA 優打1代</option><option>YODA 優打2代</option><option>YOMAX 優麥斯</option><option>HEPBURN 赫本</option><option>METIS 墨提斯</option><option>MINI 珠寶</option><option>BLADE 帕雷德</option><option>LINEAR 麗娜</option><option>POLA 泊拉</option><option>WALL LIGHT 壁燈</option><option>STEP LIGHT 地腳燈</option><option>CABINET LINEAR LIGHT 高端線條燈</option><option>LED STRIP LIGHT 低壓燈帶</option><option>OUTDOOR LIGHT 戶外燈具</option><option>VELA</option><option>鋁擠洗牆燈</option><option>鋁條燈</option><option>燈帶</option><option>軟條燈</option><option>商照燈－特殊款／其他</option><option>線型燈－特殊款／其他</option>
+    </select>
     <select class="f-select" id="sinv-st" onchange="rSampInv()">
       <option value="">所有狀態</option>
       <option>在庫</option>
@@ -1363,10 +1367,11 @@ function delDisc(code){
   // SAMPLE INV
 function rSampInv(){
   const tb=document.getElementById('sinv-tb');if(!tb)return;
-  const q=v('sinv-q')||'', st=v('sinv-st')||'';
+  const q=v('sinv-q')||'', st=v('sinv-st')||'', sr=v('sinv-sr')||'';
   let list=[...(D.sampleInv||[])].reverse();
   if(q)list=list.filter(r=>((r.model||'')+(r.series||'')).toLowerCase().includes(q.toLowerCase()));
-  if(st)list=list.filter(r=>r.status===st);
+  if(sr)list=list.filter(r=>r.series===sr);
+if(st)list=list.filter(r=>r.status===st);
   if(!list.length){tb.innerHTML='<tr><td colspan="10" class="no-data">尚無樣品記錄</td></tr>';return;}
   const sc=s=>s==='在庫'?'var(--green)':s==='已借出'?'var(--gold)':'var(--muted)';
  tb.innerHTML=list.map(r=>`<tr>
