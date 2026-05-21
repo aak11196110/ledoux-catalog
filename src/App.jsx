@@ -3272,33 +3272,30 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
     {b}{bStock!==null&&<span style={{fontSize:9,color:selSpec.beam===b?"var(--ivory)":bStock>0?"var(--green)":"var(--red)",marginLeft:4}}>{bStock>0?`(${bStock})`:"(無)"}</span>}
 </button>;
 })}
-      <button onClick={()=>setSelSpec(s=>({...s,beam:"其他"}))}style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.beam==="其他"?"var(--gold)":"transparent",color:selSpec.beam==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.beam==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
-    </div>
-    {selSpec.beam==="其他"&&<input placeholder="請輸入光束角，例：45°" value={selSpec.customBeam||""} onChange={e=>setSelSpec(s=>({...s,customBeam:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
+</div>
   </div>):null}
 
-  {/* 顏色選擇：外框色 + 內框色（若產品有色選項） */}
+{/* 顏色選擇：外框色 + 內框色（若產品有色選項） */}
   {selProd.color&&selProd.color.trim()?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>燈體顏色</div>
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       {/* 外框顏色 */}
       <div>
-        <div style={{fontSize:9,letterSpacing:1,color:"var(--muted)",marginBottom:4}}>外框色</div>
+        <div style={{fontSize:9,letterSpacing:1,color:"var(--muted)",marginBottom:4}}>外框顏色</div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
           {selProd.color.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,outerColor:c,color:c}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.outerColor===c?"var(--blk)":"transparent",color:selSpec.outerColor===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.outerColor===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
-          <button onClick={()=>setSelSpec(s=>({...s,outerColor:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.outerColor==="其他"?"var(--gold)":"transparent",color:selSpec.outerColor==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.outerColor==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
+          <button onClick={()=>setSelSpec(s=>({...s,outerColor:"特殊色"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.outerColor==="特殊色"?"var(--gold)":"transparent",color:selSpec.outerColor==="特殊色"?"var(--blk)":"var(--muted)",borderColor:selSpec.outerColor==="特殊色"?"var(--gold)":"var(--bdr)"}}>特殊色（洽業務）</button>
         </div>
-        {selSpec.outerColor==="其他"&&<input placeholder="請輸入外框顏色，例：香檳金" value={selSpec.customColor||""} onChange={e=>setSelSpec(s=>({...s,customColor:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
+        {selSpec.outerColor==="特殊色"&&<div style={{marginTop:6,fontSize:10,color:"var(--gold)",background:"#fdf5e8",border:"0.5px solid var(--gold)",padding:"7px 10px",lineHeight:1.7}}>⚠ 特殊顏色需與業務確認可行性，送出詢價後業務將主動聯繫。</div>}
       </div>
       {/* 內框顏色（選填） */}
       <div>
-        <div style={{fontSize:9,letterSpacing:1,color:"var(--muted)",marginBottom:4}}>內框色 <span style={{fontSize:8,color:"var(--muted)"}}>(選填)</span></div>
+        <div style={{fontSize:9,letterSpacing:1,color:"var(--muted)",marginBottom:4}}>內框顏色 <span style={{fontSize:8,color:"var(--muted)"}}>(選填)</span></div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
           {selProd.color.split("/").map(c=>c.trim()).map(c=>(<button key={c} onClick={()=>setSelSpec(s=>({...s,innerColor:selSpec.innerColor===c?"":c}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.innerColor===c?"var(--blk)":"transparent",color:selSpec.innerColor===c?"var(--ivory)":"var(--blk)",borderColor:selSpec.innerColor===c?"var(--blk)":"var(--bdr)"}}>{c}</button>))}
-          <button onClick={()=>setSelSpec(s=>({...s,innerColor:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.innerColor==="其他"?"var(--gold)":"transparent",color:selSpec.innerColor==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.innerColor==="其他"?"var(--gold)":"var(--bdr)"}}>其他</button>
-          <button onClick={()=>setSelSpec(s=>({...s,innerColor:""}))} style={{padding:"5px 12px",border:"0.5px solid var(--bdr2)",fontSize:11,cursor:"pointer",background:"transparent",color:"var(--muted)"}}>不指定</button>
+          <button onClick={()=>setSelSpec(s=>({...s,innerColor:"特殊色"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.innerColor==="特殊色"?"var(--gold)":"transparent",color:selSpec.innerColor==="特殊色"?"var(--blk)":"var(--muted)",borderColor:selSpec.innerColor==="特殊色"?"var(--gold)":"var(--bdr)"}}>特殊色（洽業務）</button>
         </div>
-        {selSpec.innerColor==="其他"&&<input placeholder="請輸入內框顏色，例：香檳金" value={selSpec.customInnerColor||""} onChange={e=>setSelSpec(s=>({...s,customInnerColor:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}
+        {selSpec.innerColor==="特殊色"&&<div style={{marginTop:6,fontSize:10,color:"var(--gold)",background:"#fdf5e8",border:"0.5px solid var(--gold)",padding:"7px 10px",lineHeight:1.7}}>⚠ 特殊顏色需與業務確認可行性，送出詢價後業務將主動聯繫。</div>}
       </div>
     </div>
   </div>):null}
@@ -3314,7 +3311,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
       <button onClick={()=>setSelSpec(s=>({...s,cct:"其他"}))} style={{padding:"5px 12px",border:"0.5px solid",fontSize:12,cursor:"pointer",background:selSpec.cct==="其他"?"var(--gold)":"transparent",color:selSpec.cct==="其他"?"var(--blk)":"var(--muted)",borderColor:selSpec.cct==="其他"?"var(--gold)":"var(--bdr)"}}>其他色溫</button>
     </div>
     {selSpec.cct==="其他"&&<input placeholder="請輸入色溫，例：3500K、Ra≥95" value={selSpec.customCct||""} onChange={e=>setSelSpec(s=>({...s,customCct:e.target.value}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}} maxLength={40}/>}
-    <div style={{fontSize:9,color:"var(--muted)",marginTop:4,lineHeight:1.6}}>若需特殊色溫請選「其他色溫」填入，業務確認後回覆可行性</div>
+    <div style={{fontSize:9,color:"var(--muted)",marginTop:4,lineHeight:1.6}}>⚠ 特殊色溫（非2700K/3000K/4000K）交期將多1-3週，業務確認後回覆可行性。</div>
   </div>):null}
 </div>
 {selProd.specOptions&&(typeof selProd.specOptions==="object"?Object.entries(selProd.specOptions):String(selProd.specOptions).trim().split("\n").filter(Boolean).map(line=>{const[k,v]=line.split(":").map(s=>s.trim());return[k,v?.split("/").map(s=>s.trim()).filter(Boolean)||[]]; })).filter(([k,v])=>Array.isArray(v)&&v.length>0).map(([label,options])=>(<div key={label} style={{marginBottom:12}}><div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>{label}</div><div style={{position:"relative"}}><select value={selSpec.customSpecs?.[label]||""} onChange={e=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label]:e.target.value}}))} style={{width:"100%",padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"var(--ivory2)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)",cursor:"pointer",appearance:"none"}}><option value="">請選擇{label}</option>{options.map(opt=>(<option key={opt} value={opt}>{opt}</option>))}{!options.includes("其他")&&<option value="其他">其他（自行填寫）</option>}</select></div>{selSpec.customSpecs?.[label]==="其他"&&<input placeholder={`請輸入${label}`} value={selSpec.customSpecs?.[label+"_custom"]||""} onChange={e=>setSelSpec(s=>({...s,customSpecs:{...s.customSpecs,[label+"_custom"]:e.target.value}}))} style={{marginTop:6,width:"100%",padding:"7px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,outline:"none",color:"var(--blk)"}}/>}</div>))}
