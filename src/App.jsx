@@ -2470,8 +2470,9 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <span style={{fontSize:10,color:"var(--muted)",letterSpacing:2}}>{filtered.length} 件</span>
             </div>
           </div>
-          {/* ✅ 設計公司橫幅 */}
+ {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
+          <div className="hint-box">💡 點擊產品卡片查看規格 → 選擇色溫、光束角、顏色 → 點「加入詢價單」→ 右上角詢價單下載報價。</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 12px",alignItems:"center"}}>
            <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
   <option value="">所有系列</option>
