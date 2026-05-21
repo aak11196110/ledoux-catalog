@@ -2555,7 +2555,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div className="inv-stat"><div className="inv-stat-num">{invAvail.toLocaleString()}</div><div className="inv-stat-lbl">可調貨數量</div></div>
             <div className="inv-stat"><div className="inv-stat-num">{inventory.length}</div><div className="inv-stat-lbl">品項數 SKU</div></div>
           </div>
-          <div className="inv-catbar"><button className={`inv-catbtn ${invCat==="全部"&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat("全部");setInvSeriesF(null);}}>全部</button>{allInvCats.filter(c=>c!=="全部").map(c=><button key={c} className={`inv-catbtn ${invCat===c&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat(c);setInvSeriesF(null);}}>{c}</button>)}{[...new Set(inventory.map(i=>i.series).filter(Boolean))].map(s=><button key={s} className={`inv-catbtn ${invSeriesF===s?"on":""}`} onClick={()=>{setInvSeriesF(s);setInvCat("全部");}} style={{color:"var(--gold)"}}>{s}</button>)}</div>
+          <div className="inv-catbar">`inv-catbtn ${invCat==="全部"&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat("全部");setInvSeriesF(null);}}>全部</button>{allInvCats.filter(c=>c!=="全部").map(c=><button key={c} className={`inv-catbtn ${invCat===c&&!invSeriesF?"on":""}`} onClick={()=>{setInvCat(c);setInvSeriesF(null);}}>{c}</button>)}{[...new Set(inventory.map(i=>i.series).filter(Boolean))].map(s=><button key={s} className={`inv-catbtn ${invSeriesF===s?"on":""}`} onClick={()=>{setInvSeriesF(s);setInvCat("全部");}} style={{color:"var(--gold)"}}>{s}</button>)}</div>
 <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"10px 0 16px",alignItems:"center"}}>
   <select value={invSeriesF||""} onChange={e=>setInvSeriesF(e.target.value||null)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",cursor:"pointer"}}>
     <option value="">所有系列</option>
@@ -2978,7 +2978,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
     </select>
     {(seriesF||cat!=="全部")&&<button onClick={()=>{setSeriesF(null);setCat("全部");}} style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:10,color:"var(--muted)",cursor:"pointer"}}>清除篩選</button>}
   </div>
-  <div className="pgrid">{products.filter(p=>(!seriesF||p.series===seriesF)&&(cat==="全部"||p.category===cat)).map(p=>(<div key={p.id} className="pcard"><div className="pcard-img" onClick={()=>setSelProd(p)} style={{cursor:"pointer"}}>{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div><div className="pcard-body"><div className="pcard-series">{p.series}</div><div className="pcard-model">{p.model}</div><div className="pcard-tags">{p.watt&&<span className="ptag">{p.watt}</span>}{p.beam&&<span className="ptag">{p.beam}</span>}</div><button className={`btn-samp ${sampCart.find(i=>i.id===p.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===p.id)?removeSamp(p.id):addToSamp(p)}>{sampCart.find(i=>i.id===p.id)?"已加入":"申請樣品"}</button></div></div>))}</div>
+  <div className="pgrid">{products.filter(p=>(!seriesF||p.series===seriesF)&&(cat==="全部"||p.category===cat)).map(p=>(<div key={p.id} className="pcard"><div className="pcard-img" onClick={()=>setSelProd(p)} style={{cursor:"pointer"}}>{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div><div className="pcard-body"><div className="pcard-series">{p.series}</div><div className="pcard-model">{p.model}</div><div className="pcard-tags">{p.watt&&<span className="ptag">{p.watt}</span>}{p.beam&&<span className="ptag">{p.beam}</span>}</div>`btn-samp ${sampCart.find(i=>i.id===p.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===p.id)?removeSamp(p.id):addToSamp(p)}>{sampCart.find(i=>i.id===p.id)?"已加入":"申請樣品"}</button></div></div>))}</div>
         </>}
 
         {/* ══ 安裝服務 ══ */}
@@ -3341,7 +3341,6 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             </div>
             <div className="drawer-actions">
               <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
-              <button className={`btn-samp ${sampCart.find(i=>i.id===selProd.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===selProd.id)?removeSamp(selProd.id):addToSamp(selProd)}>{sampCart.find(i=>i.id===selProd.id)?"已申請樣品":"申請樣品"}</button>
             </div>
           </div>
         </div>
