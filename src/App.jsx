@@ -3340,8 +3340,6 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
             <div className="drawer-actions">
-              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
-              <button className={`btn-samp ${sampCart.find(i=>i.id===selProd.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===selProd.id)?removeSamp(selProd.id):addToSamp(selProd)}>{sampCart.find(i=>i.id===selProd.id)?"已申請樣品":"申請樣品"}</button>
             </div>
           </div>
         </div>
