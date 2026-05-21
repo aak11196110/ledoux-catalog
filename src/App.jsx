@@ -2951,10 +2951,11 @@ if(urgentData){
           </>}
         </>}
 
-  {/* ══ 借樣品 ══ */}
+        {/* ══ 借樣品 ══ */}
 {page==="sample"&&<>
-  <div className="phead"><div><div className="ptitle">借樣品</div><div className="psub">申請試用 — 歸還可折抵購買</div></div><button className="btn-add2" onClick={()=>setSampOpen(true)}>申請清單 ({sampCart.length})</button></div>
-  <div className="hint-box" style={{marginBottom:8}}>📋 借樣品說明：借用期限 <b>2 週</b>內歸還・樣品寄出預計 <b>1–3 個工作天</b>・<b>運費由申請方負擔</b></div>
+  <div className="phead"><div><div className="ptitle">借樣品</div><div className="psub">申請試用 — 2 週內歸還可折抵購買</div></div><button className="btn-add2" onClick={()=>setSampOpen(true)}>申請清單 ({sampCart.length})</button></div>
+  <div className="hint-box">從下方產品點選「申請樣品」加入清單後提交。</div>
+  <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 16px",alignItems:"center"}}>
     <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
       <option value="">所有系列</option>
       <optgroup label="── 商照燈系列 ──">{COMMERCIAL_SERIES.map(s=><option key={s} value={s}>{s}</option>)}</optgroup><optgroup label="── 線型燈系列 ──">{LINEAR_SERIES_LIST.map(s=><option key={s} value={s}>{s}</option>)}</optgroup>
@@ -2969,9 +2970,19 @@ if(urgentData){
       <option value="停產">停產</option>
     </select>
     {(seriesF||cat!=="全部")&&<button onClick={()=>{setSeriesF(null);setCat("全部");}} style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:10,color:"var(--muted)",cursor:"pointer"}}>清除篩選</button>}
-<div className="pgrid">{products.filter(p=>(!seriesF||p.series===seriesF)&&(cat==="全部"||p.category===cat)).map(p=>{const inv=sampleInv.find(s=>s.model===p.model&&s.hasSample==="有");const noSamp=!inv;return(<div key={p.id} className="pcard" style={{opacity:noSamp?0.55:1}}><div className="pcard-img" style={{position:"relative",cursor:noSamp?"default":"pointer"}} onClick={()=>!noSamp&&setSelProd(p)}>{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}{inv&&<span style={{position:"absolute",top:6,right:6,background:"var(--gold)",color:"#fff",fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:8,letterSpacing:1}}>在台有樣品</span>}{noSamp&&<div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:600,letterSpacing:1}}>在台目前無樣品</div>}</div><div className="pcard-body"><div className="pcard-series">{p.series}</div><div className="pcard-model">{p.model}</div><div className="pcard-tags">{p.watt&&<span className="ptag">{p.watt}</span>}{p.beam&&<span className="ptag">{p.beam}</span>}</div>{inv?<button className={`btn-samp ${sampCart.find(i=>i.id===p.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===p.id)?removeSamp(p.id):addToSamp(p)}>{sampCart.find(i=>i.id===p.id)?"已加入":"申請樣品"}</button>:<details style={{marginTop:6}}><summary style={{fontSize:10,color:"var(--muted)",cursor:"pointer"}}>請與業務聯繫</summary><div style={{fontSize:10,color:"var(--muted)",marginTop:4,lineHeight:1.8}}>請聯絡業務專員</div></details>}</div></div>);})}</div>
-          </>}
-        
+  </div>
+  <div className="pgrid">{products.filter(p=>(!seriesF||p.series===seriesF)&&(cat==="全部"||p.category===cat)).map(p=>(<div key={p.id} className="pcard"><div className="pcard-img" onClick={()=>setSelProd(p)} style={{cursor:"pointer"}}>{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div><div className="pcard-body"><div className="pcard-series">{p.series}</div><div className="pcard-model">{p.model}</div><div className="pcard-tags">{p.watt&&<span className="ptag">{p.watt}</span>}{p.beam&&<span className="ptag">{p.beam}</span>}</div><button className={`btn-samp ${sampCart.find(i=>i.id===p.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===p.id)?removeSamp(p.id):addToSamp(p)}>{sampCart.find(i=>i.id===p.id)?"已加入":"申請樣品"}</button></div></div>))}</div>
+        </>}
+
+        {/* ══ 安裝服務 ══ */}
+        {page==="install"&&<>
+          <div className="phead"><div><div className="ptitle">安裝服務</div><div className="psub">原廠技術安裝 · 崁燈 ＆ 線型間接照明</div></div><button className="btn-add2" onClick={()=>setInstOpen(true)}>立即估算費用</button></div>
+          {/* ✅ 設計公司橫幅 */}
+          <ProjBanner onContact={()=>setContactModal(true)}/>
+          <div className="hint-box" style={{marginBottom:20}}>
+            <strong style={{color:"var(--blk)",display:"block",marginBottom:5}}>重要服務前置條件</strong>
+            請業主於安裝前<strong>完成開孔、拉好電線至天花板預定位置</strong>。本服務提供燈具精準定位、安裝固定與功能測試，不含開孔、線路抽換、木作修補或補漆作業。出發地：桃園市八德區。
+          </div>
           {/* 重要前置條件 */}
           <div style={{background:"#fdf8ee",border:"0.5px solid var(--gold)",borderLeft:"3px solid var(--gold)",padding:"12px 16px",marginBottom:20,fontSize:12,lineHeight:1.9,color:"var(--blk)"}}>
             <strong style={{display:"block",marginBottom:5,letterSpacing:1}}>⚠ 安裝前必要條件（崁燈 ＆ 線型燈皆適用）</strong>
@@ -3376,7 +3387,8 @@ if(urgentData){
               {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
             <div className="drawer-actions">
-           <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
+              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
+              <button className={`btn-samp ${sampCart.find(i=>i.id===selProd.id)?"done":""}`} onClick={()=>sampCart.find(i=>i.id===selProd.id)?removeSamp(selProd.id):addToSamp(selProd)}>{sampCart.find(i=>i.id===selProd.id)?"已申請樣品":"申請樣品"}</button>
             </div>
           </div>
         </div>
