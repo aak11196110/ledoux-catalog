@@ -3339,7 +3339,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <div className="pb-label">牌價</div>
               {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
-            <div className="drawer-actions">
+<div className="drawer-actions">
+              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
             </div>
           </div>
         </div>
