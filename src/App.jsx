@@ -3223,7 +3223,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
             <div className="spec-grid">
-             {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+              {[["瓦數",selProd.watt],["流明",selProd.lumen],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+            </div>
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
   const s = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(x=>x.trim());
@@ -3512,7 +3513,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           </div>
           {instCalc&&instRegion&&<div style={{fontSize:11,color:"var(--muted)",marginBottom:8,padding:"7px 10px",background:"#f4efe8",borderLeft:"2px solid var(--gold)"}}>
             合計：{instCalc.totalQty||0} 盞 + {instCalc.totalMeters||0} 米 = {instCalc.totalUnits||0} 單位
-            {instCalc.reg?.freeAt&&<span style={{color:instCalc.totalUnits>=instCalc.reg.freeAt?"var(--green)":"var(--red)",marginLeft:8}}>{instCalc.totalUnits>=instCalc.reg.freeAt?`✓ 達免車馬費門檻`:`差 ${instCalc.reg.freeAt-instCalc.totalUnits} 單位可免車馬費`}</span>}
+            {instCalc.reg?.freeAt&&<span style={{color:instCalc.totalUnits>=instCalc.reg.freeAt?"var(--green)":"var(--red)",marginLeft:8}}>{instCalc.totalUnits>=instCalc.reg.freeAt?"✓ 達免車馬費門檻":`差 ${instCalc.reg.freeAt-instCalc.totalUnits} 單位可免車馬費`}</span>}
+          </div>}
           {(installChoice===true||installChoice===null)&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成 · 下載燈具＋安裝整合報價單</button>}
           <button className="btn-gold" disabled={!instRegion} onClick={()=>{
             if(!instRegion){toast$("請先選擇安裝區域");return;}
