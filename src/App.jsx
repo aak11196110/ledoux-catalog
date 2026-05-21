@@ -3223,7 +3223,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
             <div className="spec-grid">
-              {[["瓦數",selProd.watt],["流明",selProd.lumen],["光束角",selProd.beam],["電壓",selProd.voltage],["演色性",selProd.cri],["顏色",selProd.color],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+              {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
@@ -3256,8 +3256,9 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
     })}
   </div>
 )}
-            {selProd.note&&<div className="drawer-note">{selProd.note}</div>}
+            {selProd.note&&<div className="drawer-note"><div style={{fontSize:8,letterSpacing:2,textTransform:"uppercase",color:"var(--gold)",marginBottom:4}}>補充說明</div>{selProd.note}</div>}
             <div style={{margin:"14px 0",display:"flex",flexDirection:"column",gap:10}}>
+  <div style={{fontSize:10,color:"var(--muted)",background:"#f9f5ef",border:"0.5px solid var(--bdr)",padding:"7px 10px",lineHeight:1.7}}>💡 請選擇所需規格後點「加入詢價單」，業務將依規格回覆報價。</div>
   {/* 光束角選擇 + 其他 */}
   {selProd.beam&&selProd.beam.trim()?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>光束角</div>
