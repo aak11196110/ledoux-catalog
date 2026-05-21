@@ -2856,6 +2856,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
         {/* ══ 詢價單 ══ */}
         {page==="inquiry"&&<>
           <div className="phead"><div><div className="ptitle">詢價單</div><div className="psub">填寫案名後下載報價單</div></div></div>
+          <div className="hint-box">💡 步驟：① 從產品目錄加入產品 → ② 填寫案名 → ③ 勾選確認事項 → ④ 下載報價單。設計公司享有專案折扣，請聯繫業務。</div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
           {cart.length===0?<div className="empty">請至產品目錄加入品項</div>:<>
@@ -2984,6 +2985,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
         {/* ══ 安裝服務 ══ */}
         {page==="install"&&<>
           <div className="phead"><div><div className="ptitle">安裝服務</div><div className="psub">原廠技術安裝 · 崁燈 ＆ 線型間接照明</div></div><button className="btn-add2" onClick={()=>setInstOpen(true)}>立即估算費用</button></div>
+          <div className="hint-box">💡 安裝流程：① 點「立即估算費用」填寫需求 → ② 業務確認報價 → ③ 安排技師到府安裝。出發地：桃園市八德區。</div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
           <div className="hint-box" style={{marginBottom:20}}>
