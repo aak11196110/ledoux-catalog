@@ -2961,7 +2961,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
         {/* ══ 借樣品 ══ */}
 {page==="sample"&&<>
   <div className="phead"><div><div className="ptitle">借樣品</div><div className="psub">申請試用 — 2 週內歸還可折抵購買</div></div><button className="btn-add2" onClick={()=>setSampOpen(true)}>申請清單 ({sampCart.length})</button></div>
-  <div className="hint-box">從下方產品點選「申請樣品」加入清單後提交。</div>
+  <div className="hint-box">📋 借樣品說明：借用期限 <b>2 週</b>內歸還・樣品寄出預計 <b>1–3 個工作天</b>・<b>運費由申請方負擔</b></div>
   <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"0 0 16px",alignItems:"center"}}>
     <select value={seriesF||""} onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
       <option value="">所有系列</option>
