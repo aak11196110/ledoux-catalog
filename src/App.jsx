@@ -2359,7 +2359,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
       <div className="content">
 
         {/* ══ 電子型錄 ══ */}
-        {page==="ecatalog"&&<>
+     {page==="ecatalog"&&<>
+          <div className="hint-box">💡 點擊下方型錄封面即可開啟完整電子型錄（新分頁），可下載儲存或分享給客戶。</div>
           <div className="cat-hero">
             <div className="cat-hero-eyebrow">
               <div className="cat-hero-line"/>
@@ -2708,10 +2709,11 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
   <div className="phead">
     <div>
       <div className="ptitle">預約到府產品介紹</div>
-      <div className="psub">專人攜帶實體樣品親赴現場說明</div>
+     <div className="psub">專人攜帶實體樣品親赴現場說明</div>
     </div>
   </div>
-  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:"var(--bdr2)",border:"0.5px solid var(--bdr2)",marginBottom:28}}>
+  <div className="hint-box">💡 預約流程：① 填寫下方表單選擇時間 → ② 業務確認並回覆 → ③ 專人攜帶樣品到府說明。服務範圍：桃竹苗、雙北、宜蘭。</div>
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"
     {[
       ["🚗 到府服務","業務攜帶實體樣品親赴您的現場，針對您的空間一對一說明"],
       ["💡 專業選燈","根據您的空間條件、預算與風格，提供最適合的照明配置建議"],
@@ -2823,6 +2825,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
 </>}
         {page==="design"&&<>
           <div className="phead"><div><div className="ptitle">照明設計配燈服務</div><div className="psub">專業規劃 · 預算最適化</div></div></div>
+          <div className="hint-box">💡 服務流程：① 填寫空間需求表單 → ② 業務與設計師討論配燈方案 → ③ 提供燈具清單與報價。適合新建案、裝修工程。</div>
           <div style={{background:"linear-gradient(135deg,#0e0d0c,#1a1612)",padding:"32px 36px",marginBottom:28,position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 70% 50%,rgba(184,147,90,.08),transparent 60%)"}}/>
             <div style={{fontSize:"7px",letterSpacing:"5px",textTransform:"uppercase",color:"var(--gold)",marginBottom:12,position:"relative",zIndex:1}}>服務說明</div>
