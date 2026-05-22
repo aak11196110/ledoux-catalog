@@ -649,10 +649,10 @@
       <label class="form-label">產品圖片（主圖）</label>
       <input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()">
       <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <label style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px">
+        <input type="file" id="crop-file-main" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
+        <button type="button" onclick="document.getElementById('crop-file-main').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none">
           ✂️ 上傳並裁切 (1:1)
-          <input type="file" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
-        </label>
+        </button>
         <span style="font-size:10px;color:var(--muted)">裁切後自動上傳至 ImgBB</span>
       </div>
       <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
@@ -661,10 +661,10 @@
       <label class="form-label">產品尺寸圖</label>
       <input class="form-input" id="p-dimimg" placeholder="https://...（外觀尺寸示意圖）" oninput="prevDimImg()">
       <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <label style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px">
+        <input type="file" id="crop-file-dim" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
+        <button type="button" onclick="document.getElementById('crop-file-dim').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none">
           ✂️ 上傳並裁切 (1:1)
-          <input type="file" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
-        </label>
+        </button>
         <span style="font-size:10px;color:var(--muted)">產品外觀尺寸圖</span>
       </div>
       <div id="p-dimimg-prev" style="display:none;margin-top:8px"><img id="p-dimimg-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
