@@ -1018,44 +1018,46 @@ async function _uploadToImgBB(base64, targetId) {
 let _crop = {targetId:null,img:null,nW:0,nH:0,dW:0,dH:0,sc:1,x:0,y:0,size:0,drag:false,sx:0,sy:0,ox:0,oy:0};
 
 function openCropperFromFile(file, targetId) {
-  if (!file) { toast('未偵測到檔案'); return; }
-  if (!file.type.startsWith('image/')) { toast('請選擇圖片檔案'); return; }
+  if (!file) { toast('未選擇檔案'); return; }
+  if (!file.type.startsWith('image/')) { toast('請選擇圖片格式'); return; }
+  const blob = file.slice(0);
   const reader = new FileReader();
-  reader.onerror = () => toast('讀取檔案失敗');
-  reader.onload = e => _startCrop(e.target.result, targetId);
-  reader.readAsDataURL(file);
+  reader.onerror = e => toast('讀取失敗：' + e);
+  reader.onload = function(e) {
+    const src = e.target.result;
+    const img = new Image();
+    img.onerror = () => toast('圖片載入失敗');
+    img.onload = () => _startCropWithImg(img, src, targetId);
+    img.src = src;
+  };
+  reader.readAsDataURL(blob);
 }
 
-function _startCrop(src, targetId) {
+function _startCropWithImg(img, src, targetId) {
   _crop.targetId = targetId;
-  const img = new Image();
-  img.onload = () => {
-    _crop.img = img;
-    _crop.nW = img.naturalWidth;
-    _crop.nH = img.naturalHeight;
-    const maxW = Math.min(580, window.innerWidth - 80);
-    const maxH = Math.min(420, window.innerHeight - 240);
-    const sc = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
-    _crop.dW = Math.round(img.naturalWidth * sc);
-    _crop.dH = Math.round(img.naturalHeight * sc);
-    _crop.sc = sc;
-    const wrap = document.getElementById('crop-img-wrap');
-    wrap.style.width = _crop.dW + 'px';
-    wrap.style.height = _crop.dH + 'px';
-    const bgImg = document.getElementById('crop-bg-img');
-    bgImg.src = src;
-    bgImg.style.width = _crop.dW + 'px';
-    bgImg.style.height = _crop.dH + 'px';
-    const minDim = Math.min(_crop.dW, _crop.dH);
-    _crop.size = Math.round(minDim * 0.85);
-    _crop.x = Math.round((_crop.dW - _crop.size) / 2);
-    _crop.y = Math.round((_crop.dH - _crop.size) / 2);
-    _updateCrop();
-    const cm = document.getElementById('crop-modal');
-    cm.removeAttribute('hidden');
-    cm.style.setProperty('display','flex','important');
-  };
-  img.src = src;
+  _crop.img = img;
+  _crop.nW = img.naturalWidth;
+  _crop.nH = img.naturalHeight;
+  const maxW = Math.min(580, window.innerWidth - 80);
+  const maxH = Math.min(420, window.innerHeight - 240);
+  const sc = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+  _crop.dW = Math.round(img.naturalWidth * sc);
+  _crop.dH = Math.round(img.naturalHeight * sc);
+  _crop.sc = sc;
+  const wrap = document.getElementById('crop-img-wrap');
+  wrap.style.width = _crop.dW + 'px';
+  wrap.style.height = _crop.dH + 'px';
+  const bgImg = document.getElementById('crop-bg-img');
+  bgImg.src = src;
+  bgImg.style.width = _crop.dW + 'px';
+  bgImg.style.height = _crop.dH + 'px';
+  const minDim = Math.min(_crop.dW, _crop.dH);
+  _crop.size = Math.round(minDim * 0.85);
+  _crop.x = Math.round((_crop.dW - _crop.size) / 2);
+  _crop.y = Math.round((_crop.dH - _crop.size) / 2);
+  _updateCrop();
+  const cm = document.getElementById('crop-modal');
+  cm.style.setProperty('display','flex','important');
 }
 
 function _updateCrop() {
