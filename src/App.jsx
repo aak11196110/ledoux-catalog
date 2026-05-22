@@ -3227,7 +3227,6 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
       {selProd&&<div className="drawer-overlay" onClick={()=>setSelProd(null)}>
         <div className="drawer" onClick={e=>e.stopPropagation()}>
           <div className="drawer-top"><div className="drawer-series">{selProd.series} — {selProd.category}</div><button className="close-btn" onClick={()=>setSelProd(null)}><CloseIcon/></button></div>
-          <Carousel images={selProd.images} onZoom={src=>setLightboxSrc(src)}/>
           <div className="drawer-body">
             <div className="drawer-model">{selProd.model}</div>
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
@@ -3235,6 +3234,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div className="spec-grid">
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
+                     <Carousel images={selProd.images} onZoom={src=>setLightboxSrc(src)}/>
 {selProd.dimImg&&(
   <div style={{marginBottom:16,paddingTop:14,borderTop:"0.5px solid var(--bdr2)"}}>
     <div style={{fontSize:8,letterSpacing:3,textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>尺寸圖</div>
