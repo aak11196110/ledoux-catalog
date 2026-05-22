@@ -157,6 +157,12 @@
     .dash-2col { grid-template-columns: 1fr; }
     .mobile-btn { display: block !important; }
   }
+
+  /* CROP MODAL */
+  .crop-img-wrap { position:relative;overflow:hidden;cursor:move;user-select:none;touch-action:none;border:0.5px solid var(--bdr); }
+  .crop-box { position:absolute;border:2px dashed rgba(255,255,255,0.9);box-shadow:0 0 0 1px rgba(0,0,0,0.5);box-sizing:border-box;pointer-events:none; }
+  .crop-box-grid { position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr; }
+  .crop-box-grid > div { border:0.5px solid rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
@@ -639,8 +645,30 @@
       <div class="form-group"><label class="form-label">演色性 CRI</label><input class="form-input" id="p-cri" placeholder="Ra90,Ra95"></div>
     </div>
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
- <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()"><div style="margin-top:6px"><label style="display:inline-block;padding:8px 18px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;border:none">📷 上傳圖片到 ImgBB<input type="file" accept="image/*" style="display:none" onchange="uploadImgBB(this,'p-img')"></label></div><div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div></div> 
+    <div class="form-group">
+      <label class="form-label">產品圖片（主圖）</label>
+      <input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()">
+      <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px">
+          ✂️ 上傳並裁切 (1:1)
+          <input type="file" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
+        </label>
+        <span style="font-size:10px;color:var(--muted)">裁切後自動上傳至 ImgBB</span>
+      </div>
       <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">產品尺寸圖</label>
+      <input class="form-input" id="p-dimimg" placeholder="https://...（外觀尺寸示意圖）" oninput="prevDimImg()">
+      <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px">
+          ✂️ 上傳並裁切 (1:1)
+          <input type="file" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
+        </label>
+        <span style="font-size:10px;color:var(--muted)">產品外觀尺寸圖</span>
+      </div>
+      <div id="p-dimimg-prev" style="display:none;margin-top:8px"><img id="p-dimimg-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
+    </div>
 <div style="border:0.5px solid var(--bdr);padding:16px;margin-bottom:8px">
   <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">規格選項（多個選項用 / 分隔）</div>
   <div class="form-row">
@@ -813,6 +841,34 @@
   </div>
 </div></div>
 
+<!-- 裁切 Modal -->
+<div id="crop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--wht);max-width:680px;width:100%;max-height:90vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--blk);flex-shrink:0">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);letter-spacing:3px">圖片裁切 · 1:1</div>
+      <button onclick="closeCropper()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px;overflow:auto">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase">拖曳方框選擇裁切範圍</div>
+      <div id="crop-img-wrap" class="crop-img-wrap"
+           onmousedown="cropMouseDown(event)" ontouchstart="cropMouseDown(event)">
+        <img id="crop-bg-img" style="display:block;user-select:none;pointer-events:none" draggable="false">
+        <div id="crop-ov-t"></div>
+        <div id="crop-ov-b"></div>
+        <div id="crop-ov-l"></div>
+        <div id="crop-ov-r"></div>
+        <div id="crop-box" class="crop-box">
+          <div class="crop-box-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;padding:14px 18px;border-top:0.5px solid var(--bdr);flex-shrink:0">
+      <button class="btn btn-outline" onclick="closeCropper()">取消</button>
+      <button class="btn btn-gold" onclick="confirmCrop()">✓ 確認裁切並上傳</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════
 //  LEDOUX 管理後台 · 無登入版 v2.0
@@ -910,16 +966,17 @@ function editProd(id){
  fv('p-watt',p.watt||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
 fv('p-cri',p.cri||'');fv('p-desc',p.desc||'');
 fv('p-img',(p.images&&p.images[0])||'');
+fv('p-dimimg',p.dimImg||'');
 fv('p-cct',p.cct||'');fv('p-beam',p.beam||'');fv('p-outerColor',p.outerColor||'');fv('p-innerColor',p.innerColor||'');fv('p-color',p.color||'');fv('p-voltage',p.voltage||'');fv('p-addon',Array.isArray(p.addon)?p.addon.join('/'):p.addon||'');
-prevImg();showM('modal-prod');
+prevImg();prevDimImg();showM('modal-prod');
 }
- function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';}
+ function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
     watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,
-cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],
+cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],dimImg:v('p-dimimg'),
 catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
 cct:v('p-cct'),
 beam:v('p-beam'),
@@ -938,49 +995,124 @@ async function delProd(id,name){
   D.products=D.products.filter(x=>String(x.id)!==String(id));
   rProd();await apiPost('deleteProduct',{id});toast('✓ 已刪除');
 }
-async function uploadImgBB(input, targetId) {
-  const file = input.files[0];
-  if (!file) return;
+// ── 圖片預覽 ──
+function prevImg(){const u=v('p-img');const prev=g('p-prev');if(u){g('p-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
+function prevDimImg(){const u=v('p-dimimg');const prev=g('p-dimimg-prev');if(u){g('p-dimimg-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
+
+// ── ImgBB 上傳（base64）──
+async function _uploadToImgBB(base64, targetId) {
   const fd = new FormData();
-  fd.append('image', file);
+  fd.append('image', base64);
   fd.append('key', 'e839f19ca87063763e8e6b4699d9f83f');
+  const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById(targetId).value = data.data.url;
+    if (targetId === 'p-img') prevImg();
+    else if (targetId === 'p-dimimg') prevDimImg();
+    toast('✓ 圖片裁切上傳成功');
+  } else {
+    toast('上傳失敗，請重試');
+  }
+}
+
+// ── 裁切器 ──
+let _crop = {targetId:null,img:null,nW:0,nH:0,dW:0,dH:0,sc:1,x:0,y:0,size:0,drag:false,sx:0,sy:0,ox:0,oy:0};
+
+function openCropperFromFile(file, targetId) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => _startCrop(e.target.result, targetId);
+  reader.readAsDataURL(file);
+}
+
+function _startCrop(src, targetId) {
+  _crop.targetId = targetId;
+  const img = new Image();
+  img.onload = () => {
+    _crop.img = img;
+    _crop.nW = img.naturalWidth;
+    _crop.nH = img.naturalHeight;
+    const maxW = Math.min(580, window.innerWidth - 80);
+    const maxH = Math.min(420, window.innerHeight - 240);
+    const sc = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+    _crop.dW = Math.round(img.naturalWidth * sc);
+    _crop.dH = Math.round(img.naturalHeight * sc);
+    _crop.sc = sc;
+    const wrap = document.getElementById('crop-img-wrap');
+    wrap.style.width = _crop.dW + 'px';
+    wrap.style.height = _crop.dH + 'px';
+    const bgImg = document.getElementById('crop-bg-img');
+    bgImg.src = src;
+    bgImg.style.width = _crop.dW + 'px';
+    bgImg.style.height = _crop.dH + 'px';
+    const minDim = Math.min(_crop.dW, _crop.dH);
+    _crop.size = Math.round(minDim * 0.85);
+    _crop.x = Math.round((_crop.dW - _crop.size) / 2);
+    _crop.y = Math.round((_crop.dH - _crop.size) / 2);
+    _updateCrop();
+    document.getElementById('crop-modal').style.display = 'flex';
+  };
+  img.src = src;
+}
+
+function _updateCrop() {
+  const {x,y,size,dW,dH} = _crop;
+  const box = document.getElementById('crop-box');
+  box.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;border:2px dashed rgba(255,255,255,0.9);box-shadow:0 0 0 1px rgba(0,0,0,0.5);box-sizing:border-box;pointer-events:none`;
+  document.getElementById('crop-ov-t').style.cssText = `position:absolute;top:0;left:0;right:0;height:${y}px;background:rgba(0,0,0,0.55)`;
+  document.getElementById('crop-ov-b').style.cssText = `position:absolute;left:0;right:0;top:${y+size}px;bottom:0;background:rgba(0,0,0,0.55)`;
+  document.getElementById('crop-ov-l').style.cssText = `position:absolute;left:0;width:${x}px;top:${y}px;height:${size}px;background:rgba(0,0,0,0.55)`;
+  document.getElementById('crop-ov-r').style.cssText = `position:absolute;left:${x+size}px;right:0;top:${y}px;height:${size}px;background:rgba(0,0,0,0.55)`;
+}
+
+function cropMouseDown(e) {
+  e.preventDefault();
+  _crop.drag = true;
+  const rect = document.getElementById('crop-img-wrap').getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  _crop.sx = cx - rect.left;
+  _crop.sy = cy - rect.top;
+  _crop.ox = _crop.x;
+  _crop.oy = _crop.y;
+}
+document.addEventListener('mousemove', e => {
+  if (!_crop.drag) return;
+  const rect = document.getElementById('crop-img-wrap').getBoundingClientRect();
+  _crop.x = Math.max(0, Math.min(_crop.ox + (e.clientX - rect.left) - _crop.sx, _crop.dW - _crop.size));
+  _crop.y = Math.max(0, Math.min(_crop.oy + (e.clientY - rect.top) - _crop.sy, _crop.dH - _crop.size));
+  _updateCrop();
+});
+document.addEventListener('touchmove', e => {
+  if (!_crop.drag) return;
+  e.preventDefault();
+  const rect = document.getElementById('crop-img-wrap').getBoundingClientRect();
+  _crop.x = Math.max(0, Math.min(_crop.ox + (e.touches[0].clientX - rect.left) - _crop.sx, _crop.dW - _crop.size));
+  _crop.y = Math.max(0, Math.min(_crop.oy + (e.touches[0].clientY - rect.top) - _crop.sy, _crop.dH - _crop.size));
+  _updateCrop();
+}, {passive:false});
+document.addEventListener('mouseup', () => { _crop.drag = false; });
+document.addEventListener('touchend', () => { _crop.drag = false; });
+
+function closeCropper() {
+  document.getElementById('crop-modal').style.display = 'none';
+}
+
+async function confirmCrop() {
+  const {img, x, y, size, sc} = _crop;
+  const canvas = document.createElement('canvas');
+  canvas.width = 800; canvas.height = 800;
+  canvas.getContext('2d').drawImage(img, x/sc, y/sc, size/sc, size/sc, 0, 0, 800, 800);
+  const base64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+  closeCropper();
   toast('圖片上傳中...');
   try {
-    const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById(targetId).value = data.data.url;
-      prevImg();
-      toast('✓ 圖片上傳成功');
-    } else {
-      toast('上傳失敗，請重試');
-    }
+    await _uploadToImgBB(base64, _crop.targetId);
   } catch(e) {
     toast('上傳錯誤：' + e.message);
   }
 }
-  async function uploadImgBB(input, targetId) {
-  const file = input.files[0];
-  if (!file) return;
-  const fd = new FormData();
-  fd.append('image', file);
-  fd.append('key', 'e839f19ca87063763e8e6b4699d9f83f');
-  toast('圖片上傳中...');
-  try {
-    const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById(targetId).value = data.data.url;
-      prevImg();
-      toast('✓ 圖片上傳成功');
-    } else {
-      toast('上傳失敗，請重試');
-    }
-  } catch(e) {
-    toast('上傳錯誤：' + e.message);
-  }
-}
-  function prevImg(){const u=v('p-img');const prev=g('p-prev');if(u){g('p-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
 
 // INVENTORY
 function rInv(){
