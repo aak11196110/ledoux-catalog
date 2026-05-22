@@ -995,6 +995,22 @@ async function delProd(id,name){
 function prevImg(){const u=v('p-img');const prev=g('p-prev');if(u){g('p-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
 function prevDimImg(){const u=v('p-dimimg');const prev=g('p-dimimg-prev');if(u){g('p-dimimg-prev-img').src=u;prev.style.display='block';}else prev.style.display='none';}
 
+// ── 直接上傳（不裁切）──
+async function directUpload(file, targetId) {
+  if (!file) return;
+  toast('上傳中...');
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64 = e.target.result.split(',')[1];
+    try {
+      await _uploadToImgBB(base64, targetId);
+    } catch(err) {
+      toast('上傳失敗：' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
 // ── ImgBB 上傳（base64）──
 async function _uploadToImgBB(base64, targetId) {
   const fd = new FormData();
