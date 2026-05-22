@@ -12,7 +12,8 @@
       "Bash(npm run *)",
       "Bash(npx vite *)",
       "Bash(ping -n 4 127.0.0.1)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(git rm *)"
     ]
   }
 }
