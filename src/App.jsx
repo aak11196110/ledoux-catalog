@@ -727,7 +727,7 @@ function ProjBanner({onContact}) {
   );
 }
 
-function generatePDF({cart, projectName, customer, installCalc=null, isVip, discountRate=1, discountLabel="", orderType="", urgentData=null}) {
+function generatePDF({cart, projectName, customer, installCalc=null, isVip, discountRate=1, discountLabel="", orderType="", urgentData=null, customIds={}}) {
   const today = new Date();
   const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
   const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`;
@@ -755,7 +755,7 @@ const priceLabel = discountRate < 1 ? `折扣價` : "建議牌價";
     return `<tr>
       <td style="text-align:center;padding:8px 5px;">${i+1}</td>
       <td style="text-align:center;padding:5px;">${imgHtml}</td>
-      <td style="padding:8px 6px;font-weight:500;">${p.model}</td>
+      <td style="padding:8px 6px;font-weight:500;">${customIds[item._key]?`<span style="font-size:9px;color:#888;margin-right:4px;">[${customIds[item._key]}]</span>`:""}${p.model}</td>
       <td style="padding:8px 6px;font-size:10px;color:#555;">${desc}${specNote?`<br><span style="color:#9b3a3a;font-size:9px;">${specNote}</span>`:""}</td>
       <td style="text-align:center;padding:8px 5px;">${item.qty}</td>
       <td style="text-align:center;padding:8px 5px;">盞</td>
@@ -1474,6 +1474,9 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [sampOpen,   setSampOpen]   = useState(false);
   const [instOpen,   setInstOpen]   = useState(false);
   const [cart,       setCart]       = useState([]);
+  const [customIds,  setCustomIds]  = useState({});
+  const [drawerMeters,  setDrawerMeters]  = useState("");
+  const [drawerSpaceId, setDrawerSpaceId] = useState("");
   const [sampCart,   setSampCart]   = useState([]);
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
@@ -1586,7 +1589,7 @@ if (partsData?.length > 0) setAllParts(partsData);
     })();
   }, [sheetUrl]);
 useEffect(()=>{
-  if(selProd) setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}});
+  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); }
 }, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
@@ -1872,7 +1875,7 @@ const filteredInv = inventory.filter(i=>
   const doPdfDownload = (customer) => {
     // 整合報價單：燈具（含折扣）+ 安裝費（若有）合為一份 PDF
     const installData = (installChoice===true && instRegion && instCalc) ? {instCalc,instRegion,instGroups,linearGroups,linearMeters,instNote,installTypes} : null;
- generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel,orderType,urgentData:urgentSupport&&urgentRegion?URGENT_REGIONS.find(r=>r.id===urgentRegion):null});
+ generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel,orderType,urgentData:urgentSupport&&urgentRegion?URGENT_REGIONS.find(r=>r.id===urgentRegion):null,customIds});
     const baseSubtotal=cart.reduce((s,i)=>s+(Number(i.product.stdPrice)||0)*i.qty,0);
     const lampSubtotal=Math.round(baseSubtotal*discountRate);
     if(sheetUrl){
@@ -3422,8 +3425,28 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <div className="pb-label">牌價</div>
               {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
+{selProd&&(selProd.voltage?.includes("DC24V")||selProd.voltage?.includes("DC48V"))&&selProd.watt_per_meter&&(
+  <div style={{background:"#f9f5ef",border:"0.5px solid var(--bdr)",padding:"12px 14px",marginBottom:10,borderRadius:2}}>
+    <div style={{fontSize:9,letterSpacing:2,textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>線型燈安裝資訊</div>
+    <input value={drawerSpaceId} onChange={e=>setDrawerSpaceId(e.target.value)} placeholder="空間編號（例如：客廳A）"
+      style={{width:"100%",padding:"6px 9px",border:"0.5px solid var(--bdr)",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",outline:"none",background:"transparent",marginBottom:8}}/>
+    <input type="number" step="0.1" min="0" value={drawerMeters} onChange={e=>setDrawerMeters(e.target.value)} placeholder="輸入米數"
+      style={{width:"100%",padding:"6px 9px",border:"0.5px solid var(--bdr)",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",outline:"none",background:"transparent"}}/>
+    {drawerMeters&&parseFloat(drawerMeters)>0&&(<div style={{marginTop:8,fontSize:11,color:"var(--blk)"}}>
+      建議驅動器：≥ <b>{Math.ceil(parseFloat(drawerMeters)*selProd.watt_per_meter*1.3)} W</b>
+    </div>)}
+    {selProd.voltage?.includes("DC24V")&&parseFloat(drawerMeters)>5&&(
+      <div style={{marginTop:6,fontSize:11,color:"var(--red)",fontWeight:500}}>⚠️ 單回路最長5米，建議拆成多條串聯</div>
+    )}
+  </div>
+)}
 <div className="drawer-actions">
-              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>addToCart(selProd, selSpec)}>加入詢價單</button>
+              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>{
+                const extraSpec={};
+                if(drawerMeters&&parseFloat(drawerMeters)>0) extraSpec.meters=parseFloat(drawerMeters);
+                if(drawerSpaceId.trim()) extraSpec.spaceId=drawerSpaceId.trim();
+                addToCart(selProd,{...selSpec,...extraSpec});
+              }}>加入詢價單</button>
             </div>
           </div>
         </div>
@@ -3462,7 +3485,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             const innerDisplay=sp.innerColor&&sp.innerColor!=="其他"?sp.innerColor:sp.innerColor==="其他"?(sp.customInnerColor||"特殊內框"):"";
             const colorDisplay=[outerDisplay&&`外框:${outerDisplay}`,innerDisplay&&`內框:${innerDisplay}`].filter(Boolean).join(" / ")||sp.color;
             const specLine=[cctDisplay,beamDisplay,colorDisplay].filter(Boolean).join(" · ");
-            return(<div key={item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div className="ci-model">{item.product.model}</div><div className="ci-sub">{item.product.series} · {item.product.watt}</div>{specLine&&<div style={{fontSize:10,color:"var(--muted)",marginTop:2,lineHeight:1.5}}>{specLine}</div>}<div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
+            return(<div key={item._key||item.product.id} className="ci-row"><div className="ci-img">{item.product.images?.[0]?<img src={item.product.images[0]} alt=""/>:<PlaceholderIcon/>}</div><div className="ci-info"><div style={{display:"flex",alignItems:"center",gap:5,marginBottom:2}}><input value={customIds[item._key]||""} onChange={e=>setCustomIds(m=>({...m,[item._key]:e.target.value}))} placeholder="自訂編號" style={{width:80,padding:"2px 6px",border:"0.5px solid var(--bdr)",fontSize:10,fontFamily:"'Noto Sans TC',sans-serif",outline:"none",background:"transparent",color:"var(--blk)"}}/><div className="ci-model">{item.product.model}</div></div><div className="ci-sub">{item.product.series} · {item.product.watt}</div>{specLine&&<div style={{fontSize:10,color:"var(--muted)",marginTop:2,lineHeight:1.5}}>{specLine}</div>}<div className="ci-qty"><button className="qty-btn" onClick={()=>updateQty(item.product.id,-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button className="qty-btn" onClick={()=>updateQty(item.product.id,1)}>+</button><span className="ci-price" style={{marginLeft:7}}>{price>0?`NT$ ${(price*item.qty).toLocaleString()}`:"—"}</span></div></div><button className="ci-del" onClick={()=>removeItem(item.product.id)}><CloseIcon/></button></div>);})}
         </div>
         {cart.length>0&&<div className="sp-foot">
           <div className="cart-total"><span className="cart-total-lbl">小計</span><span className="cart-total-val">NT$ {cartTotal.toLocaleString()}</span></div>
