@@ -649,7 +649,6 @@
       <label class="form-label">產品圖片（主圖）</label>
       <div style="border:0.5px solid var(--bdr);padding:12px;background:#faf8f5;margin-bottom:8px">
         <div style="font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">STEP 1 · 選圖裁切</div>
-        <input type="file" id="crop-file-main" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
         <button type="button" onclick="document.getElementById('crop-file-main').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">✂️ 選圖裁切</button>
         <div id="p-prev" style="display:none;margin-top:8px;position:relative">
           <img id="p-prev-img" style="max-height:120px;max-width:100%;border:0.5px solid var(--bdr);display:block">
@@ -666,7 +665,6 @@
       <label class="form-label">產品尺寸圖</label>
       <div style="border:0.5px solid var(--bdr);padding:12px;background:#faf8f5;margin-bottom:8px">
         <div style="font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">STEP 1 · 選圖裁切</div>
-        <input type="file" id="crop-file-dim" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
         <button type="button" onclick="document.getElementById('crop-file-dim').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">✂️ 選圖裁切</button>
         <div id="p-dimimg-prev" style="display:none;margin-top:8px;position:relative">
           <img id="p-dimimg-prev-img" style="max-height:120px;max-width:100%;border:0.5px solid var(--bdr);display:block">
@@ -1743,5 +1741,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 initCfg();
 loadAll();
 </script>
+<input type="file" id="crop-file-main" accept="image/*" style="position:fixed;left:-9999px;opacity:0" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
+<input type="file" id="crop-file-dim" accept="image/*" style="position:fixed;left:-9999px;opacity:0" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
 </body>
 </html>
