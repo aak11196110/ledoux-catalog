@@ -188,6 +188,7 @@
       <div class="sb-item" onclick="nav('installs')" id="nav-installs"><span class="sb-icon">🔧</span>安裝申請<span class="sb-badge" id="b-installs" style="display:none">0</span></div>
       <div class="sb-item" onclick="nav('visits')" id="nav-visits"><span class="sb-icon">📅</span>預約申請<span class="sb-badge" id="b-visits" style="display:none">0</span></div>
       <div class="sb-item" onclick="nav('addons')" id="nav-addons"><span class="sb-icon">🔌</span>配件管理</div>
+      <div class="sb-item" onclick="nav('drivers')" id="nav-drivers"><span class="sb-icon">⚡</span>驅動器管理</div>
       <div class="sb-section">系統</div>
       <div class="sb-item" onclick="nav('members')" id="nav-members"><span class="sb-icon">👥</span>會員管理</div>
       <div class="sb-item" onclick="nav('discounts')" id="nav-discounts"><span class="sb-icon">🏷️</span>折扣碼</div>
@@ -582,6 +583,20 @@
       </div>
     </div>
 
+    <!-- DRIVERS -->
+    <div class="page" id="page-drivers">
+      <div class="section-head">
+        <div class="section-title">驅動器管理</div>
+        <button class="btn btn-gold" onclick="openDriverM()">＋ 新增驅動器</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>型號</th><th>電壓</th><th>瓦數</th><th>價格</th><th>狀態</th><th>操作</th></tr></thead>
+          <tbody id="driver-tb"><tr><td colspan="6" class="no-data">載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -887,6 +902,42 @@
   </div>
 </div>
 
+<!-- 驅動器 Modal -->
+<div class="modal-wrap" id="modal-driver" style="display:none" onclick="if(event.target===this)hideM('modal-driver')">
+<div class="modal-box" style="max-width:560px">
+  <div class="modal-head"><div class="modal-title" id="driver-modal-title">新增驅動器</div><button class="modal-close" onclick="hideM('modal-driver')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="d-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="d-model" placeholder="LPV-60-24"></div>
+      <div class="form-group"><label class="form-label">電壓</label>
+        <select class="form-select" id="d-voltage"><option>DC24V</option><option>DC48V</option><option>AC110~240V</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">瓦數 (W)</label><input class="form-input" id="d-watt" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">價格 (NT$)</label><input class="form-input" id="d-price" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">長度 (mm)</label><input class="form-input" id="d-length" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">寬度 (mm)</label><input class="form-input" id="d-width" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">高度 (mm)</label><input class="form-input" id="d-height" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">狀態</label>
+        <select class="form-select" id="d-status"><option>上架</option><option>下架</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="d-img" placeholder="https://..."></div>
+    <div class="form-group"><label class="form-label">尺寸圖網址</label><input class="form-input" id="d-dimimg" placeholder="https://..."></div>
+    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="d-note" placeholder="選填"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideM('modal-driver')">取消</button>
+      <button class="btn btn-gold" onclick="saveDriver()">儲存並同步</button>
+    </div>
+  </div>
+</div></div>
+
 <script>
 // ════════════════════════════════════
 //  LEDOUX 管理後台 · 無登入版 v2.0
@@ -900,7 +951,7 @@ let DISCS = JSON.parse(localStorage.getItem('ldx_discs')||JSON.stringify([
   {code:"LED007",rate:0.7,note:"一般專案"},
   {code:"LED008",rate:0.8,note:"大量採購"},
 ]));
-const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',parts:'庫存零件管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定',addons:'配件管理',sample_inv:'樣品管理'};
+const PT = {dashboard:'儀表板',products:'燈具產品管理',inventory:'庫存管理',parts:'庫存零件管理',orders:'報價記錄',samples:'樣品申請',installs:'安裝申請',visits:'預約申請',members:'會員管理',discounts:'折扣碼管理',settings:'系統設定',addons:'配件管理',sample_inv:'樣品管理',drivers:'驅動器管理'};
 
 // API
 function getURL(){return localStorage.getItem('ldx_url')||DEFAULT_URL;}
@@ -925,9 +976,10 @@ const[pr,iv,or,sa,ins,vi,me,ad,si]=await Promise.all([apiGet('getProducts'),apiG
 D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(ins);D.visits=a(vi);D.members=a(me);D.addons=a(ad);D.sampleInv=a(si);
     renderAll();setBadges();setSS('ok');toast('✓ 資料已同步');
   }catch(e){setSS('err');toast('⚠ 同步失敗');}
+  loadDrivers();
 }
 function a(x){return Array.isArray(x)?x:[];}
-function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();}
+function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();}
 
 // NAV
 function nav(id){
@@ -1722,6 +1774,69 @@ async function delAddon(id,name){
   D.addons=(D.addons||[]).filter(x=>String(x.id)!==String(id));
   rAddons();toast('同步中...');
   const res=await apiPost('deleteAddon',{id});
+  toast(res&&res.success?'✓ 已刪除':'⚠ 刪除失敗');
+}
+// DRIVERS
+let DRIVERS = [];
+let editDriverId = null;
+async function loadDrivers(){
+  const data=await apiGet('getDrivers');
+  DRIVERS=Array.isArray(data)?data:[];
+  rDrivers();
+}
+function rDrivers(){
+  const tb=document.getElementById('driver-tb');if(!tb)return;
+  tb.innerHTML=DRIVERS.length?DRIVERS.map(d=>`<tr>
+    <td><b>${esc(d.model||'—')}</b></td>
+    <td>${esc(d.voltage||'—')}</td>
+    <td>${d.watt||'—'}W</td>
+    <td style="font-family:'Space Mono',monospace">NT$ ${fmt(d.price||0)}</td>
+    <td>${bdg(d.status||'上架')}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-sm btn-outline" onclick="editDriver('${esc(d.id)}')">編輯</button>
+      <button class="btn btn-sm btn-danger" onclick="delDriver('${esc(d.id)}','${esc(d.model)}')">刪除</button>
+    </td>
+  </tr>`).join(''):'<tr><td colspan="6" class="no-data">尚無驅動器資料</td></tr>';
+}
+function openDriverM(){
+  editDriverId=null;
+  document.getElementById('driver-modal-title').textContent='新增驅動器';
+  ['d-id','d-model','d-watt','d-price','d-length','d-width','d-height','d-img','d-dimimg','d-note'].forEach(k=>fv(k,''));
+  document.getElementById('d-voltage').value='DC24V';
+  document.getElementById('d-status').value='上架';
+  showM('modal-driver');
+}
+function editDriver(id){
+  const d=DRIVERS.find(x=>String(x.id)===String(id));if(!d)return;
+  editDriverId=id;
+  document.getElementById('driver-modal-title').textContent='編輯驅動器';
+  fv('d-id',d.id);fv('d-model',d.model||'');fv('d-watt',d.watt||'');fv('d-price',d.price||'');
+  fv('d-length',d.length||'');fv('d-width',d.width||'');fv('d-height',d.height||'');
+  fv('d-img',d.img||'');fv('d-dimimg',d.dimimg||'');fv('d-note',d.note||'');
+  document.getElementById('d-voltage').value=d.voltage||'DC24V';
+  document.getElementById('d-status').value=d.status||'上架';
+  showM('modal-driver');
+}
+async function saveDriver(){
+  const model=v('d-model').trim();if(!model){toast('請填寫型號');return;}
+  const rec={
+    id:editDriverId||'DRV'+Date.now(),
+    model,voltage:g('d-voltage').value,
+    watt:Number(v('d-watt'))||0,price:Number(v('d-price'))||0,
+    length:Number(v('d-length'))||0,width:Number(v('d-width'))||0,height:Number(v('d-height'))||0,
+    img:v('d-img'),dimimg:v('d-dimimg'),note:v('d-note'),status:g('d-status').value
+  };
+  const idx=DRIVERS.findIndex(x=>String(x.id)===String(rec.id));
+  if(idx>=0)DRIVERS[idx]=rec;else DRIVERS.unshift(rec);
+  rDrivers();hideM('modal-driver');toast('同步中...');
+  const res=await apiPost('saveDriver',rec);
+  toast(res&&res.success?'✓ 驅動器已儲存':'⚠ 本地更新，同步失敗');
+}
+async function delDriver(id,name){
+  if(!confirm(`確定刪除「${name}」？`))return;
+  DRIVERS=DRIVERS.filter(x=>String(x.id)!==String(id));
+  rDrivers();toast('同步中...');
+  const res=await apiPost('deleteDriver',{id});
   toast(res&&res.success?'✓ 已刪除':'⚠ 刪除失敗');
 }
 // SETTINGS
