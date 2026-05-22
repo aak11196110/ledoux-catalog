@@ -650,9 +650,8 @@
       <input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()">
       <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <input type="file" id="crop-file-main" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
-        <button type="button" onclick="document.getElementById('crop-file-main').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none">
-          ✂️ 上傳並裁切 (1:1)
-        </button>
+        <button type="button" onclick="document.getElementById('crop-file-main').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">✂️ 選圖裁切</button>
+        <button type="button" id="upload-btn-main" onclick="uploadCroppedImage('p-img')" style="display:none;align-items:center;padding:8px 16px;background:var(--gold);color:var(--blk);font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">⬆️ 上傳圖片</button>
         <span style="font-size:10px;color:var(--muted)">裁切後自動上傳至 ImgBB</span>
       </div>
       <div id="p-prev" style="display:none;margin-top:8px"><img id="p-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
@@ -662,9 +661,8 @@
       <input class="form-input" id="p-dimimg" placeholder="https://...（外觀尺寸示意圖）" oninput="prevDimImg()">
       <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <input type="file" id="crop-file-dim" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
-        <button type="button" onclick="document.getElementById('crop-file-dim').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none">
-          ✂️ 上傳並裁切 (1:1)
-        </button>
+        <button type="button" onclick="document.getElementById('crop-file-dim').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">✂️ 選圖裁切</button>
+        <button type="button" id="upload-btn-dim" onclick="uploadCroppedImage('p-dimimg')" style="display:none;align-items:center;padding:8px 16px;background:var(--gold);color:var(--blk);font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">⬆️ 上傳圖片</button>
         <span style="font-size:10px;color:var(--muted)">產品外觀尺寸圖</span>
       </div>
       <div id="p-dimimg-prev" style="display:none;margin-top:8px"><img id="p-dimimg-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
@@ -1103,16 +1101,38 @@ function closeCropper() {
   document.getElementById('crop-modal').style.setProperty('display','none','important');
 }
 
-async function confirmCrop() {
+let _croppedBase64 = null;
+let _croppedTargetId = null;
+
+function confirmCrop() {
   const {img, x, y, size, sc} = _crop;
   const canvas = document.createElement('canvas');
   canvas.width = 800; canvas.height = 800;
   canvas.getContext('2d').drawImage(img, x/sc, y/sc, size/sc, size/sc, 0, 0, 800, 800);
-  const base64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+  _croppedBase64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+  _croppedTargetId = _crop.targetId;
   closeCropper();
-  toast('圖片上傳中...');
+  const previewUrl = 'data:image/jpeg;base64,' + _croppedBase64;
+  if (_croppedTargetId === 'p-img') {
+    document.getElementById('p-prev-img').src = previewUrl;
+    document.getElementById('p-prev').style.display = 'block';
+    document.getElementById('upload-btn-main').style.display = 'inline-flex';
+  } else if (_croppedTargetId === 'p-dimimg') {
+    document.getElementById('p-dimimg-prev-img').src = previewUrl;
+    document.getElementById('p-dimimg-prev').style.display = 'block';
+    document.getElementById('upload-btn-dim').style.display = 'inline-flex';
+  }
+  toast('✓ 裁切完成，請按「上傳圖片」');
+}
+
+async function uploadCroppedImage(targetId) {
+  if (!_croppedBase64 || _croppedTargetId !== targetId) { toast('請先裁切圖片'); return; }
+  toast('上傳中...');
   try {
-    await _uploadToImgBB(base64, _crop.targetId);
+    await _uploadToImgBB(_croppedBase64, targetId);
+    _croppedBase64 = null;
+    if (targetId === 'p-img') document.getElementById('upload-btn-main').style.display = 'none';
+    else document.getElementById('upload-btn-dim').style.display = 'none';
   } catch(e) {
     toast('上傳錯誤：' + e.message);
   }
