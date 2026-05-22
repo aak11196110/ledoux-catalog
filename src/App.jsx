@@ -1531,6 +1531,12 @@ const [visitDone,    setVisitDone]    = useState(false);
   const [designDone,    setDesignDone]    = useState(false);
   const [contactModal,  setContactModal]  = useState(false);
   const [activeTags, setActiveTags] = useState([]);
+  const [advOpen, setAdvOpen] = useState(false);
+  const [rangeWatt,     setRangeWatt]     = useState({min:"", max:""});
+  const [rangeCutout,   setRangeCutout]   = useState({min:"", max:""});
+  const [rangeLength,   setRangeLength]   = useState({min:"", max:""});
+  const [rangeHeight,   setRangeHeight]   = useState({min:"", max:""});
+  const [rangeDiameter, setRangeDiameter] = useState({min:"", max:""});
   const [installTypes, setInstallTypes] = useState([]);
   const blurRef = useRef(null);
 
@@ -1676,6 +1682,34 @@ const submitVisit = async () => {
       if (tag.type==="cri")  ps = ps.filter(p=>p.cri&&p.cri.includes(tag.value));
       if (tag.type==="cert") ps = ps.filter(p=>p.cert&&p.cert.includes(tag.value));
     }
+    ps = ps.filter(p => {
+      if (rangeWatt.min || rangeWatt.max) {
+        const w = parseFloat(String(p.watt_min || p.watt || 0));
+        if (rangeWatt.min && w < parseFloat(rangeWatt.min)) return false;
+        if (rangeWatt.max && w > parseFloat(rangeWatt.max)) return false;
+      }
+      if (rangeCutout.min || rangeCutout.max) {
+        const c = parseFloat(String(p.cutout_min || p.cutout || 0));
+        if (rangeCutout.min && c < parseFloat(rangeCutout.min)) return false;
+        if (rangeCutout.max && c > parseFloat(rangeCutout.max)) return false;
+      }
+      if (rangeLength.min || rangeLength.max) {
+        const l = parseFloat(String(p.body_length || 0));
+        if (rangeLength.min && l < parseFloat(rangeLength.min)) return false;
+        if (rangeLength.max && l > parseFloat(rangeLength.max)) return false;
+      }
+      if (rangeHeight.min || rangeHeight.max) {
+        const h = parseFloat(String(p.body_height || 0));
+        if (rangeHeight.min && h < parseFloat(rangeHeight.min)) return false;
+        if (rangeHeight.max && h > parseFloat(rangeHeight.max)) return false;
+      }
+      if (rangeDiameter.min || rangeDiameter.max) {
+        const d = parseFloat(String(p.body_diameter || 0));
+        if (rangeDiameter.min && d < parseFloat(rangeDiameter.min)) return false;
+        if (rangeDiameter.max && d > parseFloat(rangeDiameter.max)) return false;
+      }
+      return true;
+    });
     return ps;
   })();
 
@@ -1687,7 +1721,11 @@ const submitVisit = async () => {
     setSeriesF(null);
   };
   const hasTag   = (type, value) => activeTags.some(t=>t.type===type&&t.value===value);
-  const clearTags = () => { setActiveTags([]); setSearchQ(""); setCat("全部"); setSeriesF(null); };
+  const clearTags = () => {
+    setActiveTags([]); setSearchQ(""); setCat("全部"); setSeriesF(null);
+    setRangeWatt({min:"",max:""}); setRangeCutout({min:"",max:""});
+    setRangeLength({min:"",max:""}); setRangeHeight({min:"",max:""}); setRangeDiameter({min:"",max:""});
+  };
 
 const filteredInv = inventory.filter(i=>
   (invCat==="全部"||i.category===invCat)&&
@@ -2494,10 +2532,37 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           </div>
           {!searchQ&&(<div className="catbar"><button className={"catbtn"+(cat==="全部"&&!seriesF?" on":"")} onClick={()=>{setCat("全部");setSeriesF(null);setActiveTags([]);}}>全部</button>{COMMERCIAL_SERIES.map(s=><button key={s} className={"catbtn"+(seriesF===s?" on":"")} onClick={()=>{setSeriesF(s);setCat("全部");setActiveTags([]);}}>{s}</button>)}{LINEAR_SERIES_LIST.map(s=><button key={s} className={"catbtn"+(seriesF===s?" on":"")} onClick={()=>{setSeriesF(s);setCat("全部");setActiveTags([]);}}>{s}</button>)}</div>)}
           <div className="filter-area">
+            {/* 主篩選：瓦數、色溫 */}
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">色溫</span>{allCcts.map(c=><button key={c} className={`filter-tag ${hasTag("cct",c)?"on":""}`} onClick={()=>toggleTag("cct",c)}>{c}</button>)}</div>
-            <div className="filter-row"><span className="filter-row-label">演色性</span>{["Ra≥80","Ra≥90","Ra≥95","Ra≥98"].map(r=><button key={r} className={`filter-tag ${hasTag("cri",r)?"on":""}`} onClick={()=>toggleTag("cri",r)}>{r}</button>)}</div>
-            <div className="filter-row"><span className="filter-row-label">防水</span>{["IP20","IP67","3C"].map(c=><button key={c} className={`filter-tag ${hasTag("cert",c)?"on":""}`} onClick={()=>toggleTag("cert",c)}>{c}</button>)}</div>
+            {/* 進階篩選按鈕 */}
+            <div style={{margin:"6px 0"}}>
+              <button onClick={()=>setAdvOpen(v=>!v)} style={{fontSize:10,letterSpacing:2,padding:"5px 16px",border:"0.5px solid var(--bdr)",background:advOpen?"var(--blk)":"transparent",color:advOpen?"var(--ivory)":"var(--blk)",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"}}>
+                {advOpen ? "▲ 收起進階篩選" : "▼ 進階篩選"}
+              </button>
+            </div>
+            {/* 進階篩選內容 */}
+            {advOpen && (<>
+              <div className="filter-row"><span className="filter-row-label">演色性</span>{["Ra≥80","Ra≥90","Ra≥95","Ra≥98"].map(r=><button key={r} className={`filter-tag ${hasTag("cri",r)?"on":""}`} onClick={()=>toggleTag("cri",r)}>{r}</button>)}</div>
+              <div className="filter-row"><span className="filter-row-label">防水</span>{["IP20","IP67","3C"].map(c=><button key={c} className={`filter-tag ${hasTag("cert",c)?"on":""}`} onClick={()=>toggleTag("cert",c)}>{c}</button>)}</div>
+              {[
+                ["開孔尺寸 (mm)", rangeCutout,   setRangeCutout],
+                ["瓦數範圍 (W)",  rangeWatt,     setRangeWatt],
+                ["燈體長度 (mm)", rangeLength,   setRangeLength],
+                ["燈體高度 (mm)", rangeHeight,   setRangeHeight],
+                ["燈體直徑 (mm)", rangeDiameter, setRangeDiameter],
+              ].map(([label, state, setter])=>(
+                <div key={label} className="filter-row">
+                  <span className="filter-row-label">{label}</span>
+                  <input type="number" placeholder="最小" value={state.min} onChange={e=>setter(v=>({...v,min:e.target.value}))}
+                    style={{width:72,padding:"4px 7px",border:"0.5px solid var(--bdr)",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",outline:"none"}}/>
+                  <span style={{color:"var(--muted)",fontSize:11,padding:"0 4px"}}>–</span>
+                  <input type="number" placeholder="最大" value={state.max} onChange={e=>setter(v=>({...v,max:e.target.value}))}
+                    style={{width:72,padding:"4px 7px",border:"0.5px solid var(--bdr)",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",outline:"none"}}/>
+                </div>
+              ))}
+            </>)}
+            {/* 已選標籤列 */}
             {activeTags.length>0&&<div className="filter-active-bar">
               <span style={{fontSize:"7px",letterSpacing:"2px",textTransform:"uppercase",color:"var(--muted)"}}>已選：</span>
               {activeTags.map(t=><span key={t.type+t.value} className="filter-chip">{t.value}<button className="filter-chip-x" onClick={()=>toggleTag(t.type,t.value)}>×</button></span>)}
