@@ -1648,14 +1648,14 @@ const submitVisit = async () => {
   const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
 
   // 折扣碼驗證
-  const DISCOUNT_CODES = { "LED006":0.6, "LED007":0.7, "LED008":0.8 };
+  const DISCOUNT_CODES = { "LED006":0.4, "LED007":0.47, "LED008":0.53 };
   const applyDiscountCode = (code) => {
     const trimmed = code.trim().toUpperCase();
     const rate = DISCOUNT_CODES[trimmed];
     if (rate) {
       setDiscountRate(rate);
       setDiscountLabel(`${trimmed} · ${Math.round(rate*10)}折`);
-      toast$(`✓ 專案折扣已套用：${Math.round(rate*10)}折`);
+      toast$(`✓ 已綁定專案，專屬折扣已套用`);
     } else if (trimmed === "") {
       setDiscountRate(1);
       setDiscountLabel("");
