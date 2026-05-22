@@ -842,7 +842,7 @@
 </div></div>
 
 <!-- 裁切 Modal -->
-<div id="crop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:16px">
+<div id="crop-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:16px;flex-direction:column;gap:12px">
   <div style="background:var(--wht);max-width:680px;width:100%;max-height:90vh;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--blk);flex-shrink:0">
       <div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);letter-spacing:3px">圖片裁切 · 1:1</div>
@@ -1054,7 +1054,8 @@ function _startCrop(src, targetId) {
     _crop.y = Math.round((_crop.dH - _crop.size) / 2);
     _updateCrop();
     const cm = document.getElementById('crop-modal');
-    cm.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:16px';
+    cm.removeAttribute('hidden');
+    cm.style.setProperty('display','flex','important');
   };
   img.src = src;
 }
@@ -1099,7 +1100,7 @@ document.addEventListener('mouseup', () => { _crop.drag = false; });
 document.addEventListener('touchend', () => { _crop.drag = false; });
 
 function closeCropper() {
-  document.getElementById('crop-modal').style.display = 'none';
+  document.getElementById('crop-modal').style.setProperty('display','none','important');
 }
 
 async function confirmCrop() {
