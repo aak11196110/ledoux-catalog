@@ -649,7 +649,7 @@
       <label class="form-label">產品圖片（主圖）</label>
       <input class="form-input" id="p-img" placeholder="https://..." oninput="prevImg()">
       <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <input type="file" id="crop-file-main" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
+        <input type="file" id="crop-file-main" accept="image/*" style="display:none" onchange="console.log('crop-main:',this.files[0]);openCropperFromFile(this.files[0],'p-img');this.value=''">
         <button type="button" onclick="document.getElementById('crop-file-main').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">✂️ 選圖裁切</button>
         <button type="button" id="upload-btn-main" onclick="uploadCroppedImage('p-img')" style="display:none;align-items:center;padding:8px 16px;background:var(--gold);color:var(--blk);font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">⬆️ 上傳圖片</button>
         <span style="font-size:10px;color:var(--muted)">裁切後自動上傳至 ImgBB</span>
@@ -660,7 +660,7 @@
       <label class="form-label">產品尺寸圖</label>
       <input class="form-input" id="p-dimimg" placeholder="https://...（外觀尺寸示意圖）" oninput="prevDimImg()">
       <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <input type="file" id="crop-file-dim" accept="image/*" style="display:none" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
+        <input type="file" id="crop-file-dim" accept="image/*" style="display:none" onchange="console.log('crop-dim:',this.files[0]);openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
         <button type="button" onclick="document.getElementById('crop-file-dim').click()" style="display:inline-flex;align-items:center;padding:8px 16px;background:var(--blk);color:#fff;font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">✂️ 選圖裁切</button>
         <button type="button" id="upload-btn-dim" onclick="uploadCroppedImage('p-dimimg')" style="display:none;align-items:center;padding:8px 16px;background:var(--gold);color:var(--blk);font-size:9px;letter-spacing:2px;cursor:pointer;gap:6px;border:none;font-family:inherit">⬆️ 上傳圖片</button>
         <span style="font-size:10px;color:var(--muted)">產品外觀尺寸圖</span>
