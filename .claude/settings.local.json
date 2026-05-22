@@ -6,7 +6,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(git config *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(git pull *)",
+      "Bash(git checkout *)"
     ]
   }
 }

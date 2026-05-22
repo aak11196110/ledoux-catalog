@@ -58,10 +58,10 @@ npm run preview  # 預覽打包結果
 
 ## 自動 Git 提交規則
 
-**當使用者說「改完了」，立即自動執行以下步驟，不需確認：**
+**每次修改完任何檔案後，立即自動執行以下步驟，不需確認：**
 
-1. `git add -A`
-2. `git commit -m "Update App.jsx"`
+1. `git add .`
+2. `git commit -m "說明此次修改內容"`
 3. `git push`
 
-這三個指令必須依序全部執行完畢。
+這三個指令必須依序全部執行完畢，commit message 要簡要說明這次改了什麼。
