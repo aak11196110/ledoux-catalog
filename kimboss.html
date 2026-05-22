@@ -294,7 +294,7 @@
   </select>
 </div>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>色溫</th><th>光束角</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th></tr></thead><tbody id="inv-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>圖片</th><th>型號</th><th>系列</th><th>色溫</th><th>光束角</th><th>顏色</th><th>總庫存</th><th>可用數</th><th>操作</th></tr></thead><tbody id="inv-tb"><tr><td colspan="8" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
 <!-- PARTS -->
 <div class="page" id="page-parts">
@@ -459,7 +459,7 @@
   </div>
   <div class="tbl-wrap">
     <table>
-     <thead><tr><th>系列</th><th>型號</th><th>有無樣品</th><th>色溫選項</th><th>光束角選項</th><th>狀態</th><th>備註</th><th>操作</th></tr></thead>
+     <thead><tr><th>圖片</th><th>系列</th><th>型號</th><th>有無樣品</th><th>色溫選項</th><th>光束角選項</th><th>狀態</th><th>備註</th><th>操作</th></tr></thead>
       <tbody id="sinv-tb"><tr><td colspan="10" class="no-data">載入中...</td></tr></tbody>
     </table>
   </div>
@@ -1020,8 +1020,10 @@ async function _uploadToImgBB(base64, targetId) {
 let _crop = {targetId:null,img:null,nW:0,nH:0,dW:0,dH:0,sc:1,x:0,y:0,size:0,drag:false,sx:0,sy:0,ox:0,oy:0};
 
 function openCropperFromFile(file, targetId) {
-  if (!file || !file.type.startsWith('image/')) return;
+  if (!file) { toast('未偵測到檔案'); return; }
+  if (!file.type.startsWith('image/')) { toast('請選擇圖片檔案'); return; }
   const reader = new FileReader();
+  reader.onerror = () => toast('讀取檔案失敗');
   reader.onload = e => _startCrop(e.target.result, targetId);
   reader.readAsDataURL(file);
 }
@@ -1051,7 +1053,8 @@ function _startCrop(src, targetId) {
     _crop.x = Math.round((_crop.dW - _crop.size) / 2);
     _crop.y = Math.round((_crop.dH - _crop.size) / 2);
     _updateCrop();
-    document.getElementById('crop-modal').style.display = 'flex';
+    const cm = document.getElementById('crop-modal');
+    cm.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:16px';
   };
   img.src = src;
 }
@@ -1124,6 +1127,7 @@ function rInv(){
   if(commSeries)list=list.filter(i=>i.series===commSeries);
   else if(lineSeries)list=list.filter(i=>i.series===lineSeries);
   document.getElementById('inv-tb').innerHTML=list.length?list.map(i=>`<tr>
+    <td style="width:48px;padding:6px 10px">${(()=>{const p=D.products.find(x=>x.model===i.model);const url=p&&p.images&&p.images[0];return url?`<img src="${url}" style="width:40px;height:40px;object-fit:contain;border:0.5px solid var(--bdr);background:#f5f2ed">`:'<div style="width:40px;height:40px;background:var(--bg2);border:0.5px solid var(--bdr)"></div>';})()}</td>
     <td><b>${i.model||'—'}</b></td>
     <td style="color:var(--muted)">${i.series||'—'}</td>
     <td>${i.cct||'—'}</td><td>${i.color||'—'}</td>
@@ -1507,6 +1511,7 @@ if(st)list=list.filter(r=>r.status===st);
   if(!list.length){tb.innerHTML='<tr><td colspan="10" class="no-data">尚無樣品記錄</td></tr>';return;}
   const sc=s=>s==='在庫'?'var(--green)':s==='已借出'?'var(--gold)':'var(--muted)';
  tb.innerHTML=list.map(r=>`<tr>
+    <td style="width:48px;padding:6px 10px">${(()=>{const p=D.products.find(x=>x.model===r.model);const url=p&&p.images&&p.images[0];return url?`<img src="${url}" style="width:40px;height:40px;object-fit:contain;border:0.5px solid var(--bdr);background:#f5f2ed">`:'<div style="width:40px;height:40px;background:var(--bg2);border:0.5px solid var(--bdr)"></div>';})()}</td>
     <td style="font-size:11px;color:var(--muted)">${esc(r.series||'—')}</td>
     <td style="font-weight:500">${esc(r.model||'—')}</td>
     <td><span style="color:${r.hasSample==='有'?'var(--green)':'var(--gold)'};font-weight:500">${esc(r.hasSample||'—')}</span></td>
