@@ -390,7 +390,7 @@ body{background:var(--ivory);color:var(--blk);font-family:'Noto Sans TC',sans-se
 .drawer-series{font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--gold)}
 .close-btn{background:none;border:none;cursor:pointer;color:var(--muted);display:flex;padding:3px;transition:color .2s}
 .close-btn:hover{color:var(--blk)}
-.car{position:relative;height:255px;background:#f0ebe2;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.car{position:relative;height:200px;background:#f0ebe2;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .car img{max-height:225px;object-fit:contain}
 .car-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(14,13,12,.2);border:none;color:#fff;width:26px;height:26px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;transition:background .2s}
 .car-btn:hover{background:rgba(14,13,12,.6)}
@@ -3235,16 +3235,16 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div className="spec-grid">
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
-            {selProd.dimImg&&(
-              <div style={{marginBottom:16,paddingTop:14,borderTop:"0.5px solid var(--bdr2)"}}>
-                <div style={{fontSize:8,letterSpacing:3,textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>尺寸圖</div>
-                <img src={selProd.dimImg} alt="尺寸圖"
-                  onClick={()=>setLightboxSrc(selProd.dimImg)}
-                  style={{maxWidth:"100%",border:"0.5px solid var(--bdr)",cursor:"zoom-in",display:"block"}}
-                  onError={e=>e.target.style.display="none"}/>
-                <div style={{fontSize:9,color:"var(--muted)",marginTop:4,letterSpacing:1}}>點擊放大</div>
-              </div>
-            )}
+{selProd.dimImg&&(
+  <div style={{marginBottom:16,paddingTop:14,borderTop:"0.5px solid var(--bdr2)"}}>
+    <div style={{fontSize:8,letterSpacing:3,textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>尺寸圖</div>
+    <img src={selProd.dimImg} alt="尺寸圖"
+      onClick={()=>setLightboxSrc(selProd.dimImg)}
+      style={{maxWidth:"100%",maxHeight:"180px",objectFit:"contain",border:"0.5px solid var(--bdr)",cursor:"zoom-in",display:"block"}}
+      onError={e=>e.target.style.display="none"}/>
+    <div style={{fontSize:9,color:"var(--muted)",marginTop:4,letterSpacing:1}}>點擊放大</div>
+  </div>
+)}
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
   const s = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(x=>x.trim());
