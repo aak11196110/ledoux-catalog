@@ -644,6 +644,28 @@
     <div class="form-row">
       <div class="form-group"><label class="form-label">演色性 CRI</label><input class="form-input" id="p-cri" placeholder="Ra90,Ra95"></div>
     </div>
+    <div style="border:0.5px solid var(--bdr);padding:16px;margin-bottom:8px">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">尺寸規格（數值欄位）</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">開孔最小 (mm)</label><input class="form-input" id="p-cutout_min" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">開孔最大 (mm)</label><input class="form-input" id="p-cutout_max" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">瓦數最小 (W)</label><input class="form-input" id="p-watt_min" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">瓦數最大 (W)</label><input class="form-input" id="p-watt_max" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">燈體長度 (mm)</label><input class="form-input" id="p-body_length" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">燈體寬度 (mm)</label><input class="form-input" id="p-body_width" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">燈體高度 (mm)</label><input class="form-input" id="p-body_height" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">燈體直徑 (mm)</label><input class="form-input" id="p-body_diameter" type="number" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">防護等級</label><input class="form-input" id="p-ip_rating" type="text" placeholder="例：IP20、IP67"></div>
+      </div>
+    </div>
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
     <div class="form-group">
       <label class="form-label">產品圖片（主圖）</label>
@@ -964,9 +986,10 @@ fv('p-cri',p.cri||'');fv('p-desc',p.desc||'');
 fv('p-img',(p.images&&p.images[0])||'');
 fv('p-dimimg',p.dimImg||'');
 fv('p-cct',p.cct||'');fv('p-beam',p.beam||'');fv('p-outerColor',p.outerColor||'');fv('p-innerColor',p.innerColor||'');fv('p-color',p.color||'');fv('p-voltage',p.voltage||'');fv('p-addon',Array.isArray(p.addon)?p.addon.join('/'):p.addon||'');
+fv('p-cutout_min',p.cutout_min||'');fv('p-cutout_max',p.cutout_max||'');fv('p-watt_min',p.watt_min||'');fv('p-watt_max',p.watt_max||'');fv('p-body_length',p.body_length||'');fv('p-body_width',p.body_width||'');fv('p-body_height',p.body_height||'');fv('p-body_diameter',p.body_diameter||'');fv('p-ip_rating',p.ip_rating||'');
 prevImg();prevDimImg();showM('modal-prod');
 }
- function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
+ function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
@@ -980,7 +1003,16 @@ outerColor:v('p-outerColor'),
 innerColor:v('p-innerColor'),
 color:v('p-color'),
 voltage:v('p-voltage'),
-addon:v('p-addon')};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
+addon:v('p-addon'),
+cutout_min:v('p-cutout_min')?Number(v('p-cutout_min')):null,
+cutout_max:v('p-cutout_max')?Number(v('p-cutout_max')):null,
+watt_min:v('p-watt_min')?Number(v('p-watt_min')):null,
+watt_max:v('p-watt_max')?Number(v('p-watt_max')):null,
+body_length:v('p-body_length')?Number(v('p-body_length')):null,
+body_width:v('p-body_width')?Number(v('p-body_width')):null,
+body_height:v('p-body_height')?Number(v('p-body_height')):null,
+body_diameter:v('p-body_diameter')?Number(v('p-body_diameter')):null,
+ip_rating:v('p-ip_rating')||null};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
   rProd();hideM('modal-prod');toast('同步中...');
   const res=await apiPost('upsertProduct',rec);
