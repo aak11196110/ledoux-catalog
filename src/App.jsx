@@ -695,13 +695,16 @@ function calcInstall(regionId, groups, linearGroups=[]) {
   return {totalQty,totalMeters,totalUnits,laborTotal,travelFee,hasVHigh,reg};
 }
 
-function Carousel({images}) {
+function Carousel({images, onZoom}) {
   const [idx,setIdx] = useState(0);
   const imgs = (images||[]).filter(Boolean);
   if (!imgs.length) return <div className="car"><PlaceholderIcon/></div>;
   return (
     <div className="car">
-      <img src={imgs[idx]} alt="" onError={e=>{e.target.style.display="none"}}/>
+      <img src={imgs[idx]} alt=""
+        onError={e=>{e.target.style.display="none"}}
+        onClick={()=>onZoom&&imgs[idx]&&onZoom(imgs[idx])}
+        style={{cursor:onZoom?"zoom-in":"default",transition:"opacity .2s"}}/>
       {imgs.length>1&&<>
         <button className="car-btn car-prev" onClick={()=>setIdx(i=>(i-1+imgs.length)%imgs.length)}>‹</button>
         <button className="car-btn car-next" onClick={()=>setIdx(i=>(i+1)%imgs.length)}>›</button>
@@ -1460,6 +1463,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [searchFocus,setSearchFocus]= useState(false);
   const [searchHist, setSearchHist] = useState([]);
   const [selProd,    setSelProd]    = useState(null);
+  const [lightboxSrc,setLightboxSrc]= useState(null);
  const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[], customSpecs:{}});
   const [addons, setAddons] = useState([]);
   const [allParts,   setAllParts]   = useState([]);
@@ -3223,7 +3227,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
       {selProd&&<div className="drawer-overlay" onClick={()=>setSelProd(null)}>
         <div className="drawer" onClick={e=>e.stopPropagation()}>
           <div className="drawer-top"><div className="drawer-series">{selProd.series} — {selProd.category}</div><button className="close-btn" onClick={()=>setSelProd(null)}><CloseIcon/></button></div>
-          <Carousel images={selProd.images}/>
+          <Carousel images={selProd.images} onZoom={src=>setLightboxSrc(src)}/>
           <div className="drawer-body">
             <div className="drawer-model">{selProd.model}</div>
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
@@ -3231,6 +3235,16 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div className="spec-grid">
               {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
+            {selProd.dimImg&&(
+              <div style={{marginBottom:16,paddingTop:14,borderTop:"0.5px solid var(--bdr2)"}}>
+                <div style={{fontSize:8,letterSpacing:3,textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>尺寸圖</div>
+                <img src={selProd.dimImg} alt="尺寸圖"
+                  onClick={()=>setLightboxSrc(selProd.dimImg)}
+                  style={{maxWidth:"100%",border:"0.5px solid var(--bdr)",cursor:"zoom-in",display:"block"}}
+                  onError={e=>e.target.style.display="none"}/>
+                <div style={{fontSize:9,color:"var(--muted)",marginTop:4,letterSpacing:1}}>點擊放大</div>
+              </div>
+            )}
             {/* 零件庫存規格選擇 */}
 {allParts.filter(p=>{
   const s = Array.isArray(p['適用產品']) ? p['適用產品'] : String(p['適用產品']||'').split(',').map(x=>x.trim());
@@ -3349,6 +3363,24 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           </div>
         </div>
       </div>}
+
+      {lightboxSrc&&(
+        <div onClick={()=>setLightboxSrc(null)} style={{
+          position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",
+          zIndex:900,display:"flex",alignItems:"center",justifyContent:"center",
+          cursor:"zoom-out",padding:20
+        }}>
+          <img src={lightboxSrc} alt="" style={{
+            maxWidth:"90vw",maxHeight:"90vh",objectFit:"contain",
+            boxShadow:"0 0 60px rgba(0,0,0,0.5)",display:"block"
+          }} onClick={e=>e.stopPropagation()}/>
+          <button onClick={()=>setLightboxSrc(null)} style={{
+            position:"fixed",top:16,right:20,background:"rgba(0,0,0,0.5)",
+            border:"0.5px solid rgba(255,255,255,0.3)",color:"rgba(255,255,255,0.9)",
+            fontSize:20,cursor:"pointer",padding:"4px 12px"
+          }}>✕</button>
+        </div>
+      )}
 
       {/* ══ 詢價單 Panel ══ */}
       <div className={`side-panel ${cartOpen?"open":""}`}>
