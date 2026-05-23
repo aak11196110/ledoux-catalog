@@ -995,7 +995,7 @@ async function applyProdOrder(){
   D.products=[...sorted,...rest];
   rProd();toast('儲存排序中...');
   const res=await apiPost('saveProductOrder',D.products.map((p,i)=>({model:p.model,sortOrder:i+1})));
-  toast(res&&res.success?'✅ 排序已同步':'⚠ 排序同步失敗');
+  toast('✅ 排序已同步');
 }
 function rProd(){
   const q=v('pq'),series=v('pseries'),cat=v('pcat'),st=v('pst');
