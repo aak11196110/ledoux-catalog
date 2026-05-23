@@ -167,7 +167,7 @@ const COMMERCIAL_SERIES = [
 ];
 // 線型燈系列
 const LINEAR_SERIES_LIST = [
-  "鋁擠洗牆燈","鋁條燈","燈帶","軟條燈","線型燈－特殊款／其他"
+  "鋁擠洗牆燈","鋁條燈","燈帶","軟條燈","線型燈－特殊款／其他","DC24V/DC48V 驅動器"
 ];
 const ALL_SERIES_LIST = [...COMMERCIAL_SERIES, ...LINEAR_SERIES_LIST];
 
