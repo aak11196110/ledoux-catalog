@@ -912,42 +912,6 @@
 </div>
 </div>
 
-<!-- 驅動器 Modal -->
-<div class="modal-wrap" id="modal-driver" style="display:none" onclick="if(event.target===this)hideM('modal-driver')">
-<div class="modal-box" style="max-width:560px">
-  <div class="modal-head"><div class="modal-title" id="driver-modal-title">新增驅動器</div><button class="modal-close" onclick="hideM('modal-driver')">✕</button></div>
-  <div class="modal-body">
-    <input type="hidden" id="d-id">
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="d-model" placeholder="LPV-60-24"></div>
-      <div class="form-group"><label class="form-label">電壓</label>
-        <select class="form-select" id="d-voltage"><option>DC24V</option><option>DC48V</option><option>AC110~240V</option></select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">瓦數 (W)</label><input class="form-input" id="d-watt" type="number" placeholder="0"></div>
-      <div class="form-group"><label class="form-label">價格 (NT$)</label><input class="form-input" id="d-price" type="number" placeholder="0"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">長度 (mm)</label><input class="form-input" id="d-length" type="number" placeholder="0"></div>
-      <div class="form-group"><label class="form-label">寬度 (mm)</label><input class="form-input" id="d-width" type="number" placeholder="0"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">高度 (mm)</label><input class="form-input" id="d-height" type="number" placeholder="0"></div>
-      <div class="form-group"><label class="form-label">狀態</label>
-        <select class="form-select" id="d-status"><option>上架</option><option>下架</option></select>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="d-img" placeholder="https://..."></div>
-    <div class="form-group"><label class="form-label">尺寸圖網址</label><input class="form-input" id="d-dimimg" placeholder="https://..."></div>
-    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="d-note" placeholder="選填"></div>
-    <div class="form-actions">
-      <button class="btn btn-outline" onclick="hideM('modal-driver')">取消</button>
-      <button class="btn btn-gold" onclick="saveDriver()">儲存並同步</button>
-    </div>
-  </div>
-</div></div>
-
 <script>
 // ════════════════════════════════════
 //  LEDOUX 管理後台 · 無登入版 v2.0
@@ -1905,5 +1869,41 @@ loadAll();
 </script>
 <input type="file" id="crop-file-main" accept="image/*" style="position:fixed;left:-9999px;opacity:0" onchange="openCropperFromFile(this.files[0],'p-img');this.value=''">
 <input type="file" id="crop-file-dim" accept="image/*" style="position:fixed;left:-9999px;opacity:0" onchange="openCropperFromFile(this.files[0],'p-dimimg');this.value=''">
+
+<!-- 驅動器 Modal -->
+<div class="modal-wrap" id="modal-driver" style="display:none" onclick="if(event.target===this)hideM('modal-driver')">
+<div class="modal-box" style="max-width:560px">
+  <div class="modal-head"><div class="modal-title" id="driver-modal-title">新增驅動器</div><button class="modal-close" onclick="hideM('modal-driver')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="d-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="d-model" placeholder="LPV-60-24"></div>
+      <div class="form-group"><label class="form-label">電壓</label>
+        <select class="form-select" id="d-voltage"><option>DC24V</option><option>DC48V</option><option>AC110~240V</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">瓦數 (W)</label><input class="form-input" id="d-watt" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">價格 (NT$)</label><input class="form-input" id="d-price" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">長度 (mm)</label><input class="form-input" id="d-length" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">寬度 (mm)</label><input class="form-input" id="d-width" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">高度 (mm)</label><input class="form-input" id="d-height" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">狀態</label>
+        <select class="form-select" id="d-status"><option>上架</option><option>下架</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="d-img" placeholder="https://..."></div>
+    <div class="form-group"><label class="form-label">尺寸圖網址</label><input class="form-input" id="d-dimimg" placeholder="https://..."></div>
+    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="d-note" placeholder="選填"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideM('modal-driver')">取消</button>
+      <button class="btn btn-gold" onclick="saveDriver()">儲存並同步</button>
+    </div>
+  </div>
+</div></div>
 </body>
 </html>
