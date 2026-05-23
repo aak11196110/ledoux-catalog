@@ -268,6 +268,9 @@
       <option>軟條燈</option>
       <option>線型燈－特殊款／其他</option>
     </optgroup>
+    <optgroup label="── 驅動器 ──">
+      <option>DC24V/DC48V 驅動器</option>
+    </optgroup>
   </select>
   <select class="f-select" id="pcat" onchange="rProd()"><option value="">所有分類</option><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option></select>
   <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
@@ -449,7 +452,7 @@
 <input class="f-input" id="sinv-q" placeholder="🔍 搜尋型號..." oninput="rSampInv()">
     <select class="f-select" id="sinv-sr" onchange="rSampInv()">
       <option value="">所有系列</option>
-      <option>DC48V 磁吸軌道</option><option>EOS 奧斯</option><option>SLOT 希洛特</option><option>COSY 寇斯</option><option>YODA 優打1代</option><option>YODA 優打2代</option><option>YOMAX 優麥斯</option><option>HEPBURN 赫本</option><option>METIS 墨提斯</option><option>MINI 珠寶</option><option>BLADE 帕雷德</option><option>LINEAR 麗娜</option><option>POLA 泊拉</option><option>WALL LIGHT 壁燈</option><option>STEP LIGHT 地腳燈</option><option>CABINET LINEAR LIGHT 高端線條燈</option><option>LED STRIP LIGHT 低壓燈帶</option><option>OUTDOOR LIGHT 戶外燈具</option><option>VELA</option><option>鋁擠洗牆燈</option><option>鋁條燈</option><option>燈帶</option><option>軟條燈</option><option>商照燈－特殊款／其他</option><option>線型燈－特殊款／其他</option>
+      <option>DC48V 磁吸軌道</option><option>EOS 奧斯</option><option>SLOT 希洛特</option><option>COSY 寇斯</option><option>YODA 優打1代</option><option>YODA 優打2代</option><option>YOMAX 優麥斯</option><option>HEPBURN 赫本</option><option>METIS 墨提斯</option><option>MINI 珠寶</option><option>BLADE 帕雷德</option><option>LINEAR 麗娜</option><option>POLA 泊拉</option><option>WALL LIGHT 壁燈</option><option>STEP LIGHT 地腳燈</option><option>CABINET LINEAR LIGHT 高端線條燈</option><option>LED STRIP LIGHT 低壓燈帶</option><option>OUTDOOR LIGHT 戶外燈具</option><option>VELA</option><option>鋁擠洗牆燈</option><option>鋁條燈</option><option>燈帶</option><option>軟條燈</option><option>商照燈－特殊款／其他</option><option>線型燈－特殊款／其他</option><option>DC24V/DC48V 驅動器</option>
     </select>
     <select class="f-select" id="sinv-st" onchange="rSampInv()">
       <option value="">所有狀態</option>
@@ -638,6 +641,9 @@
 <option>軟條燈</option>
 <option>線型燈－特殊款／其他</option>
 </optgroup>
+<optgroup label="── 驅動器 ──">
+<option>DC24V/DC48V 驅動器</option>
+</optgroup>
 </select></div>
     </div>
     <div class="form-row">
@@ -763,6 +769,9 @@
 <option>燈帶</option>
 <option>軟條燈</option>
 <option>線型燈－特殊款／其他</option>
+</optgroup>
+<optgroup label="── 驅動器 ──">
+<option>DC24V/DC48V 驅動器</option>
 </optgroup>
 </select
     </div>
@@ -1627,7 +1636,7 @@ function filterSiModels(){
   document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+filtered.map(p=>`<option value="${esc(p.model)}">${esc(p.model)}</option>`).join('');
 }
 function openSampInvM(){
-  const series=['DC48V 磁吸軌道','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','POLA 泊拉','WALL LIGHT 壁燈','STEP LIGHT 地腳燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','VELA','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他'];
+  const series=['DC48V 磁吸軌道','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','POLA 泊拉','WALL LIGHT 壁燈','STEP LIGHT 地腳燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','VELA','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他','DC24V/DC48V 驅動器'];
   document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
   document.getElementById('si-model').innerHTML='<option value="">請先選系列</option>';
   document.getElementById('sinv-title').textContent='新增樣品';
@@ -1639,7 +1648,7 @@ function openSampInvM(){
   showM('modal-sinv');
 }
 function editSampInv(id){
-  const series2=['DC48V 磁吸軌道','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','POLA 泊拉','WALL LIGHT 壁燈','STEP LIGHT 地腳燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','VELA','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他'];
+  const series2=['DC48V 磁吸軌道','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','POLA 泊拉','WALL LIGHT 壁燈','STEP LIGHT 地腳燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','VELA','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他','DC24V/DC48V 驅動器'];
   document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series2.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
 const r=(D.sampleInv||[]).find(x=>String(x.id)===String(id));if(!r)return;
 document.getElementById('si-series').value=r.series||'';
