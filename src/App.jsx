@@ -1436,6 +1436,7 @@ function App() {
   const [pending,    setPending]    = useState([]);
   const [products,   setProducts]   = useState(INIT_PRODUCTS);
   const [inventory,  setInventory]  = useState(INIT_INVENTORY);
+  const [productOrder, setProductOrder] = useState([]);
   const [sampleReqs, setSampleReqs] = useState([]);
   const [sampleInv, setSampleInv] = useState([]);
   const [installOrd, setInstallOrd] = useState([]);
@@ -1580,6 +1581,10 @@ if (addonData?.length > 0) setAddons(addonData);
         if (sinvData?.length > 0) setSampleInv(sinvData);
 if (partsData?.length > 0) setAllParts(partsData);
         setSyncStatus("ok");
+        fetch(SHEET_URL + "?action=getProductOrder")
+          .then(r => r.json())
+          .then(j => { if (j.success && j.data) setProductOrder(j.data); })
+          .catch(() => {});
         await sheetPost("checkSampleReturns", {});
       } catch(e) {
         setSyncStatus("off");
@@ -1713,6 +1718,13 @@ const submitVisit = async () => {
       }
       return true;
     });
+    if (productOrder.length > 0) {
+      ps = ps.slice().sort((a, b) => {
+        const oa = productOrder.find(o => o.model === a.model)?.sortOrder ?? 9999;
+        const ob = productOrder.find(o => o.model === b.model)?.sortOrder ?? 9999;
+        return oa - ob;
+      });
+    }
     return ps;
   })();
 

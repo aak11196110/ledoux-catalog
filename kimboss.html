@@ -232,8 +232,9 @@
 
     <!-- PRODUCTS -->
     <div class="page" id="page-products">
-      <div class="section-head"><div class="section-title">燈具產品管理</div><button class="btn btn-gold" onclick="openProdM()">＋ 新增產品</button></div>
-     <div class="filter-bar">
+      <div class="section-head"><div class="section-title">燈具產品管理</div><div style="display:flex;gap:8px"><button class="btn btn-sm btn-outline" id="sort-toggle-btn" onclick="toggleSortMode()">⇅ 調整排序</button><button class="btn btn-gold" onclick="openProdM()">＋ 新增產品</button></div></div>
+      <div id="sort-actions" style="display:none;gap:8px;margin-bottom:12px"><button class="btn btn-sm btn-gold" onclick="saveProdOrder()">💾 儲存排序</button><button class="btn btn-sm btn-outline" onclick="toggleSortMode()">✕ 取消</button></div>
+     <div class="filter-bar" id="prod-filter-bar">
   <input class="f-input" id="pq" placeholder="🔍 搜尋型號、系列..." oninput="rProd()">
   <select class="f-select" id="pseries" onchange="rProd()">
     <option value="">所有系列</option>
@@ -980,20 +981,54 @@ function rDash(){
 }
 
 // PRODUCTS
+let _sortMode = false;
+function toggleSortMode(){
+  _sortMode = !_sortMode;
+  const fb=document.getElementById('prod-filter-bar');
+  const sa=document.getElementById('sort-actions');
+  const sb=document.getElementById('sort-toggle-btn');
+  if(fb)fb.style.display=_sortMode?'none':'flex';
+  if(sa)sa.style.display=_sortMode?'flex':'none';
+  if(sb)sb.textContent=_sortMode?'— 排序中 —':'⇅ 調整排序';
+  rProd();
+}
+function moveProd(idx, dir){
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= D.products.length) return;
+  const tmp = D.products[idx]; D.products[idx] = D.products[newIdx]; D.products[newIdx] = tmp;
+  rProd();
+}
+async function saveProdOrder(){
+  toast('儲存排序中...');
+  const res = await apiPost('saveProductOrder', D.products.map((p,i)=>({model:p.model,sortOrder:i+1})));
+  toast(res&&res.success?'✅ 排序已同步':'⚠ 排序同步失敗');
+  _sortMode = false;
+  const fb=document.getElementById('prod-filter-bar');
+  const sa=document.getElementById('sort-actions');
+  const sb=document.getElementById('sort-toggle-btn');
+  if(fb)fb.style.display='flex';
+  if(sa)sa.style.display='none';
+  if(sb)sb.textContent='⇅ 調整排序';
+  rProd();
+}
 function rProd(){
- const q=v('pq'),series=v('pseries'),cat=v('pcat'),st=v('pst');
-  let list=D.products;
-  if(q)list=list.filter(p=>(p.model+p.series+p.category).toLowerCase().includes(q.toLowerCase()));
- if(series)list=list.filter(p=>p.series===series);
-  if(cat)list=list.filter(p=>p.category===cat);
-  if(st)list=list.filter(p=>p.status===st);
-  document.getElementById('prod-tb').innerHTML=list.length?list.map(p=>`<tr>
+  const q=v('pq'),series=v('pseries'),cat=v('pcat'),st=v('pst');
+  let list=_sortMode?D.products:[...D.products];
+  if(!_sortMode){
+    if(q)list=list.filter(p=>(p.model+p.series+p.category).toLowerCase().includes(q.toLowerCase()));
+    if(series)list=list.filter(p=>p.series===series);
+    if(cat)list=list.filter(p=>p.category===cat);
+    if(st)list=list.filter(p=>p.status===st);
+  }
+  document.getElementById('prod-tb').innerHTML=list.length?list.map((p,i)=>`<tr>
     <td><b>${p.model||'—'}</b></td><td style="color:var(--muted)">${p.series||'—'}</td><td>${p.category||'—'}</td>
     <td>${p.watt?p.watt+'W':'—'}</td><td style="color:var(--muted)">${p.cct||'—'}</td>
     <td style="font-family:'Space Mono',monospace">NT$ ${fmt(p.stdPrice||p.price||0)}</td>
-   <td style="display:none"></td>
     <td>${bdg(p.status||'上架')}</td>
-    <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button></td>
+    <td style="white-space:nowrap">${_sortMode
+      ?`<button class="btn btn-sm btn-outline" onclick="moveProd(${i},-1)">↑</button> <button class="btn btn-sm btn-outline" onclick="moveProd(${i},1)">↓</button>`
+      :`<button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button>`
+    }</td>
   </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無產品資料</td></tr>';
 }
 function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';showM('modal-prod');}
