@@ -1554,7 +1554,7 @@ const [visitDone,    setVisitDone]    = useState(false);
     if(i.product.category==="鋁條燈") return s + i.qty;
     return s;
   }, 0);
-  const cartTotal  = cart.reduce((s,i)=>s+(Number(i.product.stdPrice)||0)*i.qty,0);
+  const cartTotal  = cart.reduce((s,i)=>s+Math.round((Number(i.product.stdPrice)||0)*discountRate)*i.qty,0);
   const allChecked = Object.values(checks).every(Boolean);
   const allSeries  = [...new Set(products.map(p=>p.series))];
   const allCats    = [...new Set(products.map(p=>p.category))];
