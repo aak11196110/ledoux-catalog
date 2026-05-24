@@ -589,8 +589,35 @@
           <div class="form-group"><label class="form-label">聯絡電話</label><input class="form-input" id="cfg-phone" onblur="saveCo()"></div>
           <div class="form-group"><label class="form-label">電子信箱</label><input class="form-input" id="cfg-cemail" onblur="saveCo()"></div>
         </div>
-      
-      
+
+
+      </div>
+
+      <!-- 驅動器配置規則 -->
+      <div style="margin-top:18px">
+        <div class="settings-card">
+          <h3>驅動器配置規則</h3>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:14px">設定瓦數範圍對應的驅動器型號，前台線型燈計算會自動推薦。規則存於本機 localStorage。</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">瓦數下限 (W)</div>
+              <input class="form-input" type="number" id="dr-min" placeholder="0" style="width:90px">
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">瓦數上限 (W)</div>
+              <input class="form-input" type="number" id="dr-max" placeholder="100" style="width:90px">
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">驅動器型號</div>
+              <select class="form-input" id="dr-model" style="width:220px"><option value="">── 選擇驅動器 ──</option></select>
+            </div>
+            <button class="btn btn-gold" onclick="addDriverRule()">＋ 新增規則</button>
+          </div>
+          <div class="tbl-wrap">
+            <table><thead><tr><th>瓦數下限 (W)</th><th>瓦數上限 (W)</th><th>對應驅動器</th><th>操作</th></tr></thead>
+            <tbody id="driver-rules-tb"><tr><td colspan="4" class="no-data">尚無規則</td></tr></tbody></table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -959,7 +986,7 @@ D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(i
   loadDrivers();
 }
 function a(x){return Array.isArray(x)?x:[];}
-function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();}
+function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();loadDriverRules();}
 
 // NAV
 function nav(id){
@@ -1864,6 +1891,38 @@ async function initSheets(){
   toast(res&&res.success?'✅ 初始化完成':'⚠ 初始化失敗');
 }
 function clearCfg(){if(!confirm('確定清除本機設定？'))return;localStorage.clear();toast('清除完成');setTimeout(()=>location.reload(),1000);}
+
+// DRIVER RULES
+function loadDriverRules(){
+  rDriverRules();
+  const sel=document.getElementById('dr-model');if(!sel)return;
+  const drivers=(D.products||[]).filter(p=>p.series==='DC24V/DC48V 驅動器'&&p.status==='上架').sort((a,b)=>Number(a.watt)-Number(b.watt));
+  sel.innerHTML='<option value="">── 選擇驅動器 ──</option>'+drivers.map(d=>`<option value="${esc(d.model)}">${esc(d.model)}${d.watt?' ('+d.watt+'W)':''}</option>`).join('');
+}
+function rDriverRules(){
+  const tb=document.getElementById('driver-rules-tb');if(!tb)return;
+  const rules=JSON.parse(localStorage.getItem('driverRules')||'[]');
+  tb.innerHTML=rules.length?rules.map((r,i)=>`<tr><td>${r.wattMin}</td><td>${r.wattMax}</td><td><b>${esc(r.driverModel)}</b></td><td><button class="btn btn-sm btn-danger" onclick="delDriverRule(${i})">刪除</button></td></tr>`).join(''):'<tr><td colspan="4" class="no-data">尚無規則</td></tr>';
+}
+function addDriverRule(){
+  const min=Number(document.getElementById('dr-min').value)||0;
+  const max=Number(document.getElementById('dr-max').value)||0;
+  const model=document.getElementById('dr-model').value.trim();
+  if(!model){toast('請選擇驅動器型號');return;}
+  if(max<min){toast('瓦數上限需大於下限');return;}
+  const rules=JSON.parse(localStorage.getItem('driverRules')||'[]');
+  rules.push({wattMin:min,wattMax:max,driverModel:model});
+  rules.sort((a,b)=>a.wattMin-b.wattMin);
+  localStorage.setItem('driverRules',JSON.stringify(rules));
+  rDriverRules();fv('dr-min','');fv('dr-max','');document.getElementById('dr-model').value='';
+  toast('✓ 規則已儲存');
+}
+function delDriverRule(i){
+  const rules=JSON.parse(localStorage.getItem('driverRules')||'[]');
+  rules.splice(i,1);
+  localStorage.setItem('driverRules',JSON.stringify(rules));
+  rDriverRules();toast('✓ 已刪除');
+}
 
 // BADGES
 function setBadges(){
