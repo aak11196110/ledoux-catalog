@@ -1479,6 +1479,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [drawerMeters,  setDrawerMeters]  = useState("");
   const [drawerSpaceId, setDrawerSpaceId] = useState("");
   const [drawerCircuits, setDrawerCircuits] = useState([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]);
+  const [drawerCutOption, setDrawerCutOption] = useState(null);
   const [sampCart,   setSampCart]   = useState([]);
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
@@ -1595,7 +1596,7 @@ if (partsData?.length > 0) setAllParts(partsData);
     })();
   }, [sheetUrl]);
 useEffect(()=>{
-  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]); }
+  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]); setDrawerCutOption(null); }
 }, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
@@ -3440,6 +3441,23 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             </div>
 {selProd?.product_type === "linear" && (()=>{
   const driverRules = (() => { try { return JSON.parse(localStorage.getItem("driverRules")||"[]"); } catch { return []; } })();
+
+  // ── 裁切點解析：格式 "1cm|2500, 6cm|2000" ──
+  const cutOptions = (() => {
+    if (!selProd.cutOptions) return [];
+    return String(selProd.cutOptions).split(",").map(s => {
+      const [label, price] = s.trim().split("|");
+      const cm = parseFloat(label);
+      return { label: label?.trim(), cm: isNaN(cm)?null:cm, price: Number(price)||0 };
+    }).filter(o => o.label && o.cm);
+  })();
+  const activeCut = drawerCutOption || (cutOptions[0]||null);
+  const cutStep = activeCut ? +(activeCut.cm/100).toFixed(4) : 0.01;
+  const snapToStep = (val) => {
+    if (!cutStep) return val;
+    return Math.round(val / cutStep) * cutStep;
+  };
+
   const wpm = parseFloat(selProd.watt_per_meter)||0;
   const maxCircuit = parseFloat(selProd.max_circuit)||5;
   const matchDriver = (totalW) => {
@@ -3450,6 +3468,29 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
   return (
     <div style={{margin:"12px 0",padding:"12px",border:"0.5px solid var(--bdr)",background:"var(--bg2)"}}>
       <div style={{fontSize:10,letterSpacing:2,marginBottom:10}}>線型燈計算</div>
+
+      {/* 裁切點選擇 */}
+      {cutOptions.length>0&&(
+        <div style={{marginBottom:12,padding:"9px 10px",background:"#fdf8ee",border:"0.5px solid var(--gold)"}}>
+          <div style={{fontSize:9,letterSpacing:2,color:"var(--gold)",marginBottom:6}}>裁切點規格</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {cutOptions.map(opt=>(
+              <button key={opt.label} onClick={()=>setDrawerCutOption(opt)}
+                style={{padding:"5px 12px",border:"0.5px solid",fontSize:11,cursor:"pointer",
+                  background:activeCut?.label===opt.label?"var(--blk)":"transparent",
+                  color:activeCut?.label===opt.label?"var(--ivory)":"var(--blk)",
+                  borderColor:activeCut?.label===opt.label?"var(--blk)":"var(--bdr)"}}>
+                {opt.label}
+                {opt.price>0&&<span style={{fontSize:9,marginLeft:5,opacity:.7}}>NT${opt.price.toLocaleString()}/m</span>}
+              </button>
+            ))}
+          </div>
+          {activeCut&&<div style={{fontSize:9,color:"var(--muted)",marginTop:5}}>
+            長度輸入精度：每 {activeCut.cm} cm（{activeCut.cm>=100?activeCut.cm/100+"m":activeCut.cm+"cm"} 為單位）
+          </div>}
+        </div>
+      )}
+
       {drawerCircuits.map((circuit,cidx)=>{
         const totalM = circuit.segments.reduce((s,seg)=>s+(parseFloat(seg.meters)||0),0);
         const totalW = totalM>0&&wpm>0 ? Math.ceil(totalM*wpm*1.3) : 0;
@@ -3469,7 +3510,12 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
                 <span style={{fontSize:9,color:"var(--muted)",minWidth:24}}>段{sidx+1}</span>
                 <input value={seg.spaceId||""} onChange={e=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.map((s,si)=>si!==sidx?s:{...s,spaceId:e.target.value})}))}
                   placeholder="空間名稱" style={{width:80,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
-                <input type="number" step="0.01" min="0.01" value={seg.meters||""} onChange={e=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.map((s,si)=>si!==sidx?s:{...s,meters:e.target.value})}))}
+                <input type="number" step={cutStep||0.01} min={cutStep||0.01} value={seg.meters||""}
+                  onChange={e=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.map((s,si)=>si!==sidx?s:{...s,meters:e.target.value})}))}
+                  onBlur={e=>{
+                    const snapped = snapToStep(parseFloat(e.target.value)||0);
+                    if(snapped>0) setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.map((s,si)=>si!==sidx?s:{...s,meters:snapped.toFixed(2)})}));
+                  }}
                   placeholder="m" style={{width:72,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
                 <span style={{fontSize:10,color:"var(--muted)"}}>m</span>
                 {circuit.segments.length>1&&<button onClick={()=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.filter((_,si)=>si!==sidx)}))}
