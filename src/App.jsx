@@ -1478,6 +1478,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [customIds,  setCustomIds]  = useState({});
   const [drawerMeters,  setDrawerMeters]  = useState("");
   const [drawerSpaceId, setDrawerSpaceId] = useState("");
+  const [drawerCircuits, setDrawerCircuits] = useState([{id:"c1",label:"回路 1",meters:"",spaceId:""}]);
   const [sampCart,   setSampCart]   = useState([]);
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
@@ -1594,7 +1595,7 @@ if (partsData?.length > 0) setAllParts(partsData);
     })();
   }, [sheetUrl]);
 useEffect(()=>{
-  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); }
+  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",meters:"",spaceId:""}]); }
 }, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
@@ -3312,7 +3313,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             {hasStock(selProd.model)&&<div className="inv-badge-drawer"><span className="inv-badge-dot"/>台灣現貨 · 1–3 工作天出貨 · 快速到貨</div>}
             <div className="drawer-desc">{selProd.desc}</div>
             <div className="spec-grid">
-              {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["開孔尺寸",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
+              {[["瓦數",selProd.watt],["流明",selProd.lumen],["演色性",selProd.cri],["外框顏色",selProd.outerColor||"—"],["內框顏色",selProd.innerColor||"—"],["開孔直徑",selProd.cutout],["產品尺寸",selProd.size],["安裝方式",selProd.install],["認證",selProd.cert]].filter(([,v])=>v&&v!=="—").map(([l,v])=>(<div key={l} className="spec-item"><div className="spec-label">{l}</div><div className="spec-val">{v}</div></div>))}
             </div>
                      <Carousel images={selProd.images} onZoom={src=>setLightboxSrc(src)}/>
 {selProd.dimImg&&(
@@ -3437,73 +3438,72 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <div className="pb-label">牌價</div>
               {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
-{selProd?.product_type === "linear" && (
-  <div style={{margin:"12px 0",padding:"12px",border:"0.5px solid var(--bdr)",background:"var(--bg2)"}}>
-    <div style={{fontSize:10,letterSpacing:2,marginBottom:8}}>線型燈計算</div>
-    <div style={{display:"flex",gap:8,marginBottom:8}}>
-      <div>
-        <label style={{fontSize:9,color:"var(--muted)"}}>空間編號</label>
-        <input value={drawerSpaceId} onChange={e=>setDrawerSpaceId(e.target.value)}
-          placeholder="例：客廳A" style={{display:"block",width:90,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
-      </div>
-      <div>
-        <label style={{fontSize:9,color:"var(--muted)"}}>米數</label>
-        <input type="number" step="0.1" value={drawerMeters} onChange={e=>setDrawerMeters(e.target.value)}
-          placeholder="米" style={{display:"block",width:70,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
-      </div>
-    </div>
-    {drawerMeters && selProd.watt_per_meter && (()=>{
-      const wpm = parseFloat(selProd.watt_per_meter)||0;
-      const m = parseFloat(drawerMeters)||0;
-      const total = Math.ceil(m * wpm * 1.3);
-      const maxCircuit = parseFloat(selProd.max_circuit)||5;
-      const overLimit = m > maxCircuit;
-      return (
-        <div>
-          <div style={{fontSize:11,marginBottom:4}}>建議驅動器：<b>≥ {total} W</b></div>
-          {overLimit && (
-            <div style={{fontSize:10,color:"#e55",marginBottom:4}}>
-              ⚠️ 單回路最長 {maxCircuit} 米，超過需另拉一條並聯
-            </div>
-          )}
-          {(()=>{
-            const matched = products
-              .filter(p => p.series === "DC24V/DC48V 驅動器" && Number(p.watt) >= total && p.status === "上架")
-              .sort((a,b) => Number(a.watt) - Number(b.watt))
-              .slice(0,3);
-            if(!matched.length) return <div style={{fontSize:10,color:"var(--muted)",marginTop:4}}>尚無對應驅動器，請聯繫業務</div>;
-            return (
-              <div style={{marginTop:8,display:"flex",flexDirection:"column",gap:6}}>
-                {matched.map(d=>(
-                  <div key={d.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",border:"0.5px solid var(--bdr)",background:"var(--bg)"}}>
-                    {d.images?.[0] && <img src={d.images[0]} style={{width:40,height:40,objectFit:"contain"}}/>}
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:11,fontWeight:600}}>{d.model}</div>
-                      <div style={{fontSize:10,color:"var(--muted)"}}>{d.watt}W · {d.voltage} · NT$ {Number(d.stdPrice||0).toLocaleString()}</div>
-                    </div>
-                    <button onClick={()=>{
-                      const item = {
-                        ...selProd,
-                        _driverModel: d.model,
-                        _driverPrice: d.stdPrice,
-                        _meters: drawerMeters,
-                        _spaceId: drawerSpaceId
-                      };
-                      addToCart(item);
-                      toast$(`已加入：${selProd.model} + ${d.model}`);
-                    }} style={{fontSize:10,padding:"4px 10px",border:"0.5px solid var(--bdr)",background:"var(--blk)",color:"var(--wht)",cursor:"pointer"}}>
-                      選用
-                    </button>
-                  </div>
-                ))}
+{selProd?.product_type === "linear" && (()=>{
+  const driverRules = (() => { try { return JSON.parse(localStorage.getItem("driverRules")||"[]"); } catch { return []; } })();
+  const wpm = parseFloat(selProd.watt_per_meter)||0;
+  const maxCircuit = parseFloat(selProd.max_circuit)||5;
+  const matchDriver = (totalW) => {
+    const rule = driverRules.filter(r=>totalW>=Number(r.wattMin)&&totalW<=Number(r.wattMax)).sort((a,b)=>Number(a.wattMin)-Number(b.wattMin))[0];
+    if(!rule) return null;
+    return products.find(p=>p.model===rule.driverModel)||{model:rule.driverModel};
+  };
+  return (
+    <div style={{margin:"12px 0",padding:"12px",border:"0.5px solid var(--bdr)",background:"var(--bg2)"}}>
+      <div style={{fontSize:10,letterSpacing:2,marginBottom:10}}>線型燈計算</div>
+      {drawerCircuits.map((c,idx)=>{
+        const m = parseFloat(c.meters)||0;
+        const totalW = m>0&&wpm>0 ? Math.ceil(m*wpm*1.3) : 0;
+        const driver = totalW>0 ? matchDriver(totalW) : null;
+        const overLimit = m>maxCircuit;
+        return (
+          <div key={c.id} style={{marginBottom:10,padding:"9px 10px",background:"var(--bg)",border:"0.5px solid var(--bdr)"}}>
+            <div style={{display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap",marginBottom:6}}>
+              <div>
+                <label style={{fontSize:9,color:"var(--muted)",display:"block",marginBottom:2}}>{c.label} — 空間</label>
+                <input value={c.spaceId||""} onChange={e=>setDrawerCircuits(cs=>cs.map((x,i)=>i===idx?{...x,spaceId:e.target.value}:x))}
+                  placeholder="例：客廳A" style={{width:80,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
               </div>
-            );
-          })()}
+              <div>
+                <label style={{fontSize:9,color:"var(--muted)",display:"block",marginBottom:2}}>米數</label>
+                <input type="number" step="0.1" min="0.1" value={c.meters||""} onChange={e=>setDrawerCircuits(cs=>cs.map((x,i)=>i===idx?{...x,meters:e.target.value}:x))}
+                  placeholder="米" style={{width:65,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
+              </div>
+              {drawerCircuits.length>1&&<button onClick={()=>setDrawerCircuits(cs=>cs.filter((_,i)=>i!==idx))}
+                style={{padding:"4px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,cursor:"pointer",color:"var(--muted)"}}>✕</button>}
+            </div>
+            {m>0&&wpm>0&&(
+              <div>
+                <div style={{fontSize:10,color:"var(--muted)",marginBottom:3}}>{m}m × {wpm}W/m × 1.3 = <b>≥ {totalW}W 驅動器</b></div>
+                {overLimit&&<div style={{fontSize:10,color:"#e55",marginBottom:3}}>⚠️ 單回路上限 {maxCircuit}m，建議拆分</div>}
+                {driver?(
+                  <div style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",border:"0.5px solid var(--gold)",background:"#fdf8ee"}}>
+                    <span style={{fontSize:9,color:"var(--gold)"}}>✦ 建議</span>
+                    <b style={{fontSize:11}}>{driver.model}</b>
+                    {driver.watt&&<span style={{fontSize:10,color:"var(--muted)"}}>{driver.watt}W</span>}
+                    {driver.stdPrice>0&&<span style={{fontSize:10,color:"var(--muted)"}}>NT$ {Number(driver.stdPrice).toLocaleString()}</span>}
+                  </div>
+                ):(
+                  <div style={{fontSize:10,color:"var(--muted)"}}>
+                    {driverRules.length===0?"驅動器規則未設定（請至 KIMBOSS 後台設定）":"無對應規則，請聯繫業務"}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <button onClick={()=>setDrawerCircuits(cs=>[...cs,{id:"c"+Date.now(),label:`回路 ${cs.length+1}`,meters:"",spaceId:""}])}
+        style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,letterSpacing:1,cursor:"pointer",color:"var(--muted)",marginBottom:6}}>
+        ＋ 新增回路
+      </button>
+      {drawerCircuits.filter(c=>parseFloat(c.meters)>0).length>0&&(
+        <div style={{fontSize:10,color:"var(--muted)",paddingTop:6,borderTop:"0.5px solid var(--bdr2)"}}>
+          合計 {drawerCircuits.reduce((s,c)=>s+(parseFloat(c.meters)||0),0).toFixed(1)} 米 / {drawerCircuits.length} 個回路
         </div>
-      );
-    })()}
-  </div>
-)}
+      )}
+    </div>
+  );
+})()}
 <div className="drawer-actions">
               <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>{
                 const extraSpec={};
