@@ -1009,13 +1009,19 @@ async function apiGet(action){
   try{const r=await fetch(`${getURL()}?action=${action}`);const j=await r.json();return j.success?j.data:[];}
   catch(e){return[];}
 }
-async function apiPost(action,data){
-  try{
-    const payload=encodeURIComponent(JSON.stringify(data));
-    const r=await fetch(`${getURL()}?action=${action}&payload=${payload}`);
-    return await r.json();
+async function apiPost(action, payload){
+  const url = localStorage.getItem('ldx_url') || DEFAULT_URL;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action, payload})
+    });
+    return await res.json();
+  } catch(e) {
+    console.error('apiPost error:', e);
+    return null;
   }
-  catch(e){return{success:false,error:String(e)};}
 }
 
 // LOAD
