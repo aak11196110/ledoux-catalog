@@ -3437,19 +3437,38 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <div className="pb-label">牌價</div>
               {selProd.stdPrice>0?<div className="pb-val">NT$ {selProd.stdPrice?.toLocaleString()}</div>:<div className="pb-nq">請洽業務專員報價</div>}
             </div>
-{selProd&&(selProd.voltage?.includes("DC24V")||selProd.voltage?.includes("DC48V"))&&selProd.watt_per_meter&&(
-  <div style={{background:"#f9f5ef",border:"0.5px solid var(--bdr)",padding:"12px 14px",marginBottom:10,borderRadius:2}}>
-    <div style={{fontSize:9,letterSpacing:2,textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>線型燈安裝資訊</div>
-    <input value={drawerSpaceId} onChange={e=>setDrawerSpaceId(e.target.value)} placeholder="空間編號（例如：客廳A）"
-      style={{width:"100%",padding:"6px 9px",border:"0.5px solid var(--bdr)",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",outline:"none",background:"transparent",marginBottom:8}}/>
-    <input type="number" step="0.1" min="0" value={drawerMeters} onChange={e=>setDrawerMeters(e.target.value)} placeholder="輸入米數"
-      style={{width:"100%",padding:"6px 9px",border:"0.5px solid var(--bdr)",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",outline:"none",background:"transparent"}}/>
-    {drawerMeters&&parseFloat(drawerMeters)>0&&(<div style={{marginTop:8,fontSize:11,color:"var(--blk)"}}>
-      建議驅動器：≥ <b>{Math.ceil(parseFloat(drawerMeters)*selProd.watt_per_meter*1.3)} W</b>
-    </div>)}
-    {selProd.voltage?.includes("DC24V")&&parseFloat(drawerMeters)>5&&(
-      <div style={{marginTop:6,fontSize:11,color:"var(--red)",fontWeight:500}}>⚠️ 單回路最長5米，建議拆成多條串聯</div>
-    )}
+{selProd?.product_type === "linear" && (
+  <div style={{margin:"12px 0",padding:"12px",border:"0.5px solid var(--bdr)",background:"var(--bg2)"}}>
+    <div style={{fontSize:10,letterSpacing:2,marginBottom:8}}>線型燈計算</div>
+    <div style={{display:"flex",gap:8,marginBottom:8}}>
+      <div>
+        <label style={{fontSize:9,color:"var(--muted)"}}>空間編號</label>
+        <input value={drawerSpaceId} onChange={e=>setDrawerSpaceId(e.target.value)}
+          placeholder="例：客廳A" style={{display:"block",width:90,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
+      </div>
+      <div>
+        <label style={{fontSize:9,color:"var(--muted)"}}>米數</label>
+        <input type="number" step="0.1" value={drawerMeters} onChange={e=>setDrawerMeters(e.target.value)}
+          placeholder="米" style={{display:"block",width:70,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
+      </div>
+    </div>
+    {drawerMeters && selProd.watt_per_meter && (()=>{
+      const wpm = parseFloat(selProd.watt_per_meter)||0;
+      const m = parseFloat(drawerMeters)||0;
+      const total = Math.ceil(m * wpm * 1.3);
+      const maxCircuit = parseFloat(selProd.max_circuit)||5;
+      const overLimit = m > maxCircuit;
+      return (
+        <div>
+          <div style={{fontSize:11,marginBottom:4}}>建議驅動器：<b>≥ {total} W</b></div>
+          {overLimit && (
+            <div style={{fontSize:10,color:"#e55",marginBottom:4}}>
+              ⚠️ 單回路最長 {maxCircuit} 米，超過需另拉一條並聯
+            </div>
+          )}
+        </div>
+      );
+    })()}
   </div>
 )}
 <div className="drawer-actions">
