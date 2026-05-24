@@ -681,6 +681,17 @@
       <div class="form-row">
         <div class="form-group"><label class="form-label">防護等級</label><input class="form-input" id="p-ip_rating" type="text" placeholder="例：IP20、IP67"></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">產品類型</label><select class="form-input" id="p-product_type"><option value="standard">standard（一般燈具）</option><option value="linear">linear（線型燈）</option></select></div>
+        <div class="form-group"><label class="form-label">使用環境</label><select class="form-input" id="p-environment"><option value="室內">室內</option><option value="戶外">戶外</option><option value="兩者皆可">兩者皆可</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">每米瓦數 (W/m)</label><input class="form-input" id="p-watt_per_meter" type="number" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">單條最長 (m)</label><input class="form-input" id="p-max_length" type="number" step="0.01" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">回路最長 (m)</label><input class="form-input" id="p-max_circuit" type="number" step="0.01" placeholder="0"></div>
+      </div>
     </div>
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
     <div class="form-group">
@@ -1025,9 +1036,10 @@ fv('p-img',(p.images&&p.images[0])||'');
 fv('p-dimimg',p.dimImg||'');
 fv('p-cct',p.cct||'');fv('p-beam',p.beam||'');fv('p-outerColor',p.outerColor||'');fv('p-innerColor',p.innerColor||'');fv('p-color',p.color||'');fv('p-voltage',p.voltage||'');fv('p-addon',Array.isArray(p.addon)?p.addon.join('/'):p.addon||'');
 fv('p-cutout_min',p.cutout_min||'');fv('p-cutout_max',p.cutout_max||'');fv('p-watt_min',p.watt_min||'');fv('p-watt_max',p.watt_max||'');fv('p-body_length',p.body_length||'');fv('p-body_width',p.body_width||'');fv('p-body_height',p.body_height||'');fv('p-body_diameter',p.body_diameter||'');fv('p-ip_rating',p.ip_rating||'');
+g('p-product_type').value=p.product_type||'standard';g('p-environment').value=p.environment||'室內';fv('p-watt_per_meter',p.watt_per_meter||'');fv('p-max_length',p.max_length||'');fv('p-max_circuit',p.max_circuit||'');
 prevImg();prevDimImg();showM('modal-prod');
 }
- function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating'].forEach(k=>fv(k,''));document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
+ function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating','p-watt_per_meter','p-max_length','p-max_circuit'].forEach(k=>fv(k,''));g('p-product_type').value='standard';g('p-environment').value='室內';document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
@@ -1050,7 +1062,12 @@ body_length:v('p-body_length')?Number(v('p-body_length')):null,
 body_width:v('p-body_width')?Number(v('p-body_width')):null,
 body_height:v('p-body_height')?Number(v('p-body_height')):null,
 body_diameter:v('p-body_diameter')?Number(v('p-body_diameter')):null,
-ip_rating:v('p-ip_rating')||null};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
+ip_rating:v('p-ip_rating')||null,
+product_type:g('p-product_type').value||'standard',
+environment:g('p-environment').value||'室內',
+watt_per_meter:v('p-watt_per_meter')?Number(v('p-watt_per_meter')):null,
+max_length:v('p-max_length')?Number(v('p-max_length')):null,
+max_circuit:v('p-max_circuit')?Number(v('p-max_circuit')):null};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
   rProd();hideM('modal-prod');toast('同步中...');
   const res=await apiPost('upsertProduct',rec);
