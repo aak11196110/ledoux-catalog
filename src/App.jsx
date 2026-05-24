@@ -1485,6 +1485,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [onboardSteps, setOnboardSteps] = useState([]);
   const [onboardOpen, setOnboardOpen] = useState(false);
   const [onboardIdx, setOnboardIdx] = useState(0);
+  const [onboardImgIdx, setOnboardImgIdx] = useState(0);
   const [hintModal, setHintModal] = useState(null);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [sampCart,   setSampCart]   = useState([]);
@@ -1596,7 +1597,7 @@ if (addonData?.length > 0) setAddons(addonData);
           const sorted = onboardData.filter(s=>s.active==="TRUE"||s.active===true).sort((a,b)=>Number(a.step)-Number(b.step));
           setOnboardSteps(sorted);
           const seen = localStorage.getItem("ldx_onboard_seen");
-          if (!seen && sorted.length > 0) { setOnboardOpen(true); setOnboardIdx(0); }
+          if (!seen && sorted.length > 0) { setOnboardOpen(true); setOnboardIdx(0); setOnboardImgIdx(0); }
         }
         setSyncStatus("ok");
         fetch(SHEET_URL + "?action=getProductOrder")
@@ -3833,15 +3834,28 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,marginBottom:12,color:"var(--blk)"}}>
               {onboardSteps[onboardIdx]?.title}
             </div>
-            {onboardSteps[onboardIdx]?.imageUrl&&(
-              <img src={onboardSteps[onboardIdx].imageUrl} alt="" style={{width:"100%",maxHeight:180,objectFit:"contain",marginBottom:12,border:"0.5px solid var(--bdr)"}} onError={e=>e.target.style.display="none"}/>
-            )}
+            {(()=>{
+              const imgs=(onboardSteps[onboardIdx]?.imageUrl||"").split(",").map(s=>s.trim()).filter(Boolean);
+              if(!imgs.length) return null;
+              return(
+                <div style={{position:"relative",marginBottom:12}}>
+                  <img src={imgs[onboardImgIdx||0]} alt="" style={{width:"100%",maxHeight:180,objectFit:"contain",border:"0.5px solid var(--bdr)",display:"block"}} onError={e=>e.target.style.display="none"}/>
+                  {imgs.length>1&&<>
+                    <button onClick={()=>setOnboardImgIdx(i=>i<=0?imgs.length-1:i-1)} style={{position:"absolute",left:4,top:"50%",transform:"translateY(-50%)",background:"rgba(14,13,12,.6)",border:"none",color:"#fff",width:24,height:24,cursor:"pointer",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>‹</button>
+                    <button onClick={()=>setOnboardImgIdx(i=>i>=imgs.length-1?0:i+1)} style={{position:"absolute",right:4,top:"50%",transform:"translateY(-50%)",background:"rgba(14,13,12,.6)",border:"none",color:"#fff",width:24,height:24,cursor:"pointer",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center"}}>›</button>
+                    <div style={{display:"flex",gap:4,justifyContent:"center",marginTop:6}}>
+                      {imgs.map((_,i)=><div key={i} onClick={()=>setOnboardImgIdx(i)} style={{width:5,height:5,borderRadius:"50%",background:i===(onboardImgIdx||0)?"var(--blk)":"var(--bdr)",cursor:"pointer"}}/>)}
+                    </div>
+                  </>}
+                </div>
+              );
+            })()}
             <div style={{fontSize:13,color:"var(--muted)",lineHeight:1.9,marginBottom:24,whiteSpace:"pre-line"}}>
               {onboardSteps[onboardIdx]?.body}
             </div>
             <div style={{display:"flex",gap:5,justifyContent:"center",marginBottom:20}}>
               {onboardSteps.map((_,i)=>(
-                <div key={i} style={{width:6,height:6,borderRadius:"50%",background:i===onboardIdx?"var(--blk)":"var(--bdr)",cursor:"pointer",transition:"background .2s"}} onClick={()=>setOnboardIdx(i)}/>
+                <div key={i} style={{width:6,height:6,borderRadius:"50%",background:i===onboardIdx?"var(--blk)":"var(--bdr)",cursor:"pointer",transition:"background .2s"}} onClick={()=>{setOnboardIdx(i);setOnboardImgIdx(0);}}/>
               ))}
             </div>
             <div style={{display:"flex",gap:8,justifyContent:"space-between"}}>
@@ -3850,12 +3864,12 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
                 跳過
               </button>
               <div style={{display:"flex",gap:8}}>
-                {onboardIdx>0&&<button onClick={()=>setOnboardIdx(i=>i-1)}
+                {onboardIdx>0&&<button onClick={()=>{setOnboardIdx(i=>i-1);setOnboardImgIdx(0);}}
                   style={{padding:"8px 16px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:"9px",letterSpacing:"2px",cursor:"pointer"}}>
                   上一步
                 </button>}
                 {onboardIdx<onboardSteps.length-1?(
-                  <button onClick={()=>setOnboardIdx(i=>i+1)}
+                  <button onClick={()=>{setOnboardIdx(i=>i+1);setOnboardImgIdx(0);}}
                     style={{padding:"8px 20px",border:"none",background:"var(--blk)",color:"var(--ivory)",fontSize:"9px",letterSpacing:"2px",cursor:"pointer"}}>
                     下一步
                   </button>
@@ -3903,7 +3917,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <div style={{fontSize:11,color:"var(--muted)"}}>提示庫尚未設定，請至 KIMBOSS 後台新增。</div>
             )}
             <div style={{borderTop:"0.5px solid var(--bdr2)",marginTop:10,paddingTop:10}}>
-              <button onClick={()=>{setOnboardIdx(0);setOnboardOpen(true);setAssistantOpen(false);}}
+              <button onClick={()=>{setOnboardIdx(0);setOnboardImgIdx(0);setOnboardOpen(true);setAssistantOpen(false);}}
                 style={{width:"100%",padding:"7px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:"9px",letterSpacing:"2px",cursor:"pointer",color:"var(--muted)"}}>
                 重看使用導覽
               </button>
