@@ -1481,6 +1481,12 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [drawerCircuits, setDrawerCircuits] = useState([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]);
   const [drawerCutOption, setDrawerCutOption] = useState(null);
   const [drawerLightExit, setDrawerLightExit] = useState(null);
+  const [hints, setHints] = useState([]);
+  const [onboardSteps, setOnboardSteps] = useState([]);
+  const [onboardOpen, setOnboardOpen] = useState(false);
+  const [onboardIdx, setOnboardIdx] = useState(0);
+  const [hintModal, setHintModal] = useState(null);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [sampCart,   setSampCart]   = useState([]);
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
@@ -1582,7 +1588,16 @@ if (prods?.length > 0) setProducts(prods);
 if (invs?.length > 0) setInventory(invs);
 if (addonData?.length > 0) setAddons(addonData);
         if (sinvData?.length > 0) setSampleInv(sinvData);
-if (partsData?.length > 0) setAllParts(partsData);
+        if (partsData?.length > 0) setAllParts(partsData);
+        const hintsData = await sheetGet("getHints");
+        if (hintsData?.length > 0) setHints(hintsData);
+        const onboardData = await sheetGet("getOnboarding");
+        if (onboardData?.length > 0) {
+          const sorted = onboardData.filter(s=>s.active==="TRUE"||s.active===true).sort((a,b)=>Number(a.step)-Number(b.step));
+          setOnboardSteps(sorted);
+          const seen = localStorage.getItem("ldx_onboard_seen");
+          if (!seen && sorted.length > 0) { setOnboardOpen(true); setOnboardIdx(0); }
+        }
         setSyncStatus("ok");
         fetch(SHEET_URL + "?action=getProductOrder")
           .then(r => r.json())
@@ -3807,6 +3822,109 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
       </div>
 
       {toast&&<div className="toast">{toast}</div>}
+
+      {/* ══ 首次導覽 Modal ══ */}
+      {onboardOpen&&onboardSteps.length>0&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(14,13,12,.8)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"var(--ivory)",maxWidth:480,width:"100%",padding:32,position:"relative"}}>
+            <div style={{fontSize:"7px",letterSpacing:"4px",color:"var(--gold)",textTransform:"uppercase",marginBottom:4}}>
+              步驟 {onboardIdx+1} / {onboardSteps.length}
+            </div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,marginBottom:12,color:"var(--blk)"}}>
+              {onboardSteps[onboardIdx]?.title}
+            </div>
+            {onboardSteps[onboardIdx]?.imageUrl&&(
+              <img src={onboardSteps[onboardIdx].imageUrl} alt="" style={{width:"100%",maxHeight:180,objectFit:"contain",marginBottom:12,border:"0.5px solid var(--bdr)"}} onError={e=>e.target.style.display="none"}/>
+            )}
+            <div style={{fontSize:13,color:"var(--muted)",lineHeight:1.9,marginBottom:24,whiteSpace:"pre-line"}}>
+              {onboardSteps[onboardIdx]?.body}
+            </div>
+            <div style={{display:"flex",gap:5,justifyContent:"center",marginBottom:20}}>
+              {onboardSteps.map((_,i)=>(
+                <div key={i} style={{width:6,height:6,borderRadius:"50%",background:i===onboardIdx?"var(--blk)":"var(--bdr)",cursor:"pointer",transition:"background .2s"}} onClick={()=>setOnboardIdx(i)}/>
+              ))}
+            </div>
+            <div style={{display:"flex",gap:8,justifyContent:"space-between"}}>
+              <button onClick={()=>{localStorage.setItem("ldx_onboard_seen","1");setOnboardOpen(false);}}
+                style={{padding:"8px 16px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:"9px",letterSpacing:"2px",cursor:"pointer",color:"var(--muted)"}}>
+                跳過
+              </button>
+              <div style={{display:"flex",gap:8}}>
+                {onboardIdx>0&&<button onClick={()=>setOnboardIdx(i=>i-1)}
+                  style={{padding:"8px 16px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:"9px",letterSpacing:"2px",cursor:"pointer"}}>
+                  上一步
+                </button>}
+                {onboardIdx<onboardSteps.length-1?(
+                  <button onClick={()=>setOnboardIdx(i=>i+1)}
+                    style={{padding:"8px 20px",border:"none",background:"var(--blk)",color:"var(--ivory)",fontSize:"9px",letterSpacing:"2px",cursor:"pointer"}}>
+                    下一步
+                  </button>
+                ):(
+                  <button onClick={()=>{localStorage.setItem("ldx_onboard_seen","1");setOnboardOpen(false);}}
+                    style={{padding:"8px 20px",border:"none",background:"var(--gold)",color:"var(--blk)",fontSize:"9px",letterSpacing:"2px",cursor:"pointer"}}>
+                    開始使用 ✓
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ 提示 Modal ══ */}
+      {hintModal&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(14,13,12,.6)",zIndex:450,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setHintModal(null)}>
+          <div style={{background:"var(--ivory)",maxWidth:400,width:"100%",padding:24,position:"relative"}} onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setHintModal(null)} style={{position:"absolute",top:12,right:12,background:"none",border:"none",fontSize:16,cursor:"pointer",color:"var(--muted)"}}>✕</button>
+            <div style={{fontSize:"7px",letterSpacing:"3px",color:"var(--gold)",textTransform:"uppercase",marginBottom:6}}>說明</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,marginBottom:10}}>{hintModal.title}</div>
+            {hintModal.imageUrl&&<img src={hintModal.imageUrl} alt="" style={{width:"100%",maxHeight:150,objectFit:"contain",marginBottom:10,border:"0.5px solid var(--bdr)"}} onError={e=>e.target.style.display="none"}/>}
+            <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.9,whiteSpace:"pre-line"}}>{hintModal.body}</div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ 工程師小助手 ══ */}
+      <div style={{position:"fixed",bottom:24,right:24,zIndex:400}}>
+        {assistantOpen&&(
+          <div style={{position:"absolute",bottom:64,right:0,width:280,background:"var(--ivory)",border:"0.5px solid var(--bdr)",padding:16,marginBottom:8,boxShadow:"0 4px 24px rgba(0,0,0,.12)"}}>
+            <div style={{fontSize:"7px",letterSpacing:"3px",color:"var(--gold)",textTransform:"uppercase",marginBottom:8}}>小助手 · 快速說明</div>
+            {hints.length>0?(
+              <div style={{display:"flex",flexDirection:"column",gap:6,maxHeight:260,overflowY:"auto"}}>
+                {hints.slice(0,8).map(h=>(
+                  <button key={h.id} onClick={()=>{setHintModal(h);setAssistantOpen(false);}}
+                    style={{padding:"7px 10px",border:"0.5px solid var(--bdr)",background:"transparent",textAlign:"left",cursor:"pointer",fontSize:11,color:"var(--blk)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <span>[{h.code}] {h.title}</span>
+                    <span style={{fontSize:9,color:"var(--gold)"}}>→</span>
+                  </button>
+                ))}
+              </div>
+            ):(
+              <div style={{fontSize:11,color:"var(--muted)"}}>提示庫尚未設定，請至 KIMBOSS 後台新增。</div>
+            )}
+            <div style={{borderTop:"0.5px solid var(--bdr2)",marginTop:10,paddingTop:10}}>
+              <button onClick={()=>{setOnboardIdx(0);setOnboardOpen(true);setAssistantOpen(false);}}
+                style={{width:"100%",padding:"7px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:"9px",letterSpacing:"2px",cursor:"pointer",color:"var(--muted)"}}>
+                重看使用導覽
+              </button>
+            </div>
+          </div>
+        )}
+        <button onClick={()=>setAssistantOpen(v=>!v)}
+          style={{width:52,height:52,borderRadius:"50%",border:"none",background:"var(--blk)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px rgba(0,0,0,.3)",transition:"transform .2s",transform:assistantOpen?"rotate(15deg)":"none"}}>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="13" r="7" fill="#f7f4ef"/>
+            <path d="M7 13 Q14 5 21 13" fill="#b8935a"/>
+            <rect x="6" y="12" width="16" height="3" rx="1.5" fill="#b8935a"/>
+            <circle cx="11.5" cy="13.5" r="1" fill="#0e0d0c"/>
+            <circle cx="16.5" cy="13.5" r="1" fill="#0e0d0c"/>
+            <path d="M11.5 16.5 Q14 18 16.5 16.5" stroke="#0e0d0c" strokeWidth="0.8" fill="none" strokeLinecap="round"/>
+            <rect x="10" y="21" width="8" height="5" rx="1" fill="#0e0d0c"/>
+            <rect x="9" y="20" width="10" height="3" rx="1" fill="#b8935a"/>
+          </svg>
+        </button>
+      </div>
+
     </div>
     </>
   );

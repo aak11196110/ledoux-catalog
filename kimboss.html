@@ -619,6 +619,45 @@
           </div>
         </div>
       </div>
+
+      <!-- 提示庫管理 -->
+      <div style="margin-top:18px">
+        <div class="settings-card">
+          <h3>提示庫管理</h3>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:14px">設定前台「?」說明提示，代碼可重複使用於多個位置。存於 Google Sheets。</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">代碼（如 Q1）</div><input class="form-input" id="ht-code" placeholder="Q1" style="width:70px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">標題</div><input class="form-input" id="ht-title" placeholder="什麼是裁切點？" style="width:180px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">說明</div><input class="form-input" id="ht-body" placeholder="說明文字..." style="width:220px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ht-img" placeholder="https://..." style="width:180px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">使用位置備註</div><input class="form-input" id="ht-usedin" placeholder="例：裁切點選擇、色溫選擇" style="width:180px"></div>
+            <button class="btn btn-gold" onclick="saveHint()">＋ 新增提示</button>
+          </div>
+          <div class="tbl-wrap">
+            <table><thead><tr><th>代碼</th><th>標題</th><th>說明</th><th>使用位置</th><th>操作</th></tr></thead>
+            <tbody id="hint-tb"><tr><td colspan="5" class="no-data">載入中...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 導覽步驟管理 -->
+      <div style="margin-top:18px">
+        <div class="settings-card">
+          <h3>首次導覽步驟管理</h3>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:14px">設定新客戶第一次進站看到的導覽步驟。</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">步驟序號</div><input class="form-input" type="number" id="ob-step" placeholder="1" style="width:60px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">標題</div><input class="form-input" id="ob-title" placeholder="歡迎使用 LEDOUX" style="width:180px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">說明</div><textarea class="form-input" id="ob-body" placeholder="說明文字..." style="width:220px;height:60px;resize:vertical"></textarea></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ob-img" placeholder="https://..." style="width:180px"></div>
+            <button class="btn btn-gold" onclick="saveOnboardStep()">＋ 新增步驟</button>
+          </div>
+          <div class="tbl-wrap">
+            <table><thead><tr><th>序號</th><th>標題</th><th>說明</th><th>操作</th></tr></thead>
+            <tbody id="onboard-tb"><tr><td colspan="4" class="no-data">載入中...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
     </div>
 
 
@@ -990,7 +1029,7 @@ D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(i
   loadDrivers();
 }
 function a(x){return Array.isArray(x)?x:[];}
-function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();loadDriverRules();}
+function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();loadDriverRules();loadHints();loadOnboarding();}
 
 // NAV
 function nav(id){
@@ -1897,6 +1936,57 @@ async function initSheets(){
   toast(res&&res.success?'✅ 初始化完成':'⚠ 初始化失敗');
 }
 function clearCfg(){if(!confirm('確定清除本機設定？'))return;localStorage.clear();toast('清除完成');setTimeout(()=>location.reload(),1000);}
+
+// HINTS
+async function loadHints(){
+  const res = await apiPost('getHints',{});
+  const hints = res?.data||[];
+  const tb = document.getElementById('hint-tb');
+  if(!tb) return;
+  tb.innerHTML = hints.length ? hints.map(h=>`<tr>
+    <td><b>${esc(h.code)}</b></td>
+    <td>${esc(h.title)}</td>
+    <td style="font-size:10px;color:var(--muted);max-width:200px">${esc(h.body)}</td>
+    <td style="font-size:10px;color:var(--muted)">${esc(h.usedIn||'—')}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delHint('${esc(h.id)}')">刪除</button></td>
+  </tr>`).join('') : '<tr><td colspan="5" class="no-data">尚無提示</td></tr>';
+}
+async function saveHint(){
+  const code=v('ht-code').trim(),title=v('ht-title').trim(),body=v('ht-body').trim();
+  if(!code||!title){toast('請填寫代碼與標題');return;}
+  await apiPost('saveHint',{code,title,body,imageUrl:v('ht-img').trim(),usedIn:v('ht-usedin').trim(),createdAt:new Date().toISOString().split('T')[0]});
+  ['ht-code','ht-title','ht-body','ht-img','ht-usedin'].forEach(k=>fv(k,''));
+  toast('✓ 提示已儲存');loadHints();
+}
+async function delHint(id){
+  if(!confirm('確定刪除？'))return;
+  await apiPost('deleteHint',{id});toast('✓ 已刪除');loadHints();
+}
+
+// ONBOARDING
+async function loadOnboarding(){
+  const res = await apiPost('getOnboarding',{});
+  const steps = (res?.data||[]).sort((a,b)=>Number(a.step)-Number(b.step));
+  const tb = document.getElementById('onboard-tb');
+  if(!tb) return;
+  tb.innerHTML = steps.length ? steps.map(s=>`<tr>
+    <td style="text-align:center"><b>${s.step}</b></td>
+    <td>${esc(s.title)}</td>
+    <td style="font-size:10px;color:var(--muted);max-width:200px">${esc(s.body).substring(0,60)}...</td>
+    <td><button class="btn btn-sm btn-danger" onclick="delOnboardStep('${esc(s.id)}')">刪除</button></td>
+  </tr>`).join('') : '<tr><td colspan="4" class="no-data">尚無步驟</td></tr>';
+}
+async function saveOnboardStep(){
+  const step=Number(v('ob-step')),title=v('ob-title').trim(),body=v('ob-body').trim();
+  if(!step||!title){toast('請填寫步驟序號與標題');return;}
+  await apiPost('saveOnboardStep',{step,title,body,imageUrl:v('ob-img').trim(),active:true});
+  ['ob-step','ob-title','ob-body','ob-img'].forEach(k=>fv(k,''));
+  toast('✓ 步驟已儲存');loadOnboarding();
+}
+async function delOnboardStep(id){
+  if(!confirm('確定刪除？'))return;
+  await apiPost('deleteOnboardStep',{id});toast('✓ 已刪除');loadOnboarding();
+}
 
 // DRIVER RULES
 function loadDriverRules(){
