@@ -721,6 +721,7 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">裁切點規格（格式：1cm|2500, 6cm|2000）</label><input class="form-input" id="p-cutOptions" placeholder="例：1cm|2500, 6cm|2000"></div>
+        <div class="form-group"><label class="form-label">出光方式（格式：底部出光|圖片網址, 左側出光|圖片網址）</label><input class="form-input" id="p-lightExit" placeholder="例：底部出光|https://..., 左側出光|https://..."></div>
       </div>
     </div>
     <div class="form-group"><label class="form-label">產品說明</label><textarea class="form-textarea" id="p-desc"></textarea></div>
@@ -1066,10 +1067,10 @@ fv('p-img',(p.images&&p.images[0])||'');
 fv('p-dimimg',p.dimImg||'');
 fv('p-cct',p.cct||'');fv('p-beam',p.beam||'');fv('p-outerColor',p.outerColor||'');fv('p-innerColor',p.innerColor||'');fv('p-color',p.color||'');fv('p-voltage',p.voltage||'');fv('p-addon',Array.isArray(p.addon)?p.addon.join('/'):p.addon||'');
 fv('p-cutout_min',p.cutout_min||'');fv('p-cutout_max',p.cutout_max||'');fv('p-watt_min',p.watt_min||'');fv('p-watt_max',p.watt_max||'');fv('p-body_length',p.body_length||'');fv('p-body_width',p.body_width||'');fv('p-body_height',p.body_height||'');fv('p-body_diameter',p.body_diameter||'');fv('p-ip_rating',p.ip_rating||'');
-g('p-product_type').value=p.product_type||'standard';g('p-environment').value=p.environment||'室內';fv('p-watt_per_meter',p.watt_per_meter||'');fv('p-max_length',p.max_length||'');fv('p-max_circuit',p.max_circuit||'');fv('p-cutOptions',p.cutOptions||'');
+g('p-product_type').value=p.product_type||'standard';g('p-environment').value=p.environment||'室內';fv('p-watt_per_meter',p.watt_per_meter||'');fv('p-max_length',p.max_length||'');fv('p-max_circuit',p.max_circuit||'');fv('p-cutOptions',p.cutOptions||'');fv('p-lightExit',p.lightExit||'');
 prevImg();prevDimImg();showM('modal-prod');
 }
- function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating','p-watt_per_meter','p-max_length','p-max_circuit','p-cutOptions'].forEach(k=>fv(k,''));g('p-product_type').value='standard';g('p-environment').value='室內';document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
+ function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating','p-watt_per_meter','p-max_length','p-max_circuit','p-cutOptions','p-lightExit'].forEach(k=>fv(k,''));g('p-product_type').value='standard';g('p-environment').value='室內';document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
@@ -1098,7 +1099,8 @@ environment:g('p-environment').value||'室內',
 watt_per_meter:v('p-watt_per_meter')?Number(v('p-watt_per_meter')):null,
 max_length:v('p-max_length')?Number(v('p-max_length')):null,
 max_circuit:v('p-max_circuit')?Number(v('p-max_circuit')):null,
-cutOptions:v('p-cutOptions').trim()||null};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
+cutOptions:v('p-cutOptions').trim()||null,
+lightExit:v('p-lightExit').trim()||null};  const idx=D.products.findIndex(x=>String(x.id)===String(id));
   if(idx>=0)D.products[idx]=rec;else D.products.unshift(rec);
   rProd();hideM('modal-prod');toast('同步中...');
   const res=await apiPost('upsertProduct',rec);

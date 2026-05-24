@@ -1480,6 +1480,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [drawerSpaceId, setDrawerSpaceId] = useState("");
   const [drawerCircuits, setDrawerCircuits] = useState([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]);
   const [drawerCutOption, setDrawerCutOption] = useState(null);
+  const [drawerLightExit, setDrawerLightExit] = useState(null);
   const [sampCart,   setSampCart]   = useState([]);
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
@@ -1596,7 +1597,7 @@ if (partsData?.length > 0) setAllParts(partsData);
     })();
   }, [sheetUrl]);
 useEffect(()=>{
-  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]); setDrawerCutOption(null); }
+  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]); setDrawerCutOption(null); setDrawerLightExit(null); }
 }, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
@@ -3400,6 +3401,36 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
     </div>
   </div>):null}
 
+{/* 出光方式選擇 */}
+{selProd.lightExit&&selProd.lightExit.trim()&&(()=>{
+  const exitOptions = String(selProd.lightExit).split(",").map(s=>{
+    const [label, img] = s.trim().split("|");
+    return { label: label?.trim(), img: img?.trim()||"" };
+  }).filter(o=>o.label);
+  if(!exitOptions.length) return null;
+  return (
+    <div style={{marginBottom:12}}>
+      <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>出光方式</div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        {exitOptions.map(opt=>(
+          <button key={opt.label} onClick={()=>setDrawerLightExit(drawerLightExit?.label===opt.label?null:opt)}
+            style={{padding:"6px 10px",border:"0.5px solid",fontSize:11,cursor:"pointer",textAlign:"center",
+              background:drawerLightExit?.label===opt.label?"var(--blk)":"transparent",
+              color:drawerLightExit?.label===opt.label?"var(--ivory)":"var(--blk)",
+              borderColor:drawerLightExit?.label===opt.label?"var(--blk)":"var(--bdr)",
+              display:"flex",flexDirection:"column",alignItems:"center",gap:5,minWidth:70}}>
+            {opt.img&&<img src={opt.img} alt={opt.label}
+              style={{width:48,height:36,objectFit:"contain",opacity:drawerLightExit?.label===opt.label?1:0.6}}
+              onError={e=>e.target.style.display="none"}/>}
+            <span style={{fontSize:10,letterSpacing:1}}>{opt.label}</span>
+          </button>
+        ))}
+      </div>
+      {drawerLightExit&&<div style={{fontSize:9,color:"var(--gold)",marginTop:5}}>已選：{drawerLightExit.label}</div>}
+    </div>
+  );
+})()}
+
   {/* 色溫選擇 + 其他 */}
   {selProd.cct&&(selProd.cct.includes("/")||selProd.cct==="色溫可生產")?(<div>
     <div style={{fontSize:10,letterSpacing:2,color:"var(--muted)",marginBottom:6}}>色溫</div>
@@ -3571,6 +3602,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
                 const extraSpec={};
                 if(drawerMeters&&parseFloat(drawerMeters)>0) extraSpec.meters=parseFloat(drawerMeters);
                 if(drawerSpaceId.trim()) extraSpec.spaceId=drawerSpaceId.trim();
+                if(drawerLightExit?.label) extraSpec.lightExit=drawerLightExit.label;
+                if(drawerCutOption?.label) extraSpec.cutOption=drawerCutOption.label;
                 addToCart(selProd,{...selSpec,...extraSpec});
               }}>加入詢價單</button>
             </div>
