@@ -3466,6 +3466,39 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               ⚠️ 單回路最長 {maxCircuit} 米，超過需另拉一條並聯
             </div>
           )}
+          {(()=>{
+            const matched = products
+              .filter(p => p.series === "DC24V/DC48V 驅動器" && Number(p.watt) >= total && p.status === "上架")
+              .sort((a,b) => Number(a.watt) - Number(b.watt))
+              .slice(0,3);
+            if(!matched.length) return <div style={{fontSize:10,color:"var(--muted)",marginTop:4}}>尚無對應驅動器，請聯繫業務</div>;
+            return (
+              <div style={{marginTop:8,display:"flex",flexDirection:"column",gap:6}}>
+                {matched.map(d=>(
+                  <div key={d.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",border:"0.5px solid var(--bdr)",background:"var(--bg)"}}>
+                    {d.images?.[0] && <img src={d.images[0]} style={{width:40,height:40,objectFit:"contain"}}/>}
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:11,fontWeight:600}}>{d.model}</div>
+                      <div style={{fontSize:10,color:"var(--muted)"}}>{d.watt}W · {d.voltage} · NT$ {Number(d.stdPrice||0).toLocaleString()}</div>
+                    </div>
+                    <button onClick={()=>{
+                      const item = {
+                        ...selProd,
+                        _driverModel: d.model,
+                        _driverPrice: d.stdPrice,
+                        _meters: drawerMeters,
+                        _spaceId: drawerSpaceId
+                      };
+                      addToCart(item);
+                      toast$(`已加入：${selProd.model} + ${d.model}`);
+                    }} style={{fontSize:10,padding:"4px 10px",border:"0.5px solid var(--bdr)",background:"var(--blk)",color:"var(--wht)",cursor:"pointer"}}>
+                      選用
+                    </button>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       );
     })()}
