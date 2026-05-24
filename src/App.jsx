@@ -1478,7 +1478,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [customIds,  setCustomIds]  = useState({});
   const [drawerMeters,  setDrawerMeters]  = useState("");
   const [drawerSpaceId, setDrawerSpaceId] = useState("");
-  const [drawerCircuits, setDrawerCircuits] = useState([{id:"c1",label:"回路 1",meters:"",spaceId:""}]);
+  const [drawerCircuits, setDrawerCircuits] = useState([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]);
   const [sampCart,   setSampCart]   = useState([]);
   const [sampForm,   setSampForm]   = useState({name:"",company:"",phone:"",address:"",note:""});
   const [sampDone,   setSampDone]   = useState(false);
@@ -1595,7 +1595,7 @@ if (partsData?.length > 0) setAllParts(partsData);
     })();
   }, [sheetUrl]);
 useEffect(()=>{
-  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",meters:"",spaceId:""}]); }
+  if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]); }
 }, [selProd]);
   const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
@@ -3450,41 +3450,54 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
   return (
     <div style={{margin:"12px 0",padding:"12px",border:"0.5px solid var(--bdr)",background:"var(--bg2)"}}>
       <div style={{fontSize:10,letterSpacing:2,marginBottom:10}}>線型燈計算</div>
-      {drawerCircuits.map((c,idx)=>{
-        const m = parseFloat(c.meters)||0;
-        const totalW = m>0&&wpm>0 ? Math.ceil(m*wpm*1.3) : 0;
+      {drawerCircuits.map((circuit,cidx)=>{
+        const totalM = circuit.segments.reduce((s,seg)=>s+(parseFloat(seg.meters)||0),0);
+        const totalW = totalM>0&&wpm>0 ? Math.ceil(totalM*wpm*1.3) : 0;
         const driver = totalW>0 ? matchDriver(totalW) : null;
-        const overLimit = m>maxCircuit;
+        const overLimit = totalM>maxCircuit;
         return (
-          <div key={c.id} style={{marginBottom:10,padding:"9px 10px",background:"var(--bg)",border:"0.5px solid var(--bdr)"}}>
-            <div style={{display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap",marginBottom:6}}>
-              <div>
-                <label style={{fontSize:9,color:"var(--muted)",display:"block",marginBottom:2}}>{c.label} — 空間</label>
-                <input value={c.spaceId||""} onChange={e=>setDrawerCircuits(cs=>cs.map((x,i)=>i===idx?{...x,spaceId:e.target.value}:x))}
-                  placeholder="例：客廳A" style={{width:80,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
-              </div>
-              <div>
-                <label style={{fontSize:9,color:"var(--muted)",display:"block",marginBottom:2}}>米數</label>
-                <input type="number" step="0.1" min="0.1" value={c.meters||""} onChange={e=>setDrawerCircuits(cs=>cs.map((x,i)=>i===idx?{...x,meters:e.target.value}:x))}
-                  placeholder="米" style={{width:65,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
-              </div>
-              {drawerCircuits.length>1&&<button onClick={()=>setDrawerCircuits(cs=>cs.filter((_,i)=>i!==idx))}
-                style={{padding:"4px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,cursor:"pointer",color:"var(--muted)"}}>✕</button>}
+          <div key={circuit.id} style={{marginBottom:12,padding:"10px",background:"var(--bg)",border:"0.5px solid var(--bdr)"}}>
+            {/* 回路標題列 */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div style={{fontSize:10,letterSpacing:1,color:"var(--gold)",fontWeight:500}}>{circuit.label}</div>
+              {drawerCircuits.length>1&&<button onClick={()=>setDrawerCircuits(cs=>cs.filter((_,i)=>i!==cidx))}
+                style={{padding:"2px 8px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,cursor:"pointer",color:"var(--muted)"}}>✕ 刪除此回路</button>}
             </div>
-            {m>0&&wpm>0&&(
-              <div>
-                <div style={{fontSize:10,color:"var(--muted)",marginBottom:3}}>{m}m × {wpm}W/m × 1.3 = <b>≥ {totalW}W 驅動器</b></div>
-                {overLimit&&<div style={{fontSize:10,color:"#e55",marginBottom:3}}>⚠️ 單回路上限 {maxCircuit}m，建議拆分</div>}
+            {/* 各段 */}
+            {circuit.segments.map((seg,sidx)=>(
+              <div key={seg.id} style={{display:"flex",gap:6,alignItems:"center",marginBottom:6,flexWrap:"wrap"}}>
+                <span style={{fontSize:9,color:"var(--muted)",minWidth:24}}>段{sidx+1}</span>
+                <input value={seg.spaceId||""} onChange={e=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.map((s,si)=>si!==sidx?s:{...s,spaceId:e.target.value})}))}
+                  placeholder="空間名稱" style={{width:80,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
+                <input type="number" step="0.01" min="0.01" value={seg.meters||""} onChange={e=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.map((s,si)=>si!==sidx?s:{...s,meters:e.target.value})}))}
+                  placeholder="m" style={{width:72,padding:"4px 8px",border:"0.5px solid var(--bdr)",fontSize:11,background:"transparent"}}/>
+                <span style={{fontSize:10,color:"var(--muted)"}}>m</span>
+                {circuit.segments.length>1&&<button onClick={()=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:c.segments.filter((_,si)=>si!==sidx)}))}
+                  style={{padding:"2px 6px",border:"none",background:"transparent",fontSize:12,cursor:"pointer",color:"var(--muted)"}}>✕</button>}
+              </div>
+            ))}
+            {/* 同回路新增段 */}
+            <button onClick={()=>setDrawerCircuits(cs=>cs.map((c,ci)=>ci!==cidx?c:{...c,segments:[...c.segments,{id:"s"+Date.now(),spaceId:"",meters:""}]}))}
+              style={{fontSize:9,padding:"3px 10px",border:"0.5px dashed var(--bdr)",background:"transparent",cursor:"pointer",color:"var(--muted)",letterSpacing:1,marginBottom:8}}>
+              ＋ 同回路新增一段
+            </button>
+            {/* 回路合計 */}
+            {totalM>0&&wpm>0&&(
+              <div style={{paddingTop:6,borderTop:"0.5px solid var(--bdr2)"}}>
+                <div style={{fontSize:10,color:"var(--muted)",marginBottom:3}}>
+                  合計 <b>{totalM.toFixed(2)}m</b> × {wpm}W/m × 1.3 = <b>≥ {totalW}W 驅動器</b>
+                </div>
+                {overLimit&&<div style={{fontSize:10,color:"#e55",marginBottom:3}}>⚠️ 超過單回路上限 {maxCircuit}m，建議拆為新回路</div>}
                 {driver?(
                   <div style={{display:"flex",alignItems:"center",gap:8,padding:"5px 8px",border:"0.5px solid var(--gold)",background:"#fdf8ee"}}>
-                    <span style={{fontSize:9,color:"var(--gold)"}}>✦ 建議</span>
+                    <span style={{fontSize:9,color:"var(--gold)"}}>✦ 建議驅動器</span>
                     <b style={{fontSize:11}}>{driver.model}</b>
                     {driver.watt&&<span style={{fontSize:10,color:"var(--muted)"}}>{driver.watt}W</span>}
                     {driver.stdPrice>0&&<span style={{fontSize:10,color:"var(--muted)"}}>NT$ {Number(driver.stdPrice).toLocaleString()}</span>}
                   </div>
                 ):(
                   <div style={{fontSize:10,color:"var(--muted)"}}>
-                    {driverRules.length===0?"驅動器規則未設定（請至 KIMBOSS 後台設定）":"無對應規則，請聯繫業務"}
+                    {driverRules.length===0?"請至 KIMBOSS 後台設定驅動器規則":"無對應規則，請聯繫業務"}
                   </div>
                 )}
               </div>
@@ -3492,15 +3505,18 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           </div>
         );
       })}
-      <button onClick={()=>setDrawerCircuits(cs=>[...cs,{id:"c"+Date.now(),label:`回路 ${cs.length+1}`,meters:"",spaceId:""}])}
-        style={{padding:"5px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,letterSpacing:1,cursor:"pointer",color:"var(--muted)",marginBottom:6}}>
-        ＋ 新增回路
+      {/* 新增獨立回路 */}
+      <button onClick={()=>setDrawerCircuits(cs=>[...cs,{id:"c"+Date.now(),label:`回路 ${cs.length+1}`,segments:[{id:"s"+Date.now(),spaceId:"",meters:""}]}])}
+        style={{padding:"5px 14px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,letterSpacing:1,cursor:"pointer",color:"var(--muted)",marginBottom:8,display:"block"}}>
+        ＋ 新增回路（獨立驅動器）
       </button>
-      {drawerCircuits.filter(c=>parseFloat(c.meters)>0).length>0&&(
-        <div style={{fontSize:10,color:"var(--muted)",paddingTop:6,borderTop:"0.5px solid var(--bdr2)"}}>
-          合計 {drawerCircuits.reduce((s,c)=>s+(parseFloat(c.meters)||0),0).toFixed(1)} 米 / {drawerCircuits.length} 個回路
-        </div>
-      )}
+      {/* 總合計 */}
+      {(()=>{
+        const allM = drawerCircuits.reduce((s,c)=>s+c.segments.reduce((ss,seg)=>ss+(parseFloat(seg.meters)||0),0),0);
+        return allM>0&&<div style={{fontSize:10,color:"var(--muted)",paddingTop:6,borderTop:"0.5px solid var(--bdr2)"}}>
+          全部合計 {allM.toFixed(2)} 米 / {drawerCircuits.length} 個回路
+        </div>;
+      })()}
     </div>
   );
 })()}
