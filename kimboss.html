@@ -1012,11 +1012,11 @@ async function apiGet(action){
 async function apiPost(action, payload){
   const url = localStorage.getItem('ldx_url') || DEFAULT_URL;
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({action, payload})
+    const params = new URLSearchParams({
+      action: action,
+      payload: encodeURIComponent(JSON.stringify(payload))
     });
+    const res = await fetch(`${url}?${params.toString()}`);
     return await res.json();
   } catch(e) {
     console.error('apiPost error:', e);
