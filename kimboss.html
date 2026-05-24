@@ -1954,10 +1954,14 @@ async function loadHints(){
 async function saveHint(){
   const code=v('ht-code').trim(),title=v('ht-title').trim(),body=v('ht-body').trim();
   if(!code||!title){toast('請填寫代碼與標題');return;}
-  const hPayload = JSON.parse(JSON.stringify({code,title,body,imageUrl:v('ht-img').trim(),usedIn:v('ht-usedin').trim(),createdAt:new Date().toISOString().split('T')[0]}));
-  await apiPost('saveHint', hPayload);
-  ['ht-code','ht-title','ht-body','ht-img','ht-usedin'].forEach(k=>fv(k,''));
-  toast('✓ 提示已儲存');loadHints();
+  const payload={code,title,body,imageUrl:v('ht-img').trim(),usedIn:v('ht-usedin').trim(),createdAt:new Date().toISOString().split('T')[0]};
+  const res=await apiPost('saveHint',payload);
+  if(res&&res.success){
+    ['ht-code','ht-title','ht-body','ht-img','ht-usedin'].forEach(k=>fv(k,''));
+    toast('✓ 提示已儲存');loadHints();
+  } else {
+    toast('⚠ 儲存失敗：'+(res?.message||'請檢查 GAS 連線'));
+  }
 }
 async function delHint(id){
   if(!confirm('確定刪除？'))return;
