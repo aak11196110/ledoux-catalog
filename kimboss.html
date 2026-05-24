@@ -1954,7 +1954,8 @@ async function loadHints(){
 async function saveHint(){
   const code=v('ht-code').trim(),title=v('ht-title').trim(),body=v('ht-body').trim();
   if(!code||!title){toast('請填寫代碼與標題');return;}
-  await apiPost('saveHint',{code,title,body,imageUrl:v('ht-img').trim(),usedIn:v('ht-usedin').trim(),createdAt:new Date().toISOString().split('T')[0]});
+  const hPayload = JSON.parse(JSON.stringify({code,title,body,imageUrl:v('ht-img').trim(),usedIn:v('ht-usedin').trim(),createdAt:new Date().toISOString().split('T')[0]}));
+  await apiPost('saveHint', hPayload);
   ['ht-code','ht-title','ht-body','ht-img','ht-usedin'].forEach(k=>fv(k,''));
   toast('✓ 提示已儲存');loadHints();
 }
@@ -1979,7 +1980,8 @@ async function loadOnboarding(){
 async function saveOnboardStep(){
   const step=Number(v('ob-step')),title=v('ob-title').trim(),body=v('ob-body').trim();
   if(!step||!title){toast('請填寫步驟序號與標題');return;}
-  await apiPost('saveOnboardStep',{step,title,body,imageUrl:v('ob-img').trim(),active:true});
+  const obPayload = JSON.parse(JSON.stringify({step,title,body,imageUrl:v('ob-img').trim(),active:true}));
+  await apiPost('saveOnboardStep', obPayload);
   ['ob-step','ob-title','ob-body','ob-img'].forEach(k=>fv(k,''));
   toast('✓ 步驟已儲存');loadOnboarding();
 }
