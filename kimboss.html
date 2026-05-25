@@ -629,7 +629,7 @@
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">代碼（如 Q1）</div><input class="form-input" id="ht-code" placeholder="Q1" style="width:70px"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">標題</div><input class="form-input" id="ht-title" placeholder="什麼是裁切點？" style="width:180px"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">說明</div><input class="form-input" id="ht-body" placeholder="說明文字..." style="width:220px"></div>
-            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ht-img" placeholder="https://..." style="width:180px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ht-img" placeholder="https://..." style="width:180px"><br><button class="btn btn-sm" style="margin-top:4px;background:#0e0d0c;color:#f7f4ef;font-size:9px;letter-spacing:1px" onclick="document.getElementById('ht-img-file').click()">■ 上傳圖片</button><input type="file" id="ht-img-file" accept="image/*" style="display:none" onchange="directUpload(this.files[0],'ht-img')"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">使用位置備註</div><input class="form-input" id="ht-usedin" placeholder="例：裁切點選擇、色溫選擇" style="width:180px"></div>
             <button class="btn btn-gold" onclick="saveHint()">＋ 新增提示</button>
           </div>
@@ -649,7 +649,7 @@
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">步驟序號</div><input class="form-input" type="number" id="ob-step" placeholder="1" style="width:60px"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">標題</div><input class="form-input" id="ob-title" placeholder="歡迎使用 LEDOUX" style="width:180px"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">說明</div><textarea class="form-input" id="ob-body" placeholder="說明文字..." style="width:220px;height:60px;resize:vertical"></textarea></div>
-            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ob-img" placeholder="https://..." style="width:180px"></div>
+            <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ob-img" placeholder="https://..." style="width:180px"><br><button class="btn btn-sm" style="margin-top:4px;background:#0e0d0c;color:#f7f4ef;font-size:9px;letter-spacing:1px" onclick="document.getElementById('ob-img-file').click()">■ 上傳圖片</button><input type="file" id="ob-img-file" accept="image/*" style="display:none" onchange="directUpload(this.files[0],'ob-img')"></div>
             <button class="btn btn-gold" onclick="saveOnboardStep()">＋ 新增步驟</button>
           </div>
           <div class="tbl-wrap">
