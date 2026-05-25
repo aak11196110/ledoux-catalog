@@ -109,9 +109,11 @@ async function sheetPost(action, data) {
 //      .setMimeType(ContentService.MimeType.JSON);
 //  }
 // ══════════════════════════════════════════
-async function sendNotifyEmail(subject, body) {
+async function sendNotifyEmail(subject, body, htmlBody) {
   try {
-    await sheetPost("sendEmail", { to: NOTIFY_EMAIL, subject, body });
+    const payload = { to: NOTIFY_EMAIL, subject, body };
+    if (htmlBody) payload.htmlBody = htmlBody;
+    await sheetPost("sendEmail", payload);
   } catch (e) { console.warn("Email 通知失敗：", e); }
 }
 
@@ -1912,10 +1914,73 @@ const filteredInv = inventory.filter(i=>
     if(sheetUrl){
       sheetPost("saveOrder",{id:"ORD"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:customer.name,company:customer.company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:lampSubtotal,tax:0,shipping:0,total:0,isVip:isVip?"是":"否",discount:discountLabel||"牌價"});
     }
-    sendNotifyEmail(
-      `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
-      `━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${Math.round(lampSubtotal*0.05).toLocaleString()}\n含稅總計：NT$ ${Math.round(lampSubtotal*1.05).toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`
-    );
+    {
+      const _tax=Math.round(lampSubtotal*0.05);
+      const _total=Math.round(lampSubtotal*1.05);
+      const _rows=cart.map((item,idx)=>{
+        const p=item.product;
+        const price=Math.round(Number(p.stdPrice)*discountRate);
+        const sub=price*item.qty;
+        const spec=[item.spec?.cct,item.spec?.beam,item.spec?.outerColor||item.spec?.color].filter(Boolean).join(' / ');
+        const bg=idx%2===0?'#f7f4ef':'#f0ece5';
+        return '<tr style="background:'+bg+'">'
+          +'<td style="padding:8px 10px;border-bottom:0.5px solid #ddd"><b>'+p.model+'</b></td>'
+          +'<td style="padding:8px 10px;border-bottom:0.5px solid #ddd;font-size:11px;color:#5a5450">'+(p.series||'—')+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:0.5px solid #ddd;font-size:11px;color:#5a5450">'+(spec||'—')+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:0.5px solid #ddd;text-align:center">'+item.qty+' 盞</td>'
+          +'<td style="padding:8px 10px;border-bottom:0.5px solid #ddd;text-align:right">NT$ '+price.toLocaleString()+'</td>'
+          +'<td style="padding:8px 10px;border-bottom:0.5px solid #ddd;text-align:right"><b>NT$ '+sub.toLocaleString()+'</b></td>'
+          +'</tr>';
+      }).join('');
+      const _instHtml=installData
+        ?'<div style="margin-top:20px;padding:16px;background:#f0ece5;border-left:3px solid #b8935a">'
+          +'<div style="font-size:10px;letter-spacing:2px;color:#8a8278;margin-bottom:10px">安裝費用明細</div>'
+          +'<table style="width:100%;font-size:13px;border-collapse:collapse">'
+          +'<tr><td style="padding:4px 0;color:#8a8278">安裝區域</td><td style="text-align:right">'+(installData.instCalc?.reg?.label||installData.instRegion||'—')+'</td></tr>'
+          +'<tr><td style="padding:4px 0;color:#8a8278">施工費</td><td style="text-align:right">NT$ '+(installData.instCalc?.laborTotal||0).toLocaleString()+'</td></tr>'
+          +((installData.instCalc?.travelFee||0)>0?'<tr><td style="padding:4px 0;color:#8a8278">車馬費</td><td style="text-align:right">NT$ '+installData.instCalc.travelFee.toLocaleString()+'</td></tr>':'')
+          +'<tr><td style="padding:8px 0;font-weight:bold;border-top:0.5px solid #ccc">安裝費小計</td><td style="text-align:right;font-weight:bold;border-top:0.5px solid #ccc">NT$ '+((installData.instCalc?.laborTotal||0)+(installData.instCalc?.travelFee||0)).toLocaleString()+'</td></tr>'
+          +'</table></div>'
+        :'';
+      const _htmlBody='<html><body style="margin:0;padding:20px;background:#eee9e1;font-family:sans-serif">'
+        +'<div style="max-width:680px;margin:0 auto">'
+        +'<div style="background:#0e0d0c;padding:20px 24px">'
+        +'<div style="font-family:Georgia,serif;font-size:20px;letter-spacing:4px;color:#b8935a">LEDOUX 諾科照明</div>'
+        +'<div style="font-size:10px;letter-spacing:2px;color:#f7f4ef;margin-top:3px">報價單下載通知</div>'
+        +'</div>'
+        +'<div style="padding:24px;background:#f7f4ef">'
+        +'<table style="width:100%;font-size:13px;margin-bottom:20px;border-collapse:collapse">'
+        +'<tr><td style="color:#8a8278;width:60px;padding:4px 0">客戶</td><td style="padding:4px 0">'+customer.name+'</td>'
+        +'<td style="color:#8a8278;width:60px">公司</td><td>'+(customer.company||'—')+'</td></tr>'
+        +'<tr><td style="color:#8a8278;padding:4px 0">電話</td><td style="padding:4px 0">'+(customer.phone||'—')+'</td>'
+        +'<td style="color:#8a8278">案名</td><td>'+(projName||'—')+'</td></tr>'
+        +'<tr><td style="color:#8a8278;padding:4px 0">折扣</td><td colspan="3" style="padding:4px 0"><b style="color:#b8935a">'+(discountLabel||'牌價')+'</b></td></tr>'
+        +'</table>'
+        +'<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">'
+        +'<thead><tr style="background:#0e0d0c">'
+        +'<th style="padding:9px 10px;text-align:left;color:#b8935a;font-weight:400">型號</th>'
+        +'<th style="padding:9px 10px;text-align:left;color:#b8935a;font-weight:400">系列</th>'
+        +'<th style="padding:9px 10px;text-align:left;color:#b8935a;font-weight:400">規格</th>'
+        +'<th style="padding:9px 10px;text-align:center;color:#b8935a;font-weight:400">數量</th>'
+        +'<th style="padding:9px 10px;text-align:right;color:#b8935a;font-weight:400">單價</th>'
+        +'<th style="padding:9px 10px;text-align:right;color:#b8935a;font-weight:400">小計</th>'
+        +'</tr></thead><tbody>'+_rows+'</tbody></table>'
+        +'<table style="width:220px;margin-left:auto;font-size:13px;border-collapse:collapse">'
+        +'<tr><td style="padding:5px 10px;color:#8a8278">燈具小計</td><td style="padding:5px 10px;text-align:right">NT$ '+lampSubtotal.toLocaleString()+'</td></tr>'
+        +'<tr><td style="padding:5px 10px;color:#8a8278">稅金 (5%)</td><td style="padding:5px 10px;text-align:right">NT$ '+_tax.toLocaleString()+'</td></tr>'
+        +'<tr style="background:#0e0d0c"><td style="padding:8px 10px;color:#b8935a;font-weight:bold">含稅總計</td><td style="padding:8px 10px;text-align:right;color:#b8935a;font-weight:bold">NT$ '+_total.toLocaleString()+'</td></tr>'
+        +'</table>'
+        +_instHtml
+        +'</div>'
+        +'<div style="background:#0e0d0c;color:#5a5450;padding:12px 24px;font-size:10px;letter-spacing:1px">LEDOUX 諾科照明 報價系統自動通知 · 請勿回覆此信</div>'
+        +'</div></body></html>';
+      const _plain=`━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${_tax.toLocaleString()}\n含稅總計：NT$ ${_total.toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`;
+      sendNotifyEmail(
+        `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
+        _plain,
+        _htmlBody
+      );
+    }
 if(urgentData){
   sendNotifyEmail(
     "【⚡ 急件訂單】"+customer.name+"（"+(customer.company||"訪客")+"）— "+projName,
@@ -3815,10 +3880,6 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             {instCalc.reg?.freeAt&&<span style={{color:instCalc.totalUnits>=instCalc.reg.freeAt?"var(--green)":"var(--red)",marginLeft:8}}>{instCalc.totalUnits>=instCalc.reg.freeAt?"✓ 達免車馬費門檻":`差 ${instCalc.reg.freeAt-instCalc.totalUnits} 單位可免車馬費`}</span>}
           </div>}
           {(installChoice===true||installChoice===null)&&instRegion&&<button className="btn-pdf" style={{marginBottom:8}} onClick={()=>{setInstOpen(false);doActualDownload();}}>✓ 完成 · 下載燈具＋安裝整合報價單</button>}
-          <button className="btn-gold" disabled={!instRegion} onClick={()=>{
-            if(!instRegion){toast$("請先選擇安裝區域");return;}
-            generateInstallOnlyPDF();
-          }}>📄 生成安裝費用試算 PDF</button>
         </div>}
       </div>
 
