@@ -728,13 +728,9 @@
     </div>
     <div style="border:0.5px solid var(--bdr);padding:16px;margin-bottom:8px">
       <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">尺寸規格（數值欄位）</div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">開孔最小 (mm)</label><input class="form-input" id="p-cutout_min" type="number" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">開孔最大 (mm)</label><input class="form-input" id="p-cutout_max" type="number" placeholder="0"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">瓦數最小 (W)</label><input class="form-input" id="p-watt_min" type="number" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">瓦數最大 (W)</label><input class="form-input" id="p-watt_max" type="number" placeholder="0"></div>
+      <div style="margin-bottom:8px">
+        <label class="form-label">開孔尺寸</label>
+        <input type="text" class="form-input" id="p-cutout" placeholder="例：Ø75mm 或 120×80mm" style="width:100%">
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">燈體長度 (mm)</label><input class="form-input" id="p-body_length" type="number" placeholder="0"></div>
