@@ -631,6 +631,7 @@
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">說明</div><input class="form-input" id="ht-body" placeholder="說明文字..." style="width:220px"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ht-img" placeholder="https://..." style="width:180px"><br><button class="btn btn-sm" style="margin-top:4px;background:#0e0d0c;color:#f7f4ef;font-size:9px;letter-spacing:1px" onclick="document.getElementById('ht-img-file').click()">■ 上傳圖片</button><input type="file" id="ht-img-file" accept="image/*" style="display:none" onchange="directUpload(this.files[0],'ht-img')"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">使用位置備註</div><input class="form-input" id="ht-usedin" placeholder="例：裁切點選擇、色溫選擇" style="width:180px"></div>
+            <input type="hidden" id="ht-editing-id" value="">
             <button class="btn btn-gold" onclick="saveHint()">＋ 新增提示</button>
           </div>
           <div class="tbl-wrap">
@@ -650,6 +651,7 @@
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">標題</div><input class="form-input" id="ob-title" placeholder="歡迎使用 LEDOUX" style="width:180px"></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">說明</div><textarea class="form-input" id="ob-body" placeholder="說明文字..." style="width:220px;height:60px;resize:vertical"></textarea></div>
             <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">圖片網址（選填）</div><input class="form-input" id="ob-img" placeholder="https://..." style="width:180px"><br><button class="btn btn-sm" style="margin-top:4px;background:#0e0d0c;color:#f7f4ef;font-size:9px;letter-spacing:1px" onclick="document.getElementById('ob-img-file').click()">■ 上傳圖片</button><input type="file" id="ob-img-file" accept="image/*" style="display:none" onchange="directUpload(this.files[0],'ob-img')"></div>
+            <input type="hidden" id="ob-editing-id" value="">
             <button class="btn btn-gold" onclick="saveOnboardStep()">＋ 新增步驟</button>
           </div>
           <div class="tbl-wrap">
@@ -1950,20 +1952,35 @@ async function loadHints(){
     <td>${esc(h.title)}</td>
     <td style="font-size:10px;color:var(--muted);max-width:200px">${esc(h.body)}</td>
     <td style="font-size:10px;color:var(--muted)">${esc(h.usedIn||'—')}</td>
-    <td><button class="btn btn-sm btn-danger" onclick="delHint('${esc(h.id)}')">刪除</button></td>
+    <td><button class="btn btn-sm btn-outline" onclick="editHint('${esc(h.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delHint('${esc(h.id)}')">刪除</button></td>
   </tr>`).join('') : '<tr><td colspan="5" class="no-data">尚無提示</td></tr>';
 }
 async function saveHint(){
   const code=v('ht-code').trim(),title=v('ht-title').trim(),body=v('ht-body').trim();
   if(!code||!title){toast('請填寫代碼與標題');return;}
+  const editingId = document.getElementById('ht-editing-id').value;
   const payload={code,title,body,imageUrl:v('ht-img').trim(),usedIn:v('ht-usedin').trim(),createdAt:new Date().toISOString().split('T')[0]};
+  if(editingId) payload.id = editingId;
   const res=await apiPost('saveHint',payload);
   if(res&&res.success){
     ['ht-code','ht-title','ht-body','ht-img','ht-usedin'].forEach(k=>fv(k,''));
+    fv('ht-editing-id','');
     toast('✓ 提示已儲存');loadHints();
   } else {
     toast('⚠ 儲存失敗：'+(res?.message||'請檢查 GAS 連線'));
   }
+}
+async function editHint(id){
+  const res = await apiPost('getHints',{});
+  const h = (res?.data||[]).find(x=>x.id===id);
+  if(!h) return;
+  fv('ht-code', h.code);
+  fv('ht-title', h.title);
+  fv('ht-body', h.body);
+  fv('ht-img', h.imageUrl||'');
+  fv('ht-usedin', h.usedIn||'');
+  document.getElementById('ht-editing-id').value = h.id;
+  toast('已載入，修改後按「儲存提示」');
 }
 async function delHint(id){
   if(!confirm('確定刪除？'))return;
@@ -1980,16 +1997,30 @@ async function loadOnboarding(){
     <td style="text-align:center"><b>${s.step}</b></td>
     <td>${esc(s.title)}</td>
     <td style="font-size:10px;color:var(--muted);max-width:200px">${esc(s.body).substring(0,60)}...</td>
-    <td><button class="btn btn-sm btn-danger" onclick="delOnboardStep('${esc(s.id)}')">刪除</button></td>
+    <td><button class="btn btn-sm btn-outline" onclick="editOnboardStep('${esc(s.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delOnboardStep('${esc(s.id)}')">刪除</button></td>
   </tr>`).join('') : '<tr><td colspan="4" class="no-data">尚無步驟</td></tr>';
 }
 async function saveOnboardStep(){
   const step=Number(v('ob-step')),title=v('ob-title').trim(),body=v('ob-body').trim();
   if(!step||!title){toast('請填寫步驟序號與標題');return;}
+  const obEditingId = document.getElementById('ob-editing-id').value;
   const obPayload = JSON.parse(JSON.stringify({step,title,body,imageUrl:v('ob-img').trim(),active:true}));
+  if(obEditingId) obPayload.id = obEditingId;
   await apiPost('saveOnboardStep', obPayload);
   ['ob-step','ob-title','ob-body','ob-img'].forEach(k=>fv(k,''));
+  fv('ob-editing-id','');
   toast('✓ 步驟已儲存');loadOnboarding();
+}
+async function editOnboardStep(id){
+  const res = await apiPost('getOnboarding',{});
+  const s = (res?.data||[]).find(x=>x.id===id);
+  if(!s) return;
+  fv('ob-step', s.step);
+  fv('ob-title', s.title);
+  fv('ob-body', s.body);
+  fv('ob-img', s.imageUrl||'');
+  document.getElementById('ob-editing-id').value = s.id;
+  toast('已載入，修改後按「儲存步驟」');
 }
 async function delOnboardStep(id){
   if(!confirm('確定刪除？'))return;
