@@ -1557,9 +1557,9 @@ function openRec(type,id){
   const sel=document.getElementById('r-status');
   sel.innerHTML=(STSTATUS[type]||[]).map(s=>`<option ${s===rec.status?'selected':''}>${s}</option>`).join('');
   const qWrap=document.getElementById('r-qty-wrap');
-const qList=document.getElementById('r-items-list');
-if(type==='orders'&&rec.items){
-  qWrap.style.display='block';
+  const qList=document.getElementById('r-items-list');
+  if(qWrap&&qList&&type==='orders'&&rec.items){
+    qWrap.style.display='block';
   const parts=(rec.items||'').split(/[、,]/).filter(x=>x.trim());
   qList.innerHTML=parts.map((p,i)=>{
     const m=p.match(/([^×x]+)[×x](\d+)/);
@@ -1571,10 +1571,10 @@ if(type==='orders'&&rec.items){
       <span style="font-size:10px;color:var(--muted)">盞</span>
     </div>`;
   }).join('');
-} else {
-  qWrap.style.display='none';
-  qList.innerHTML='';
-}
+  } else {
+    if(qWrap)qWrap.style.display='none';
+    if(qList)qList.innerHTML='';
+  }
   fv('r-note',rec.adminNote||'');
   try{showM('modal-rec');}catch(e){console.error('showM error',e);}
 }
