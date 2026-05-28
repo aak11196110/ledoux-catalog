@@ -389,7 +389,7 @@
       <div class="section-head"><div class="section-title">報價記錄</div></div>
       <div class="filter-bar">
         <input class="f-input" id="oq" placeholder="🔍 搜尋客戶、案名..." oninput="rOrd()">
-        <select class="f-select" id="ost" onchange="rOrd()"><option value="">所有狀態</option><option>已下載</option><option>已成交</option><option>未成交</option></select>
+        <select class="f-select" id="ost" onchange="rOrd()"><option value="">所有狀態</option><option>已下載</option><option>已成交</option><option>未成交</option><option>已取消</option><option>待貨</option><option>追蹤中</option><option>已結案</option></select>
       </div>
       <div class="tbl-wrap"><table><thead><tr><th>單號</th><th>日期</th><th>客戶</th><th>公司</th><th>案名</th><th>品項</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead><tbody id="ord-tb"><tr><td colspan="9" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
@@ -1540,7 +1540,7 @@ async function delMem(id,name){
 }
 
 // RECORD MODAL
-const STSTATUS={samples:['待處理','已寄出','已完成','已取消'],installs:['待確認','已確認','施工中','已完成','已取消'],visits:['待確認','已確認','已完成','已取消'],orders:['已下載','已成交','未成交','已取消']};
+const STSTATUS={samples:['待處理','已寄出','已完成','已取消','備用中'],installs:['待確認','已確認','施工中','已完成','已取消','待貨'],visits:['待確認','已確認','已完成','已取消','改期'],orders:['已下載','已成交','未成交','已取消','待貨','追蹤中','已結案']};
 const SHEETS={samples:'樣品申請',installs:'安裝申請',visits:'預約申請',orders:'報價記錄'};
 function openRec(type,id){
   const rec=D[type].find(x=>String(x.id)===String(id));if(!rec)return;
@@ -2083,7 +2083,7 @@ function a2s(x){return Array.isArray(x)?x.slice(0,2).join('、'):(x||'—');}
 function showM(id){const el=document.getElementById(id);if(el)el.style.display='flex';}
 function hideM(id){const el=document.getElementById(id);if(el)el.style.display='none';}
 function bdg(s){
-  const cls=!s?'b-new':['待處理','待確認'].includes(s)?'b-pending':['已完成','已成交','active','已寄出','已確認'].includes(s)?'b-ok':['已取消','未成交','disabled'].includes(s)?'b-cancel':s==='vip'?'b-vip':'b-new';
+  const cls=!s?'b-new':['待處理','待確認'].includes(s)?'b-pending':['已完成','已成交','active','已寄出','已確認'].includes(s)?'b-ok':['已取消','未成交','disabled'].includes(s)?'b-cancel':['待貨','追蹤中','改期','備用中'].includes(s)?'b-pending':s==='vip'?'b-vip':'b-new';
   return`<span class="badge ${cls}">${s||'—'}</span>`;
 }
 
