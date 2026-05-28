@@ -1543,7 +1543,8 @@ async function delMem(id,name){
 const STSTATUS={samples:['待處理','已寄出','已完成','已取消','備用中'],installs:['待確認','已確認','施工中','已完成','已取消','待貨'],visits:['待確認','已確認','已完成','已取消','改期'],orders:['已下載','已成交','未成交','已取消','待貨','追蹤中','已結案']};
 const SHEETS={samples:'樣品申請',installs:'安裝申請',visits:'預約申請',orders:'報價記錄'};
 function openRec(type,id){
-  const rec=D[type].find(x=>String(x.id)===String(id));if(!rec)return;
+  console.log('openRec',type,id,D[type]&&D[type][0]);
+  const rec=D[type].find(x=>String(x.id)===String(id));if(!rec){console.log('rec not found, ids=',D[type].map(x=>x.id));return;}
   fv('r-id',id);fv('r-sheet',SHEETS[type]);
   document.getElementById('rm-title').textContent=(PT[type]||type)+' · 處理';
   const FLD={
