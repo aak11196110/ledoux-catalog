@@ -2091,7 +2091,7 @@ function bdg(s){
 
   function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
 
-window.onerror=function(){return true;};
+window.onerror=function(msg,src,line,col,err){console.error('GLOBAL ERR:',msg,'line:',line,'col:',col,err);return true;};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-wrap').forEach(m=>m.style.display='none');});
 initCfg();
 loadAll();
