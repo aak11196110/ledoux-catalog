@@ -1553,7 +1553,7 @@ function openRec(type,id){
     visits:[['聯繫人',rec.customerName],['公司',rec.company],['電話',rec.phone],['地址',rec.address],['預約日期',rec.visitDate],['預約時段',rec.visitSlot],['感興趣系列',rec.interestedSeries],['指定型號',rec.interestedModel],['備註',rec.note]],
     orders:[['客戶',rec.customerName],['公司',rec.company],['案名',rec.projectName],['金額','NT$ '+fmt(rec.subtotal||0)],['折扣',rec.discount||'牌價']],
   };
-  document.getElementById('r-detail').innerHTML=(FLD[type]||[]).filter(f=>f[1]&&f[1]!=='undefined'&&f[1]!=='0盞').map(f=>`<div><span style="color:var(--muted);display:inline-block;width:76px;font-size:10px">${f[0]}</span>${f[1]||'—'}</div>`).join('');
+  try{document.getElementById('r-detail').innerHTML=(FLD[type]||[]).filter(f=>f[1]&&f[1]!=='undefined'&&f[1]!=='0盞').map(f=>`<div><span style="color:var(--muted);display:inline-block;width:76px;font-size:10px">${f[0]}</span>${f[1]||'—'}</div>`).join('');}catch(e){console.error('r-detail error',e);}
   const sel=document.getElementById('r-status');
   sel.innerHTML=(STSTATUS[type]||[]).map(s=>`<option ${s===rec.status?'selected':''}>${s}</option>`).join('');
   const qWrap=document.getElementById('r-qty-wrap');
@@ -1575,7 +1575,8 @@ if(type==='orders'&&rec.items){
   qWrap.style.display='none';
   qList.innerHTML='';
 }
-  fv('r-note',rec.adminNote||'');showM('modal-rec');
+  fv('r-note',rec.adminNote||'');
+  try{showM('modal-rec');}catch(e){console.error('showM error',e);}
 }
 async function updateRec(){
   const id=v('r-id'),sheet=v('r-sheet'),status=v('r-status'),note=v('r-note');
