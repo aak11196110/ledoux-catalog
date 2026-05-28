@@ -1746,7 +1746,7 @@ function filterSiModels(){
   document.getElementById('si-model').innerHTML='<option value="">請選擇型號</option>'+filtered.map(p=>`<option value="${esc(p.model)}">${esc(p.model)}</option>`).join('');
 }
 function openSampInvM(){
-  const series=['DC48V 磁吸軌道','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','POLA 泊拉','WALL LIGHT 壁燈','STEP LIGHT 地腳燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','VELA','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他','DC24V/DC48V 驅動器'];
+  const series=['DC48V 磁吸軌道','DC48V 天際線','DC48V 超薄磁吸軌道','DC48V 編織布帶','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','VELA 維拉','WALL LIGHT 壁燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他','DC24V/DC48V 驅動器'];
   document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
   document.getElementById('si-model').innerHTML='<option value="">請先選系列</option>';
   document.getElementById('sinv-title').textContent='新增樣品';
@@ -1758,7 +1758,7 @@ function openSampInvM(){
   showM('modal-sinv');
 }
 function editSampInv(id){
-  const series2=['DC48V 磁吸軌道','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','POLA 泊拉','WALL LIGHT 壁燈','STEP LIGHT 地腳燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','VELA','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他','DC24V/DC48V 驅動器'];
+  const series2=['DC48V 磁吸軌道','DC48V 天際線','DC48V 超薄磁吸軌道','DC48V 編織布帶','EOS 奧斯','SLOT 希洛特','COSY 寇斯','YODA 優打1代','YODA 優打2代','YOMAX 優麥斯','HEPBURN 赫本','METIS 墨提斯','MINI 珠寶','BLADE 帕雷德','LINEAR 麗娜','VELA 維拉','WALL LIGHT 壁燈','CABINET LINEAR LIGHT 高端線條燈','LED STRIP LIGHT 低壓燈帶','OUTDOOR LIGHT 戶外燈具','鋁擠洗牆燈','鋁條燈','燈帶','軟條燈','商照燈－特殊款／其他','線型燈－特殊款／其他','DC24V/DC48V 驅動器'];
   document.getElementById('si-series').innerHTML='<option value="">請選擇系列</option>'+series2.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
 const r=(D.sampleInv||[]).find(x=>String(x.id)===String(id));if(!r)return;
 document.getElementById('si-series').value=r.series||'';
