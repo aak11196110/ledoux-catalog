@@ -1910,9 +1910,6 @@ const filteredInv = inventory.filter(i=>
  generatePDF({cart,projectName:projName,customer:{...customer,phone:customer.phone||custPhone,address:customer.address||custAddress},installCalc:installData,isVip,discountRate,discountLabel,orderType,urgentData:urgentSupport&&urgentRegion?URGENT_REGIONS.find(r=>r.id===urgentRegion):null,customIds});
     const baseSubtotal=cart.reduce((s,i)=>s+(Number(i.product.stdPrice)||0)*i.qty,0);
     const lampSubtotal=Math.round(baseSubtotal*discountRate);
-    if(sheetUrl){
-      sheetPost("saveOrder",{id:"ORD"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:customer.name,company:customer.company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:lampSubtotal,tax:0,shipping:0,total:0,isVip:isVip?"是":"否",discount:discountLabel||"牌價",body:_plain,htmlBody:_htmlBody});
-    }
     {
       const _tax=Math.round(lampSubtotal*0.05);
       const _total=Math.round(lampSubtotal*1.05);
