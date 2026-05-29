@@ -1576,7 +1576,12 @@ function openRec(type,id){
     if(qList)qList.innerHTML='';
   }
   fv('r-note',rec.adminNote||'');
-  try{showM('modal-rec');}catch(e){console.error('showM error',e);}
+  console.log('about to showM modal-rec');
+  try{
+    const el=document.getElementById('modal-rec');
+    console.log('modal-rec el=',el,'display=',el&&el.style.display);
+    if(el){el.style.display='flex';console.log('set display flex done');}
+  }catch(e){console.error('showM error',e);}
 }
 async function updateRec(){
   const id=v('r-id'),sheet=v('r-sheet'),status=v('r-status'),note=v('r-note');
