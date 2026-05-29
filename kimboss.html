@@ -893,7 +893,7 @@
 </div></div>
 
 <!-- 記錄處理 Modal -->
-<div id="modal-rec" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(14,13,12,0.65);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)hideM('modal-rec')">
+<div id="modal-rec" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:rgba(14,13,12,0.65);align-items:center;justify-content:center;padding:20px;box-sizing:border-box" onclick="if(event.target===this)hideM('modal-rec')">
 <div class="modal-box">
   <div class="modal-head"><div class="modal-title" id="rm-title">處理申請</div><button class="modal-close" onclick="hideM('modal-rec')">✕</button></div>
   <div class="modal-body">
@@ -1580,7 +1580,7 @@ function openRec(type,id){
   try{
     const el=document.getElementById('modal-rec');
     console.log('modal-rec el=',el,'display=',el&&el.style.display);
-    if(el){el.style.display='flex';console.log('set display flex done');}
+    if(el){el.style.cssText=el.style.cssText.replace('display:none','display:flex');el.style.display='flex';console.log('set display flex done',el.style.display,el.getBoundingClientRect());}
   }catch(e){console.error('showM error',e);}
 }
 async function updateRec(){
