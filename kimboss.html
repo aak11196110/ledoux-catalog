@@ -1540,7 +1540,7 @@ async function delMem(id,name){
 }
 
 // RECORD MODAL
-const STSTATUS={samples:['待處理','已寄出','已完成','已取消','備用中'],installs:['待確認','已確認','施工中','已完成','已取消','待貨'],visits:['待確認','已確認','已完成','已取消','改期'],orders:['已下載','已成交','未成交','已取消','待貨','追蹤中','已結案']};
+const STSTATUS={samples:['待處理','已寄出','已完成','已取消','備用中'],installs:['待確認','已確認','施工中','已完成','已取消','待貨'],visits:['待確認','已確認','已完成','已取消','改期'],orders:['新訊息','已讀未處理','處理中','已讀取訂單待聯繫客戶','已連繫客戶待報價','已連繫客戶待與工廠下訂','與工廠下完單待貨運到台灣','已到台灣公司待出貨','台灣公司現貨待理貨','已出貨待貨運送至指定位置']};
 const SHEETS={samples:'樣品申請',installs:'安裝申請',visits:'預約申請',orders:'報價記錄'};
 function openRec(type,id){
   console.log('openRec',type,id,D[type]&&D[type][0]);
