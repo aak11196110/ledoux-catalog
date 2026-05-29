@@ -1576,12 +1576,11 @@ function openRec(type,id){
     if(qList)qList.innerHTML='';
   }
   fv('r-note',rec.adminNote||'');
-  console.log('about to showM modal-rec');
-  try{
-    const el=document.getElementById('modal-rec');
-    console.log('modal-rec el=',el,'display=',el&&el.style.display);
-    if(el){el.style.cssText=el.style.cssText.replace('display:none','display:flex');el.style.display='flex';console.log('set display flex done',el.style.display,el.getBoundingClientRect());}
-  }catch(e){console.error('showM error',e);}
+  const el=document.getElementById('modal-rec');
+  if(el){
+    document.body.appendChild(el);
+    el.style.cssText='display:flex;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(14,13,12,0.65);align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
+  }
 }
 async function updateRec(){
   const id=v('r-id'),sheet=v('r-sheet'),status=v('r-status'),note=v('r-note');
