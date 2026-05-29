@@ -1660,6 +1660,9 @@ const submitVisit = async () => {
     toast$("請填寫完整資料並選擇日期時段");
     return;
   }
+  if (submitVisit._sending) return;
+  submitVisit._sending = true;
+  setTimeout(() => { submitVisit._sending = false; }, 5000);
   const rec = {
     id: "VISIT"+Date.now(),
     date: new Date().toISOString().split("T")[0],
