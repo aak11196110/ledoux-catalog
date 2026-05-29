@@ -1674,10 +1674,6 @@ const submitVisit = async () => {
     status: "待確認"
   };
   if (sheetUrl) await sheetPost("saveVisitRequest", rec);
-  sendNotifyEmail(
-    `【預約到府介紹】${visitForm.name}（${visitForm.company||"—"}）— ${visitDate} ${visitSlot}`,
-    `預約到府產品介紹申請\n\n聯繫人：${visitForm.name}\n公司：${visitForm.company||"—"}\n電話：${visitForm.phone}\n地址：${visitForm.address||"—"}\n\n預約日期：${visitDate}\n預約時段：${visitSlot}\n\n感興趣系列：${visitForm.interestedSeries.join("、")||"—"}\n指定型號：${visitForm.interestedModel||"—"}\n備註：${visitForm.note||"—"}\n\nLEDOUX 諾科照明 報價系統自動通知`
-  );
   setVisitDone(true);
 };
   const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
