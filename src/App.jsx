@@ -1682,7 +1682,7 @@ const submitVisit = async () => {
 
   const filtered = (() => {
     let ps = searchQ.trim() ? searchProducts(products, searchQ) : products;
-    if (seriesF) ps = ps.filter(p=>p.series && p.series.trim()===seriesF.trim());
+    if (seriesF) ps = ps.filter(p=>{ if (!p.series) return false; return p.series.trim() === seriesF.trim(); });
    else if (cat!=="全部") ps = ps.filter(p=>p.category===cat||(cat==="鋁條燈"&&p.category==="軟條燈")||(cat==="軟條燈"&&p.category==="鋁條燈"));
     for (const tag of activeTags) {
       if (tag.type==="watt") ps = ps.filter(p=>p.watt===tag.value);
