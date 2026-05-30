@@ -1573,7 +1573,8 @@ const [visitDone,    setVisitDone]    = useState(false);
   const cartTotal  = cart.reduce((s,i)=>s+Math.round((Number(i.product.stdPrice)||0)*discountRate)*i.qty,0);
   const allChecked = Object.values(checks).every(Boolean);
   const allSeries  = [...new Set(products.map(p=>p.series))];
-  const allCats    = [...new Set(products.map(p=>p.category))];
+  const VALID_CATS = ["崁燈","軌道燈","磁吸系統","吸頂燈","壁燈","地腳燈","戶外燈","鋁條燈","燈帶","軟條燈","其他"];
+  const allCats    = [...new Set(products.map(p=>p.category))].filter(c=>c&&VALID_CATS.includes(c)).sort();
   const allInvCats = ["全部",...new Set(inventory.map(i=>i.category))];
   const allWatts   = [...new Set(products.map(p=>p.watt).filter(Boolean).filter(w=>!w.includes("/")))].sort();
   const allCcts    = ["2700K","3000K","3500K","4000K","6500K"];
@@ -2626,7 +2627,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
     {LINEAR_SERIES_LIST.map(s=><option key={s} value={s}>{s}</option>)}
   </optgroup>
 </select>
-            <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+            <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);setActiveTags([]);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
               <option value="全部">所有分類</option>
               {allCats.filter(Boolean).map(c=><option key={c} value={c}>{c}</option>)}
             </select>
@@ -3142,7 +3143,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
       <option value="">所有系列</option>
       <optgroup label="── 商照燈系列 ──">{COMMERCIAL_SERIES.map(s=><option key={s} value={s}>{s}</option>)}</optgroup><optgroup label="── 線型燈系列 ──">{LINEAR_SERIES_LIST.map(s=><option key={s} value={s}>{s}</option>)}</optgroup>
     </select>
-    <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
+    <select value={cat} onChange={e=>{setCat(e.target.value);setSeriesF(null);setActiveTags([]);}} style={{padding:"6px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:1,color:"var(--blk)",cursor:"pointer"}}>
       <option value="全部">所有分類</option>
       {allCats.filter(Boolean).map(c=><option key={c} value={c}>{c}</option>)}
     </select>
