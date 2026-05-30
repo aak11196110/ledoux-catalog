@@ -1681,9 +1681,11 @@ const submitVisit = async () => {
   };
 
   const filtered = (() => {
+    const _seriesF = seriesF;
+    const _cat = cat;
     let ps = searchQ.trim() ? searchProducts(products, searchQ) : products;
-    if (seriesF) ps = ps.filter(p=>{ if (!p.series) return false; return p.series.trim() === seriesF.trim(); });
-   else if (cat!=="全部") ps = ps.filter(p=>p.category===cat||(cat==="鋁條燈"&&p.category==="軟條燈")||(cat==="軟條燈"&&p.category==="鋁條燈"));
+    if (_seriesF) ps = ps.filter(p=>{ if (!p.series) return false; return p.series.trim() === _seriesF.trim(); });
+    else if (_cat!=="全部") ps = ps.filter(p=>p.category===_cat||((_cat==="鋁條燈")&&p.category==="軟條燈")||((_cat==="軟條燈")&&p.category==="鋁條燈"));
     for (const tag of activeTags) {
       if (tag.type==="watt") ps = ps.filter(p=>p.watt===tag.value);
       if (tag.type==="cct")  ps = ps.filter(p=>p.cct&&p.cct.includes(tag.value.replace("K","")));
