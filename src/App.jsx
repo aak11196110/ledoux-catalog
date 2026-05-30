@@ -1591,7 +1591,11 @@ const [prods, invs, addonData, partsData, sinvData] = await Promise.all([
   sheetGet("getParts"),
     sheetGet("getSampleInventory")
 ]);
-if (prods?.length > 0) setProducts(prods.filter(p => p.series && p.series.trim() !== ""));
+if (prods?.length > 0) {
+  const cloudIds = new Set(prods.map(p=>String(p.id)));
+  const localOnly = INIT_PRODUCTS.filter(p=>!cloudIds.has(String(p.id)));
+  setProducts([...prods.filter(p => p.series && p.series.trim() !== ""), ...localOnly.filter(p => p.series && p.series.trim() !== "")]);
+}
 if (invs?.length > 0) setInventory(invs);
 if (addonData?.length > 0) setAddons(addonData);
         if (sinvData?.length > 0) setSampleInv(sinvData);
