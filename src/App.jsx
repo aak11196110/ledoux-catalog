@@ -1590,7 +1590,7 @@ const [prods, invs, addonData, partsData, sinvData] = await Promise.all([
   sheetGet("getParts"),
     sheetGet("getSampleInventory")
 ]);
-if (prods?.length > 0) setProducts(prods);
+if (prods?.length > 0) setProducts(prods.filter(p => p.series && p.series.trim() !== ""));
 if (invs?.length > 0) setInventory(invs);
 if (addonData?.length > 0) setAddons(addonData);
         if (sinvData?.length > 0) setSampleInv(sinvData);
