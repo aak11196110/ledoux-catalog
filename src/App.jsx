@@ -94,8 +94,11 @@ async function sheetPost(action, data) {
   if (!SHEET_URL) return null;
   try {
     const payload = encodeURIComponent(JSON.stringify(data));
-    const res = await fetch(`${SHEET_URL}?action=${action}&payload=${payload}`);
-    return await res.json();
+    const res = await fetch(`${SHEET_URL}?action=${action}&payload=${payload}`, {
+      method: "POST",
+      mode: "no-cors",
+    });
+    return {};
   } catch { return null; }
 }
 
