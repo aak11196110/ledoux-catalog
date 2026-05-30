@@ -1685,7 +1685,7 @@ const submitVisit = async () => {
   const toast$ = m => { setToast(m); setTimeout(()=>setToast(""),3000); };
 
   // 折扣碼驗證
-  const DISCOUNT_CODES = { "LED006":0.4, "LED007":0.47, "LED008":0.53 };
+  const DISCOUNT_CODES = { "LED006":0.3, "LED007":0.35, "LED008":0.4 };
   const applyDiscountCode = (code) => {
     const trimmed = code.trim().toUpperCase();
     const rate = DISCOUNT_CODES[trimmed];
