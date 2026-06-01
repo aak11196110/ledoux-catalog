@@ -90,6 +90,19 @@ async function sheetGet(action) {
     return json.success ? json.data : null;
   } catch { return null; }
 }
+async function applyProductOrder(products) {
+  try {
+    const orderData = await sheetGet("getProductOrder");
+    if (!orderData || orderData.length === 0) return products;
+    const orderMap = {};
+    orderData.forEach(r => { orderMap[r.model] = r.sortOrder; });
+    return [...products].sort((a, b) => {
+      const oa = orderMap[a.model] ?? 99999;
+      const ob = orderMap[b.model] ?? 99999;
+      return oa - ob;
+    });
+  } catch { return products; }
+}
 async function sheetPost(action, data) {
   if (!SHEET_URL) return null;
   try {
@@ -1566,7 +1579,8 @@ const [prods, invs, addonData, partsData, sinvData] = await Promise.all([
 if (prods?.length > 0) {
   const cloudIds = new Set(prods.map(p=>String(p.id)));
   const localOnly = INIT_PRODUCTS.filter(p=>!cloudIds.has(String(p.id)));
-  setProducts([...prods.filter(p => p.series && p.series.trim() !== ""), ...localOnly.filter(p => p.series && p.series.trim() !== "")]);
+  const sorted = await applyProductOrder([...prods.filter(p => p.series && p.series.trim() !== ""), ...localOnly.filter(p => p.series && p.series.trim() !== "")]);
+  setProducts(sorted);
 }
 if (invs?.length > 0) setInventory(invs);
 if (addonData?.length > 0) setAddons(addonData);
