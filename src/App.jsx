@@ -2326,7 +2326,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div className={`sm-sub ${page==="admin"?"on":""}`} onClick={()=>{setPage("admin");setMenuOpen(false);}}>
               <span className="sm-dot"/>產品管理
             </div>
-            {[{id:"members",label:"帳號管理"},{id:"products",label:"產品管理"},{id:"inv_admin",label:"庫存管理"},{id:"cat_admin",label:"型錄管理"},{id:"cloud_settings",label:"雲端設定"},{id:"sample_admin",label:"樣品申請",badge:sampleReqs.filter(r=>r.status==="pending").length},{id:"install_admin",label:"安裝申請",badge:installOrd.filter(o=>o.status==="pending").length},{id:"sample_inv",label:"樣品管理"}].map(n=>(
+            {[{id:"members",label:"帳號管理"},{id:"products",label:"產品管理"},{id:"inv_admin",label:"庫存管理"},{id:"cat_admin",label:"型錄管理"},{id:"cloud_settings",label:"雲端設定"},{id:"sample_admin",label:"樣品申請",badge:sampleReqs.filter(r=>r.status==="pending").length},{id:"install_admin",label:"安裝申請",badge:installOrd.filter(o=>o.status==="pending").length},{id:"sample_inv",label:"樣品管理"},{id:"biz_quote",label:"📋 業務快速報價"}].map(n=>(
               <div key={n.id} className={`sm-item ${page===n.id?"on":""}`} onClick={()=>{setPage(n.id);setMenuOpen(false);}}>
                 <span>{n.label}</span>{n.badge>0&&<span className="sm-badge">{n.badge}</span>}
               </div>
@@ -3237,6 +3237,9 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           <div className="tbl-wrap"><table><thead><tr><th>姓名</th><th>公司</th><th>帳號</th><th>身份</th><th>調整</th><th>開通日</th><th></th></tr></thead><tbody>{members.map(m=>(<tr key={m.id}><td style={{fontWeight:400}}>{m.name}</td><td>{m.company}</td><td style={{fontFamily:"monospace"}}>{m.username}</td><td><span className={`rb r-${m.role==="admin"?"admin":m.role==="vip"?"vip":"std"}`}>{roleLabel(m.role)}</span></td><td><select className="role-sel" value={m.role} onChange={e=>{setMembers(x=>x.map(i=>i.id===m.id?{...i,role:e.target.value}:i));if(user.id===m.id)setUser(u=>({...u,role:e.target.value}));toast$("權限已更新");}}><option value="standard">一般</option><option value="vip">VIP</option><option value="admin">管理</option></select></td><td style={{color:"var(--muted)"}}>{m.approvedAt}</td><td>{m.id!==user.id&&<button className="btn-del2" onClick={()=>{setMembers(x=>x.filter(x=>x.id!==m.id));toast$("帳號已刪除");}}><CloseIcon/></button>}</td></tr>))}</tbody></table></div>
         </>}
 
+        {/* ══ 業務快速報價 ══ */}
+        {page==="biz_quote"&&isAdmin&&<BizQuotePage products={products} user={user}/>}
+
         {/* ══ 產品管理 ══ */}
         {page==="products"&&isAdmin&&<>
           <div className="phead"><div><div className="ptitle">產品管理</div><div className="psub">{products.length} 件商品</div></div><button className="btn-add2" onClick={()=>setShowAdd(v=>!v)}>新增產品</button></div>
@@ -3983,6 +3986,303 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
 
     </div>
     </>
+  );
+}
+
+// ══════════════════════════════════════════
+//  業務快速報價頁面 BizQuotePage
+// ══════════════════════════════════════════
+function BizQuotePage({ products, user }) {
+  const COMPANY = { name:"台灣諾科照明有限公司", eng:"LEDOUX LIGHTING CO;LTD", email:"kim@ledouxlight.com.tw" };
+  const [step, setStep] = useState(1);
+  const [cust, setCust] = useState({ company:"", name:"", phone:"", address:"", projectName:"" });
+  const [discountRate, setDiscountRate] = useState(1);
+  const [discountLabel, setDiscountLabel] = useState("");
+  const [searchQ, setSearchQ] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [toast, setToast] = useState("");
+
+  const showToast = (msg) => { setToast(msg); setTimeout(()=>setToast(""),2200); };
+
+  const filteredProds = products.filter(p => {
+    if (!searchQ) return true;
+    const q = searchQ.toLowerCase();
+    return (p.model||"").toLowerCase().includes(q) || (p.series||"").toLowerCase().includes(q) || (p.category||"").toLowerCase().includes(q);
+  });
+
+  const addItem = (p) => {
+    setSelectedItems(prev => {
+      const exists = prev.find(x => x.model === p.model);
+      if (exists) return prev.map(x => x.model===p.model ? {...x, qty: x.qty+1} : x);
+      return [...prev, { ...p, qty:1, customNote:"" }];
+    });
+    showToast(`已加入 ${p.model}`);
+  };
+
+  const removeItem = (model) => setSelectedItems(prev => prev.filter(x=>x.model!==model));
+  const updateQty = (model, qty) => {
+    const n = parseInt(qty)||1;
+    if (n<=0) { removeItem(model); return; }
+    setSelectedItems(prev => prev.map(x=>x.model===model?{...x,qty:n}:x));
+  };
+  const updateNote = (model, note) => setSelectedItems(prev => prev.map(x=>x.model===model?{...x,customNote:note}:x));
+
+  const getPrice = (p) => {
+    const base = Number(p.projPrice||p.stdPrice||0);
+    return Math.round(base * discountRate / 5) * 5;
+  };
+
+  const subtotal = selectedItems.reduce((s,x)=>s+getPrice(x)*x.qty, 0);
+  const tax = Math.round(subtotal * 0.05);
+  const total = subtotal + tax;
+
+  const genAutoNote = (p) => {
+    const m = (p.model||"").toUpperCase();
+    const v = (p.voltage||"").toUpperCase();
+    const notes = [];
+    if (v.includes("AC220")||v.includes("AC110")) notes.push(`含AC110~240V驅動器`);
+    if (v.includes("DC48")) notes.push(`不含DC48V驅動器`);
+    if (v.includes("DC24")) notes.push(`不含DC24V驅動器`);
+    if (m.includes("-M")||m.includes("MESH")||(p.desc||"").includes("無線")) notes.push("米家無線調光調色\n含AC220~240V驅動器\n含配件蜂巢網");
+    if (p.customNote) notes.push(p.customNote);
+    return notes.join("\n");
+  };
+
+  const generatePDF = () => {
+    if (!cust.company||!cust.projectName) { showToast("請填寫客戶公司和案件名稱"); return; }
+    if (selectedItems.length===0) { showToast("請至少選一項產品"); return; }
+    const today = new Date();
+    const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
+    const qn = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*999)+1).padStart(3,"0")}`;
+
+    const rows = selectedItems.map((p,i) => {
+      const price = getPrice(p);
+      const amt = price * p.qty;
+      const note = genAutoNote(p);
+      const imgStyle = `width:72px;height:56px;object-fit:contain;`;
+      return `<tr>
+        <td style="text-align:center;font-size:11px">${i+1}</td>
+        <td style="text-align:center"><img src="${p.imageUrl||""}" style="${imgStyle}" onerror="this.style.display='none'"/></td>
+        <td style="font-weight:600;font-size:11px">${p.model||""}</td>
+        <td style="font-size:10px;color:#555">${[p.watt?(p.watt+"W"):"",p.beam?(p.beam+"°"):"",p.cct||"",p.voltage||"",p.cri?("CRI>"+p.cri):"",p.color||""].filter(Boolean).join(" · ")}</td>
+        <td style="text-align:center">${p.qty}</td>
+        <td style="text-align:center">盞</td>
+        <td style="text-align:right">NT$ ${price.toLocaleString()}</td>
+        <td style="text-align:right;font-weight:600">NT$ ${amt.toLocaleString()}</td>
+        <td style="font-size:9px;white-space:pre-line;color:#444">${note}</td>
+      </tr>`;
+    }).join("");
+
+    const discRow = discountRate < 1 ? `<div class="tot-row"><span>折扣（${discountLabel}）</span><span>-${Math.round((1-discountRate)*100)}%</span></div>` : "";
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>報價單_${cust.projectName}_${qn}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans TC',Arial,sans-serif;font-size:11px;color:#1a1410;background:#fff;padding:24px 28px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1410;padding-bottom:12px;margin-bottom:14px}
+.logo-main{font-size:22px;font-weight:900;letter-spacing:3px;color:#1a1410}
+.logo-sub{font-size:8px;letter-spacing:3px;color:#777;margin-top:2px}
+.co-info{text-align:right;font-size:10px;color:#555;line-height:1.7}
+.doc-title{text-align:center;font-size:18px;font-weight:700;letter-spacing:8px;margin:14px 0;color:#1a1410}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #ccc;margin-bottom:14px}
+.meta-cell{display:flex;border-bottom:0.5px solid #e0e0e0;border-right:0.5px solid #e0e0e0}
+.meta-lbl{background:#f4efe8;padding:5px 10px;font-size:9px;letter-spacing:1px;color:#888;min-width:72px;display:flex;align-items:center}
+.meta-val{padding:5px 10px;font-size:11px;color:#1a1410;display:flex;align-items:center}
+.price-note{background:#fff8ec;border-left:3px solid #b8935a;padding:7px 12px;font-size:10px;color:#7a5c2a;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px}
+th{background:#1a1410;color:#f7f4ef;padding:6px 8px;font-size:9px;letter-spacing:1px;font-weight:600;text-align:center}
+td{padding:8px 8px;border-bottom:0.5px solid #e8e4de;vertical-align:middle}
+.left{text-align:left}
+tr:nth-child(even) td{background:#faf8f5}
+.totals{display:flex;justify-content:flex-end;margin-bottom:14px}
+.totals-inner{border:0.5px solid #ccc;min-width:240px}
+.tot-row{display:flex;justify-content:space-between;padding:6px 12px;font-size:11px;border-bottom:0.5px solid #eee}
+.final{background:#1a1410;color:#f7f4ef;font-weight:700;font-size:13px;border:none}
+.notes{font-size:9.5px;line-height:2;color:#555;border-top:0.5px solid #ccc;padding-top:10px;margin-bottom:16px}
+.sign-area{display:flex;gap:0;border:0.5px solid #ccc;margin-bottom:12px}
+.sign-box{flex:1;padding:24px 12px 8px;font-size:10px;color:#888;border-right:0.5px solid #ccc}
+.sign-box:last-child{border-right:none}
+.footer{text-align:center;font-size:9px;color:#aaa;border-top:0.5px solid #e0e0e0;padding-top:8px}
+@media print{body{padding:0}}
+</style></head><body>
+<div class="header">
+  <div><div class="logo-main">Ledoux 諾科照明</div><div class="logo-sub">LEDOUX LIGHTING CO;LTD</div></div>
+  <div class="co-info"><strong>${COMPANY.name}</strong><br>桃園市八德區建德路88號<br>TEL: (03)368-7525 &nbsp;|&nbsp; FAX: (03)368-7552<br>${COMPANY.email}</div>
+</div>
+<div class="doc-title">報　價　單</div>
+<div class="meta-grid">
+  <div class="meta-cell"><div class="meta-lbl">客戶名稱</div><div class="meta-val">${cust.company||"—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">單據日期</div><div class="meta-val">${ds}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">案件名稱</div><div class="meta-val">${cust.projectName||"—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">報價單號</div><div class="meta-val">${qn}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">聯繫人</div><div class="meta-val">${cust.name||"—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">幣別</div><div class="meta-val">NTD</div></div>
+  <div class="meta-cell"><div class="meta-lbl">客戶電話</div><div class="meta-val">${cust.phone||"—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">負責業務</div><div class="meta-val">池宇山</div></div>
+  <div class="meta-cell"><div class="meta-lbl">客戶地址</div><div class="meta-val">${cust.address||"—"}</div></div>
+  <div class="meta-cell"><div class="meta-lbl">E-mail</div><div class="meta-val">${COMPANY.email}</div></div>
+</div>
+${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${discountLabel}</strong> 專屬折扣，報價僅供本次專案使用，請勿對外流通。</div>`:""}
+<table>
+  <thead><tr>
+    <th style="width:30px">No.</th><th style="width:80px">產品圖片</th><th style="width:90px" class="left">產品型號</th>
+    <th class="left">產品描述</th><th style="width:40px">數量</th><th style="width:35px">單位</th>
+    <th style="width:70px">單價</th><th style="width:75px">金額</th><th style="width:100px" class="left">備註</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="totals"><div class="totals-inner">
+  ${discRow}
+  <div class="tot-row"><span>金額（未稅）</span><span>NT$ ${subtotal.toLocaleString()}</span></div>
+  <div class="tot-row"><span>稅金（5%）</span><span>NT$ ${tax.toLocaleString()}</span></div>
+  <div class="tot-row final"><span>總金額（含稅）</span><span>NT$ ${total.toLocaleString()}</span></div>
+</div></div>
+<div class="notes">
+  <strong>備　註：</strong><br>
+  A. 本報價單有效期限30天，請於期限內回簽訂單。<br>
+  B. 謹請確認以上單價及數量，如無誤，煩將訂購報價單回傳【Fax:03-368 7552】。<br>
+  C. 燈具保固期限：室內保固3年、戶外保固2年。<br>
+  D. 交期如遇天災或事變等不可抗力，未能依時履約交貨，得展延交期。<br>
+  E. 單筆未滿 NT$3,000，運費由買方自付；庫存不足時生產交期約1個月起。
+</div>
+<div class="sign-area">
+  <div class="sign-box">經辦：</div><div class="sign-box">客戶確認：</div><div class="sign-box">日期：</div>
+</div>
+<div class="footer">${COMPANY.name} · ${COMPANY.eng} · 報價單號：${qn}<br>本報價單由業務手動產生</div>
+</body></html>`;
+
+    const blob = new Blob([html], {type:"text/html;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `報價單_${cust.projectName}_${qn}.html`; a.click();
+    URL.revokeObjectURL(url);
+    showToast("✓ 報價單已下載");
+  };
+
+  const S = {
+    page:{padding:"0 0 40px"},
+    phead:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20},
+    ptitle:{fontFamily:"'Cormorant Garamond',serif",fontSize:22,letterSpacing:2,color:"var(--blk)"},
+    psub:{fontSize:10,color:"var(--muted)",letterSpacing:1},
+    card:{background:"var(--ivory)",border:"0.5px solid var(--bdr)",padding:"14px 16px",marginBottom:12},
+    label:{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:6},
+    row:{display:"flex",gap:10,flexWrap:"wrap",marginBottom:10},
+    inp:{flex:1,minWidth:140,padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",fontFamily:"'Noto Sans TC',sans-serif",outline:"none"},
+    srch:{width:"100%",padding:"9px 12px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:12,color:"var(--blk)",fontFamily:"'Noto Sans TC',sans-serif",outline:"none",marginBottom:12},
+    grid:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10,marginBottom:16},
+    pcard:{border:"0.5px solid var(--bdr)",background:"var(--ivory)",padding:10,cursor:"pointer",transition:"border-color .2s"},
+    pcardHover:{borderColor:"var(--gold)"},
+    pimg:{width:"100%",height:80,objectFit:"contain",marginBottom:6,display:"block"},
+    pmodel:{fontSize:11,fontWeight:600,marginBottom:2},
+    pprice:{fontSize:10,color:"var(--gold)"},
+    selTbl:{width:"100%",borderCollapse:"collapse",marginBottom:12},
+    selTh:{fontSize:"9px",letterSpacing:"1px",color:"var(--muted)",padding:"6px 8px",borderBottom:"0.5px solid var(--bdr)",textAlign:"left"},
+    selTd:{padding:"8px 8px",borderBottom:"0.5px solid var(--bdr2)",verticalAlign:"middle",fontSize:11},
+    qtyInp:{width:52,padding:"4px 6px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,textAlign:"center",fontFamily:"'Noto Sans TC',sans-serif"},
+    noteInp:{width:"100%",padding:"3px 6px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,fontFamily:"'Noto Sans TC',sans-serif"},
+    totBox:{display:"flex",justifyContent:"flex-end",marginBottom:16},
+    totInner:{border:"0.5px solid var(--bdr)",minWidth:220},
+    totRow:{display:"flex",justifyContent:"space-between",padding:"6px 12px",fontSize:11,borderBottom:"0.5px solid var(--bdr2)"},
+    totFinal:{background:"var(--blk)",color:"var(--ivory)",fontWeight:700,fontSize:13,padding:"8px 12px",display:"flex",justifyContent:"space-between"},
+    btnGold:{padding:"10px 24px",border:"none",background:"var(--gold)",color:"var(--blk)",fontSize:"9px",letterSpacing:"3px",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif",fontWeight:700},
+    btnOut:{padding:"10px 20px",border:"0.5px solid var(--bdr)",background:"transparent",color:"var(--muted)",fontSize:"9px",letterSpacing:"2px",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"},
+  };
+
+  const DISCOUNT_OPTIONS = [
+    {label:"無折扣",rate:1},{label:"9折",rate:0.9},{label:"85折",rate:0.85},{label:"8折",rate:0.8},{label:"75折",rate:0.75},{label:"7折",rate:0.7},
+  ];
+
+  return (
+    <div style={S.page}>
+      <div style={S.phead}>
+        <div><div style={S.ptitle}>業務快速報價</div><div style={S.psub}>SALES QUOTATION TOOL</div></div>
+      </div>
+
+      {/* Step 1: 客戶資料 */}
+      <div style={S.card}>
+        <div style={S.label}>① 客戶資料</div>
+        <div style={S.row}>
+          <input style={S.inp} placeholder="客戶公司名稱 *" value={cust.company} onChange={e=>setCust(p=>({...p,company:e.target.value}))}/>
+          <input style={S.inp} placeholder="案件名稱 *" value={cust.projectName} onChange={e=>setCust(p=>({...p,projectName:e.target.value}))}/>
+        </div>
+        <div style={S.row}>
+          <input style={S.inp} placeholder="聯繫人姓名" value={cust.name} onChange={e=>setCust(p=>({...p,name:e.target.value}))}/>
+          <input style={S.inp} placeholder="客戶電話" value={cust.phone} onChange={e=>setCust(p=>({...p,phone:e.target.value}))}/>
+          <input style={S.inp} placeholder="客戶地址（選填）" value={cust.address} onChange={e=>setCust(p=>({...p,address:e.target.value}))}/>
+        </div>
+        <div style={S.row}>
+          <div style={{fontSize:"9px",color:"var(--muted)",letterSpacing:1,alignSelf:"center"}}>折扣：</div>
+          {DISCOUNT_OPTIONS.map(d=>(
+            <button key={d.label} onClick={()=>{setDiscountRate(d.rate);setDiscountLabel(d.label);}}
+              style={{padding:"6px 14px",border:`0.5px solid ${discountRate===d.rate?"var(--gold)":"var(--bdr)"}`,background:discountRate===d.rate?"var(--gold)":"transparent",color:discountRate===d.rate?"var(--blk)":"var(--muted)",fontSize:10,cursor:"pointer"}}>
+              {d.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 2: 選產品 */}
+      <div style={S.card}>
+        <div style={S.label}>② 選擇產品</div>
+        <input style={S.srch} placeholder="🔍 搜尋型號 / 系列 / 分類..." value={searchQ} onChange={e=>setSearchQ(e.target.value)}/>
+        <div style={S.grid}>
+          {filteredProds.slice(0,60).map(p=>(
+            <div key={p.model} style={S.pcard} onClick={()=>addItem(p)}>
+              <img src={p.imageUrl||""} style={S.pimg} alt={p.model} onError={e=>e.target.style.display="none"}/>
+              <div style={S.pmodel}>{p.model}</div>
+              <div style={{fontSize:9,color:"var(--muted)",marginBottom:4}}>{p.series}</div>
+              <div style={S.pprice}>NT$ {getPrice(p).toLocaleString()}</div>
+              <div style={{fontSize:"9px",color:"var(--gold)",marginTop:4}}>＋ 加入</div>
+            </div>
+          ))}
+        </div>
+        {filteredProds.length===0&&<div style={{color:"var(--muted)",fontSize:11,padding:"12px 0"}}>找不到符合的產品</div>}
+      </div>
+
+      {/* Step 3: 已選清單 */}
+      {selectedItems.length>0&&(
+        <div style={S.card}>
+          <div style={S.label}>③ 報價清單（{selectedItems.length} 項）</div>
+          <table style={S.selTbl}>
+            <thead><tr>
+              <th style={S.selTh}>型號</th>
+              <th style={S.selTh}>單價</th>
+              <th style={S.selTh}>數量</th>
+              <th style={S.selTh}>金額</th>
+              <th style={S.selTh}>備註（可編輯）</th>
+              <th style={S.selTh}></th>
+            </tr></thead>
+            <tbody>
+              {selectedItems.map(p=>(
+                <tr key={p.model}>
+                  <td style={S.selTd}><strong>{p.model}</strong><div style={{fontSize:9,color:"var(--muted)"}}>{p.series}</div></td>
+                  <td style={S.selTd}>NT$ {getPrice(p).toLocaleString()}</td>
+                  <td style={S.selTd}><input type="number" min="1" style={S.qtyInp} value={p.qty} onChange={e=>updateQty(p.model,e.target.value)}/></td>
+                  <td style={{...S.selTd,fontWeight:600}}>NT$ {(getPrice(p)*p.qty).toLocaleString()}</td>
+                  <td style={S.selTd}><input style={S.noteInp} placeholder="附加備註（選填）" value={p.customNote} onChange={e=>updateNote(p.model,e.target.value)}/></td>
+                  <td style={S.selTd}><button onClick={()=>removeItem(p.model)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:14}}>✕</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={S.totBox}>
+            <div style={S.totInner}>
+              {discountRate<1&&<div style={S.totRow}><span>折扣（{discountLabel}）</span><span>-{Math.round((1-discountRate)*100)}%</span></div>}
+              <div style={S.totRow}><span>未稅小計</span><span>NT$ {subtotal.toLocaleString()}</span></div>
+              <div style={S.totRow}><span>稅金 5%</span><span>NT$ {tax.toLocaleString()}</span></div>
+              <div style={S.totFinal}><span>總計（含稅）</span><span>NT$ {total.toLocaleString()}</span></div>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+            <button style={S.btnOut} onClick={()=>setSelectedItems([])}>清空清單</button>
+            <button style={S.btnGold} onClick={generatePDF}>⬇ 生成報價單 HTML</button>
+          </div>
+        </div>
+      )}
+
+      {toast&&<div className="toast">{toast}</div>}
+    </div>
   );
 }
 
