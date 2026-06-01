@@ -1083,7 +1083,11 @@ async function applyProdOrder(){
   const rest=D.products.filter(p=>!sorted.find(s=>String(s.id)===String(p.id)));
   D.products=[...sorted,...rest];
   rProd();toast('儲存排序中...');
-  const res=await apiPost('saveProductOrder',D.products.map((p,i)=>({model:p.model,sortOrder:i+1})));
+  const orderPayload=D.products.map((p,i)=>({model:p.model,sortOrder:i+1}));
+  const chunkSize=50;
+  for(let i=0;i<orderPayload.length;i+=chunkSize){
+    await apiPost('saveProductOrder',orderPayload.slice(i,i+chunkSize));
+  }
   toast('✅ 排序已同步');
 }
 function rProd(){
