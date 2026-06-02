@@ -2247,6 +2247,11 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             <div style={{fontSize:12,color:"var(--muted)",lineHeight:1.8,marginBottom:14}}>免帳號直接瀏覽產品目錄、電子型錄、選燈、產生報價單。</div>
             <button className="btn-primary" onClick={()=>setUser({role:"guest",name:"訪客",company:"",position:"",username:"guest"})}>訪客瀏覽 · 免登入</button>
           </div>
+          <div className="sec-lbl">管理員登入</div>
+          <div className="lf"><label>帳號</label><input value={loginF.username} onChange={e=>setLoginF(p=>({...p,username:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入帳號"/></div>
+          <div className="lf"><label>密碼</label><input type="password" value={loginF.password} onChange={e=>setLoginF(p=>({...p,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入密碼"/></div>
+          <button className="btn-outline" style={{width:"100%",marginTop:6}} onClick={doLogin}>管理員登入</button>
+          {loginErr&&<div className="auth-err">{loginErr}</div>}
         </div>
       </div>
     </div>
