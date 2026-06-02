@@ -4011,17 +4011,41 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
 // ══════════════════════════════════════════
 //  業務快速報價頁面 BizQuotePage
 // ══════════════════════════════════════════
+const BIZ_CLIENTS_KEY = "bizClients_v1";
+function loadBizClients() { try { return JSON.parse(localStorage.getItem(BIZ_CLIENTS_KEY)||"[]"); } catch { return []; } }
+function saveBizClients(list) { try { localStorage.setItem(BIZ_CLIENTS_KEY, JSON.stringify(list)); } catch {} }
+
 function BizQuotePage({ products, user }) {
   const COMPANY = { name:"台灣諾科照明有限公司", eng:"LEDOUX LIGHTING CO;LTD", email:"kim@ledouxlight.com.tw" };
-  const [step, setStep] = useState(1);
   const [cust, setCust] = useState({ company:"", name:"", phone:"", address:"", projectName:"" });
-  const [discountRate, setDiscountRate] = useState(1);
-  const [discountLabel, setDiscountLabel] = useState("");
+  const [discountInput, setDiscountInput] = useState("100");
   const [searchQ, setSearchQ] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [toast, setToast] = useState("");
+  const [clientList, setClientList] = useState(loadBizClients());
+  const [showClientDD, setShowClientDD] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
 
   const showToast = (msg) => { setToast(msg); setTimeout(()=>setToast(""),2200); };
+
+  const discountRate = Math.min(1, Math.max(0.1, (parseFloat(discountInput)||100)/100));
+
+  const saveClient = () => {
+    if (!cust.company) return;
+    const list = loadBizClients();
+    const existing = list.find(c => c.company===cust.company && c.name===cust.name);
+    if (!existing) {
+      list.unshift({ company:cust.company, name:cust.name, phone:cust.phone, address:cust.address, savedAt: new Date().toISOString() });
+      saveBizClients(list.slice(0,100));
+      setClientList(list.slice(0,100));
+      showToast("✓ 客戶資料已儲存");
+    }
+  };
+
+  const filteredClients = clientList.filter(c => {
+    if (!clientSearch) return true;
+    return c.company.includes(clientSearch) || (c.name||"").includes(clientSearch);
+  });
 
   const filteredProds = products.filter(p => {
     if (!searchQ) return true;
@@ -4077,13 +4101,18 @@ function BizQuotePage({ products, user }) {
     const rows = selectedItems.map((p,i) => {
       const price = getPrice(p);
       const amt = price * p.qty;
-      const note = genAutoNote(p);
-      const imgStyle = `width:72px;height:56px;object-fit:contain;`;
+      const note = p.customNote || autoNote(p);
+      const imgTag = (p.imageUrl||p.images?.[0]) ? `<img src="${p.imageUrl||p.images[0]}" style="width:72px;height:56px;object-fit:contain;" onerror="this.style.display='none'"/>` : "";
       return `<tr>
         <td style="text-align:center;font-size:11px">${i+1}</td>
-        <td style="text-align:center"><img src="${p.imageUrl||""}" style="${imgStyle}" onerror="this.style.display='none'"/></td>
+        <td style="text-align:center">${imgTag}</td>
         <td style="font-weight:600;font-size:11px">${p.model||""}</td>
-        <td style="font-size:10px;color:#555">${[p.watt?(p.watt+"W"):"",p.beam?(p.beam+"°"):"",p.cct||"",p.voltage||"",p.cri?("CRI>"+p.cri):"",p.color||""].filter(Boolean).join(" · ")}</td>
+        <td style="text-align:center;font-size:11px">${p.watt?(p.watt+"W"):""}</td>
+        <td style="text-align:center;font-size:11px">${p.beam?(p.beam+"°"):""}</td>
+        <td style="text-align:center;font-size:11px">${p.cct||""}</td>
+        <td style="text-align:center;font-size:11px">${p.voltage||""}</td>
+        <td style="text-align:center;font-size:11px">${p.cri?("CRI>"+p.cri):""}</td>
+        <td style="text-align:center;font-size:11px">${p.color||""}</td>
         <td style="text-align:center">${p.qty}</td>
         <td style="text-align:center">盞</td>
         <td style="text-align:right">NT$ ${price.toLocaleString()}</td>
@@ -4092,7 +4121,7 @@ function BizQuotePage({ products, user }) {
       </tr>`;
     }).join("");
 
-    const discRow = discountRate < 1 ? `<div class="tot-row"><span>折扣（${discountLabel}）</span><span>-${Math.round((1-discountRate)*100)}%</span></div>` : "";
+    const discRow = "";
 
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>報價單_${cust.projectName}_${qn}</title>
@@ -4145,9 +4174,11 @@ tr:nth-child(even) td{background:#faf8f5}
 ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${discountLabel}</strong> 專屬折扣，報價僅供本次專案使用，請勿對外流通。</div>`:""}
 <table>
   <thead><tr>
-    <th style="width:30px">No.</th><th style="width:80px">產品圖片</th><th style="width:90px" class="left">產品型號</th>
-    <th class="left">產品描述</th><th style="width:40px">數量</th><th style="width:35px">單位</th>
-    <th style="width:70px">單價</th><th style="width:75px">金額</th><th style="width:100px" class="left">備註</th>
+    <th style="width:28px">No.</th><th style="width:72px">產品圖片</th><th style="width:85px" class="left">產品型號</th>
+    <th style="width:42px">瓦數</th><th style="width:36px">角度</th><th style="width:44px">色溫</th>
+    <th style="width:52px">電壓</th><th style="width:44px">演色性</th><th style="width:44px">顏色</th>
+    <th style="width:36px">數量</th><th style="width:30px">單位</th>
+    <th style="width:68px">單價</th><th style="width:72px">金額</th><th class="left">備註</th>
   </tr></thead>
   <tbody>${rows}</tbody>
 </table>
@@ -4208,9 +4239,22 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
     btnOut:{padding:"10px 20px",border:"0.5px solid var(--bdr)",background:"transparent",color:"var(--muted)",fontSize:"9px",letterSpacing:"2px",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"},
   };
 
-  const DISCOUNT_OPTIONS = [
-    {label:"無折扣",rate:1},{label:"9折",rate:0.9},{label:"85折",rate:0.85},{label:"8折",rate:0.8},{label:"75折",rate:0.75},{label:"7折",rate:0.7},
-  ];
+  const autoNote = (p) => {
+    const parts = [];
+    if (p.watt) parts.push(`${p.watt}W`);
+    if (p.beam) parts.push(`${p.beam}°`);
+    if (p.cct) parts.push(p.cct);
+    if (p.voltage) parts.push(p.voltage);
+    if (p.cri) parts.push(`CRI>${p.cri}`);
+    if (p.color) parts.push(p.color);
+    const v = (p.voltage||"").toUpperCase();
+    const m = (p.model||"").toUpperCase();
+    if (m.includes("-M") || (p.desc||"").includes("無線")) parts.push("米家無線調光調色");
+    if (v.includes("AC110")||v.includes("AC220")) parts.push("含AC110~240V驅動器");
+    if (v.includes("DC48")) parts.push("不含DC48V驅動器");
+    if (v.includes("DC24")) parts.push("不含DC24V驅動器");
+    return parts.join(" · ");
+  };
 
   return (
     <div style={S.page}>
@@ -4231,13 +4275,32 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
           <input style={S.inp} placeholder="客戶地址（選填）" value={cust.address} onChange={e=>setCust(p=>({...p,address:e.target.value}))}/>
         </div>
         <div style={S.row}>
-          <div style={{fontSize:"9px",color:"var(--muted)",letterSpacing:1,alignSelf:"center"}}>折扣：</div>
-          {DISCOUNT_OPTIONS.map(d=>(
-            <button key={d.label} onClick={()=>{setDiscountRate(d.rate);setDiscountLabel(d.label);}}
-              style={{padding:"6px 14px",border:`0.5px solid ${discountRate===d.rate?"var(--gold)":"var(--bdr)"}`,background:discountRate===d.rate?"var(--gold)":"transparent",color:discountRate===d.rate?"var(--blk)":"var(--muted)",fontSize:10,cursor:"pointer"}}>
-              {d.label}
-            </button>
-          ))}
+          <div style={{fontSize:"9px",color:"var(--muted)",letterSpacing:1,alignSelf:"center"}}>折扣（輸入數字，100=無折扣，85=85折）：</div>
+          <input type="number" min="10" max="100" step="1" value={discountInput}
+            onChange={e=>setDiscountInput(e.target.value)}
+            style={{width:80,padding:"6px 10px",border:"0.5px solid var(--gold)",background:"transparent",fontSize:13,textAlign:"center",fontFamily:"'Noto Sans TC',sans-serif",color:"var(--blk)"}}/>
+          <div style={{fontSize:10,color:"var(--gold)",alignSelf:"center"}}>
+            {discountRate<1 ? `= ${Math.round(discountRate*100)}折` : "= 無折扣"}
+          </div>
+          <button onClick={saveClient} style={{marginLeft:"auto",padding:"6px 16px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,cursor:"pointer",color:"var(--muted)"}}>💾 儲存客戶資料</button>
+        </div>
+        {/* 客戶資料快速帶入 */}
+        <div style={{position:"relative",marginBottom:8}}>
+          <input style={{...S.srch,marginBottom:0}} placeholder="🔍 搜尋已儲存客戶..." value={clientSearch}
+            onChange={e=>{setClientSearch(e.target.value);setShowClientDD(true);}}
+            onFocus={()=>setShowClientDD(true)}/>
+          {showClientDD && filteredClients.length>0 && (
+            <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"0.5px solid var(--bdr)",zIndex:99,maxHeight:180,overflowY:"auto",boxShadow:"0 4px 12px rgba(0,0,0,0.1)"}}>
+              {filteredClients.map((c,i)=>(
+                <div key={i} onClick={()=>{setCust(p=>({...p,company:c.company,name:c.name,phone:c.phone,address:c.address}));setClientSearch("");setShowClientDD(false);showToast(`已帶入 ${c.company}`);}}
+                  style={{padding:"10px 14px",cursor:"pointer",borderBottom:"0.5px solid var(--bdr2)",fontSize:12}}>
+                  <strong>{c.company}</strong>
+                  {c.name&&<span style={{color:"var(--muted)",marginLeft:8,fontSize:11}}>{c.name}</span>}
+                  {c.phone&&<span style={{color:"var(--muted)",marginLeft:8,fontSize:10}}>{c.phone}</span>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -4279,7 +4342,10 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
                   <td style={S.selTd}>NT$ {getPrice(p).toLocaleString()}</td>
                   <td style={S.selTd}><input type="number" min="1" style={S.qtyInp} value={p.qty} onChange={e=>updateQty(p.model,e.target.value)}/></td>
                   <td style={{...S.selTd,fontWeight:600}}>NT$ {(getPrice(p)*p.qty).toLocaleString()}</td>
-                  <td style={S.selTd}><input style={S.noteInp} placeholder="附加備註（選填）" value={p.customNote} onChange={e=>updateNote(p.model,e.target.value)}/></td>
+                  <td style={S.selTd}>
+                    <div style={{fontSize:9,color:"var(--muted)",marginBottom:3}}>{autoNote(p)}</div>
+                    <input style={S.noteInp} placeholder="附加說明（選填）" value={p.customNote} onChange={e=>updateNote(p.model,e.target.value)}/>
+                  </td>
                   <td style={S.selTd}><button onClick={()=>removeItem(p.model)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:14}}>✕</button></td>
                 </tr>
               ))}
