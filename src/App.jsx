@@ -4101,14 +4101,25 @@ function BizQuotePage({ products, user }) {
     const rows = selectedItems.map((p,i) => {
       const price = getPrice(p);
       const amt = price * p.qty;
-      const note = p.customNote || autoNote(p);
-      const imgTag = (p.imageUrl||p.images?.[0]) ? `<img src="${p.imageUrl||p.images[0]}" style="width:72px;height:56px;object-fit:contain;" onerror="this.style.display='none'"/>` : "";
+      const beamVal = (p.beam||"").includes("/")||((p.beam||"").split("/").length>1) ? "" : (p.beam?(p.beam+"°"):"");
+      const extraNote = p.customNote || (() => {
+        const extras = [];
+        const v = (p.voltage||"").toUpperCase();
+        const m = (p.model||"").toUpperCase();
+        if (m.includes("-M")||(p.desc||"").includes("無線")) extras.push("米家無線調光調色");
+        if (v.includes("AC110")||v.includes("AC220")) extras.push("含AC110~240V驅動器");
+        else if (v.includes("DC48")) extras.push("不含DC48V驅動器");
+        else if (v.includes("DC24")) extras.push("不含DC24V驅動器");
+        return extras.join("\n");
+      })();
+      const imgSrc = p.imageUrl||(p.images&&p.images[0])||"";
+      const imgTag = imgSrc ? `<img src="${imgSrc}" style="width:72px;height:56px;object-fit:contain;" onerror="this.style.display='none'"/>` : "";
       return `<tr>
         <td style="text-align:center;font-size:11px">${i+1}</td>
         <td style="text-align:center">${imgTag}</td>
         <td style="font-weight:600;font-size:11px">${p.model||""}</td>
         <td style="text-align:center;font-size:11px">${p.watt?(p.watt+"W"):""}</td>
-        <td style="text-align:center;font-size:11px">${p.beam?(p.beam+"°"):""}</td>
+        <td style="text-align:center;font-size:11px">${beamVal}</td>
         <td style="text-align:center;font-size:11px">${p.cct||""}</td>
         <td style="text-align:center;font-size:11px">${p.voltage||""}</td>
         <td style="text-align:center;font-size:11px">${p.cri?("CRI>"+p.cri):""}</td>
@@ -4117,7 +4128,7 @@ function BizQuotePage({ products, user }) {
         <td style="text-align:center">盞</td>
         <td style="text-align:right">NT$ ${price.toLocaleString()}</td>
         <td style="text-align:right;font-weight:600">NT$ ${amt.toLocaleString()}</td>
-        <td style="font-size:9px;white-space:pre-line;color:#444">${note}</td>
+        <td style="font-size:9px;white-space:pre-line;color:#444">${extraNote}</td>
       </tr>`;
     }).join("");
 
@@ -4155,7 +4166,11 @@ tr:nth-child(even) td{background:#faf8f5}
 @media print{body{padding:0}}
 </style></head><body>
 <div class="header">
-  <div><div class="logo-main">Ledoux 諾科照明</div><div class="logo-sub">LEDOUX LIGHTING CO;LTD</div></div>
+  <div style="display:flex;flex-direction:column;justify-content:center">
+    <img src="https://raw.githubusercontent.com/aak11196110/ledoux-catalog/main/public/ledoux-logo.png" style="height:48px;object-fit:contain;object-position:left;margin-bottom:4px;" onerror="this.style.display='none'"/>
+    <div class="logo-main" style="font-size:16px">Ledoux 諾科照明</div>
+    <div class="logo-sub">LEDOUX LIGHTING CO;LTD</div>
+  </div>
   <div class="co-info"><strong>${COMPANY.name}</strong><br>桃園市八德區建德路88號<br>TEL: (03)368-7525 &nbsp;|&nbsp; FAX: (03)368-7552<br>${COMPANY.email}</div>
 </div>
 <div class="doc-title">報　價　單</div>
