@@ -955,7 +955,7 @@ ${installRows ? `
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `報價單_${projectName}_${qn}.html`;
+  a.download = `詢價單_${projectName}_${qn}.html`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1971,7 +1971,7 @@ const filteredInv = inventory.filter(i=>
         +'</div></body></html>';
       const _plain=`━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${_tax.toLocaleString()}\n含稅總計：NT$ ${_total.toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`;
       sendNotifyEmail(
-        `【報價單】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
+        `【詢價】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
         _plain,
         _htmlBody
       );
@@ -2469,7 +2469,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
                 需要安裝<br/><span style={{fontSize:"8px",color:"#9a8a7a",letterSpacing:"1px"}}>填寫安裝資訊</span>
               </button>
               <button onClick={()=>handleInstallAnswer(false)} style={{padding:"18px 12px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"9px",letterSpacing:"3px",cursor:"pointer",textTransform:"uppercase",lineHeight:1.8}}>
-                不需要<br/><span style={{fontSize:"8px",letterSpacing:"1px"}}>直接下載報價單</span>
+                不需要<br/><span style={{fontSize:"8px",letterSpacing:"1px"}}>直接下載詢價單</span>
               </button>
             </div>
           </div>
@@ -2481,7 +2481,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
         <div className="modal-box" onClick={e=>e.stopPropagation()}>
           <div className="modal-head"><div className="modal-title">填寫公司資料</div><button className="close-btn" onClick={()=>setGuestModal(false)}><CloseIcon/></button></div>
           <div className="modal-body">
-            <div className="hint-box" style={{marginBottom:16}}>下載報價單前請填寫基本聯絡資料，資料僅用於報價單顯示。</div>
+            <div className="hint-box" style={{marginBottom:16}}>下載詢價單前請填寫基本聯絡資料（必填），資料用於詢價單顯示及業務聯繫。</div>
             {[["公司名稱","company","公司全名"],["聯絡人","contact","姓名"],["聯絡電話","phone","0912-345-678"]].map(([l,k,ph])=>(
               <div key={k} className="lf">
                 <label>{l} <span className="req">*</span></label>
@@ -3027,8 +3027,20 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
 
         {/* ══ 詢價單 ══ */}
         {page==="inquiry"&&<>
-          <div className="phead"><div><div className="ptitle">詢價單</div><div className="psub">填寫案名後下載報價單</div></div></div>
-          <div className="hint-box">💡 步驟：① 從產品目錄加入產品 → ② 填寫案名 → ③ 勾選確認事項 → ④ 下載報價單。設計公司享有專案折扣，請聯繫業務。</div>
+          <div className="phead"><div><div className="ptitle">詢價單</div><div className="psub">24小時自助詢價 · 確認規格數量後下載</div></div></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+            <div style={{background:"#f4f1eb",border:"0.5px solid var(--bdr)",padding:"16px 18px"}}>
+              <div style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>📋 詢價單</div>
+              <div style={{fontSize:13,fontWeight:600,marginBottom:6,color:"var(--blk)"}}>自助取得價格</div>
+              <div style={{fontSize:11,color:"var(--muted)",lineHeight:1.8}}>選好燈具數量後立即下載，24小時自助取得燈具單價與總價參考。<br/><br/>⚠ 如需正式生產或出庫存，請點選右側「申請正式報價」，業務將聯繫確認細節。</div>
+            </div>
+            <div style={{background:"#0e0d0c",border:"0.5px solid var(--blk)",padding:"16px 18px"}}>
+              <div style={{fontSize:"8px",letterSpacing:"3px",textTransform:"uppercase",color:"var(--gold)",marginBottom:8}}>📬 申請正式報價</div>
+              <div style={{fontSize:13,fontWeight:600,marginBottom:6,color:"var(--ivory)"}}>業務聯繫確認細節</div>
+              <div style={{fontSize:11,color:"#9a8a7a",lineHeight:1.8}}>確認好數量及規格後，點選申請正式報價，業務將聯繫您確認細節。<br/><br/>✦ 生產燈具或出庫存必須走此流程，業務確認無誤後方可安排。</div>
+            </div>
+          </div>
+          <div className="hint-box">💡 步驟：① 從產品目錄加入產品 → ② 填寫案名、公司、姓名 → ③ 勾選確認事項 → ④ 下載詢價單 或 申請正式報價</div>
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
           {cart.length===0?<div className="empty">請至產品目錄加入品項</div>:<>
@@ -4205,8 +4217,9 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
 </div></div>
 <div class="notes">
   <strong>備　註：</strong><br>
-  A. 本報價單有效期限30天，請於期限內回簽訂單。<br>
-  B. 謹請確認以上單價及數量，如無誤，煩將訂購報價單回傳【Fax:03-368 7552】。<br>
+  此為詢價單，價格以本單為準。如需正式生產或出庫存，請至平台點選「申請正式報價」，業務將聯繫確認規格細節後安排後續作業。<br><br>
+  A. 本詢價單有效期限30天。<br>
+  B. 謹請確認以上單價及數量，如需正式下訂，請回傳至【Fax:03-368 7552】或聯繫業務。<br>
   C. 燈具保固期限：室內保固3年、戶外保固2年。<br>
   D. 交期如遇天災或事變等不可抗力，未能依時履約交貨，得展延交期。<br>
   E. 單筆未滿 NT$3,000，運費由買方自付；庫存不足時生產交期約1個月起。
