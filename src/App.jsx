@@ -2706,6 +2706,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
                     </div>
                   ):<div className="pcard-desc">{p.desc}</div>}
                   <div className="pcard-tags">
+                    {p.isPromoted==="是"&&<span className="ptag" style={{background:"var(--gold)",color:"#fff",borderColor:"var(--gold)",fontWeight:700}}>🔥 主推 · 無MOQ</span>}
+                    {p.isPromoted!=="是"&&p.moq&&<span className="ptag" style={{color:"#9b6b3a",borderColor:"#9b6b3a"}}>MOQ {p.moq}</span>}
                     {p.watt&&<span className="ptag">{p.watt}</span>}
                     {p.beam&&<span className="ptag">{p.beam}</span>}
                     {p.cct&&<span className="ptag">{p.cct}</span>}
