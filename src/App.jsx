@@ -3775,6 +3775,16 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
         {cart.length>0&&<div className="sp-foot">
           <div className="cart-total"><span className="cart-total-lbl">小計</span><span className="cart-total-val">NT$ {cartTotal.toLocaleString()}</span></div>
           {cartTotal<3000&&<div className="warn-ship">未滿 NT$3,000，運費由買方支付</div>}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:10}}>
+            <div style={{background:"#f4f1eb",border:"0.5px solid var(--bdr)",padding:"8px 10px",fontSize:9,lineHeight:1.6}}>
+              <strong style={{color:"var(--blk)"}}>📋 下載詢價單</strong><br/>
+              <span style={{color:"var(--muted)"}}>立即取得價格參考</span>
+            </div>
+            <div style={{background:"#0e0d0c",border:"0.5px solid var(--blk)",padding:"8px 10px",fontSize:9,lineHeight:1.6}}>
+              <strong style={{color:"var(--gold)"}}>📬 申請正式報價</strong><br/>
+              <span style={{color:"#9a8a7a"}}>業務聯繫確認細節</span>
+            </div>
+          </div>
           <div className="cp-project"><label>案名 *</label><input value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/></div>
           <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:10}}>
             <input style={{flex:1,padding:"6px 9px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)"}} placeholder="— — —" value={discountCode} onChange={e=>setDiscountCode(e.target.value)} onBlur={()=>applyDiscountCode(discountCode)} onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)} maxLength={8}/>
@@ -3782,7 +3792,8 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             {discountLabel&&<div style={{fontSize:10,color:"#7a5a2a",background:"#fdf5e8",border:"0.5px solid var(--gold)",borderLeft:"2px solid var(--gold)",padding:"8px 10px",marginTop:6,lineHeight:1.8}}>⚠ 專案報價僅提供設計公司、建築師事務所自行接案使用。本報價不適用於標案、統包轉包或代購用途，如有上述需求請洽業務另行報價。</div>}
           </div>
           <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
-          <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"下載報價單":"請先勾選確認事項"}</button>
+          <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"📋 下載詢價單":"請先勾選確認事項"}</button>
+          <button onClick={submitFormalQuoteRequest} style={{width:"100%",marginTop:8,padding:"10px",background:"#0e0d0c",color:"var(--gold)",border:"0.5px solid var(--gold)",fontSize:11,letterSpacing:2,cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"}}>📬 申請正式報價 · 業務將聯繫您</button>
         </div>}
       </div>
 
