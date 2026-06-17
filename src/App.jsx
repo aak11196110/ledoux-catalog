@@ -2017,6 +2017,33 @@ if(typeof urgentData !== 'undefined' && urgentData){
     });
   };
 
+  // ✅ 申請正式報價：客戶確認需要業務聯繫處理生產/出貨
+  const submitFormalQuoteRequest = async () => {
+    const company = custCompany.trim() || (isGuest ? guestInfo.company : user.company) || "";
+    const name    = custName.trim()    || (isGuest ? guestInfo.contact : user.name)    || "";
+    const phone   = custPhone.trim()   || (isGuest ? guestInfo.phone : "")             || "";
+    if (!company || !name || !phone) {
+      const errs={};
+      if(!company)errs.company="必填";
+      if(!name)errs.contact="必填";
+      if(!phone)errs.phone="必填";
+      setGuestErr(errs);
+      setGuestModal(true);
+      toast$("請先填寫公司、姓名、電話");
+      return;
+    }
+    if (!projName.trim()) { toast$("請先填寫案名"); return; }
+    if (cart.length===0) { toast$("請先加入產品"); return; }
+    await sendNotifyEmail(
+      `【需聯繫】${name}（${company}）申請正式報價 — ${projName}`,
+      `━━━━━━━━━━━━━━━━━━━━\n⚠ 客戶申請正式報價，請盡快聯繫確認細節\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${name}\n公　　司：${company}\n聯絡電話：${phone}\n案　　名：${projName}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>`  • ${i.product.model}（${i.product.series}）× ${i.qty} 盞`).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 詢價系統自動通知`
+    );
+    if(sheetUrl){
+      await sheetPost("saveOrder",{id:"FORMAL"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:name,company:company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:0,tax:0,shipping:0,total:0,isVip:"否",discount:"申請正式報價-需聯繫"});
+    }
+    toast$("✓ 已送出申請，業務將盡快聯繫您");
+  };
+
 // 安裝 Modal 確認後：不需要安裝 → 直接下載；需要安裝 → 開安裝 Panel 再回來
   const handleInstallAnswer = (needInstall) => {
     setInstallAskModal(false);
@@ -3041,6 +3068,9 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             </div>
           </div>
           <div className="hint-box">💡 步驟：① 從產品目錄加入產品 → ② 填寫案名、公司、姓名 → ③ 勾選確認事項 → ④ 下載詢價單 或 申請正式報價</div>
+          {cart.length>0&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:16}}>
+            <button onClick={submitFormalQuoteRequest} style={{padding:"10px 24px",background:"#0e0d0c",color:"var(--gold)",border:"0.5px solid var(--gold)",fontSize:11,letterSpacing:2,cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"}}>📬 申請正式報價 · 業務將聯繫您</button>
+          </div>}
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
           {cart.length===0?<div className="empty">請至產品目錄加入品項</div>:<>
