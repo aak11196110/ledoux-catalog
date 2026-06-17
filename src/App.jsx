@@ -1705,6 +1705,7 @@ const submitVisit = async () => {
       if (tag.type==="cct")  ps = ps.filter(p=>p.cct&&p.cct.includes(tag.value.replace("K","")));
       if (tag.type==="cri")  ps = ps.filter(p=>p.cri&&p.cri.includes(tag.value));
       if (tag.type==="cert") ps = ps.filter(p=>p.cert&&p.cert.includes(tag.value));
+      if (tag.type==="promo") ps = ps.filter(p=>p.isPromoted==="是");
     }
     ps = ps.filter(p => {
       if (rangeWatt.min || rangeWatt.max) {
@@ -1752,6 +1753,7 @@ const submitVisit = async () => {
     setSeriesF(null);
   };
   const hasTag   = (type, value) => activeTags.some(t=>t.type===type&&t.value===value);
+  const promoTagActive = activeTags.some(t => t.type === "promo");
   const clearTags = () => {
     setActiveTags([]); setSearchQ(""); setCat("全部"); setSeriesF(null);
     setRangeWatt({min:"",max:""}); setRangeCutout({min:"",max:""});
@@ -2646,6 +2648,10 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
             {/* 主篩選：瓦數、色溫 */}
             <div className="filter-row"><span className="filter-row-label">瓦數</span>{allWatts.map(w=><button key={w} className={`filter-tag ${hasTag("watt",w)?"on":""}`} onClick={()=>toggleTag("watt",w)}>{w}</button>)}</div>
             <div className="filter-row"><span className="filter-row-label">色溫</span>{allCcts.map(c=><button key={c} className={`filter-tag ${hasTag("cct",c)?"on":""}`} onClick={()=>toggleTag("cct",c)}>{c}</button>)}</div>
+            <div className="filter-row">
+              <span className="filter-row-label">產品類型</span>
+              <button className={`filter-tag ${hasTag("promo","是")?"on":""}`} style={hasTag("promo","是")?{background:"var(--gold)",borderColor:"var(--gold)",color:"#fff"}:{}} onClick={()=>toggleTag("promo","是")}>🔥 只看主推 · 無MOQ</button>
+            </div>
             {/* 進階篩選按鈕 */}
             <div style={{margin:"6px 0"}}>
               <button onClick={()=>setAdvOpen(v=>!v)} style={{fontSize:10,letterSpacing:2,padding:"5px 16px",border:"0.5px solid var(--bdr)",background:advOpen?"var(--blk)":"transparent",color:advOpen?"var(--ivory)":"var(--blk)",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"}}>
