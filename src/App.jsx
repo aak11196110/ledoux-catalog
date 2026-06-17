@@ -1971,10 +1971,11 @@ const filteredInv = inventory.filter(i=>
         +'</div></body></html>';
       const _plain=`━━━━━━━━━━━━━━━━━━━━\n報價單下載通知\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${customer.name}\n公　　司：${customer.company||"—"}\n聯絡電話：${customer.phone||"—"}\n案　　名：${projName||"—"}\n折　扣：${discountLabel||"牌價"}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>{const p=i.product;const price=Math.round(Number(p.stdPrice)*discountRate);return `  • ${p.model}（${p.series}）× ${i.qty} 盞  NT$${price.toLocaleString()}/盞  小計 NT$${(price*i.qty).toLocaleString()}`;}).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\n燈具小計：NT$ ${lampSubtotal.toLocaleString()}\n稅金(5%)：NT$ ${_tax.toLocaleString()}\n含稅總計：NT$ ${_total.toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 報價系統自動通知`;
       sendNotifyEmail(
-        `【詢價】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
+        isFormalRequest ? `【需聯繫】${customer.name}（${customer.company||"訪客"}）申請正式報價 — ${projName}` : `【詢價】${customer.name}（${customer.company||"訪客"}）— ${projName}`,
         _plain,
         _htmlBody
       );
+      setIsFormalRequest(false);
     }
 if(typeof urgentData !== 'undefined' && urgentData){
   sendNotifyEmail(
@@ -2017,32 +2018,16 @@ if(typeof urgentData !== 'undefined' && urgentData){
     });
   };
 
-  // ✅ 申請正式報價：客戶確認需要業務聯繫處理生產/出貨
-  const submitFormalQuoteRequest = async () => {
-    const company = custCompany.trim() || (isGuest ? guestInfo.company : user.company) || "";
-    const name    = custName.trim()    || (isGuest ? guestInfo.contact : user.name)    || "";
-    const phone   = custPhone.trim()   || (isGuest ? guestInfo.phone : "")             || "";
-    if (!company || !name || !phone) {
-      const errs={};
-      if(!company)errs.company="必填";
-      if(!name)errs.contact="必填";
-      if(!phone)errs.phone="必填";
-      setGuestErr(errs);
-      setGuestModal(true);
-      toast$("請先填寫公司、姓名、電話");
-      return;
-    }
-    if (!projName.trim()) { toast$("請先填寫案名"); return; }
-    if (cart.length===0) { toast$("請先加入產品"); return; }
-    await sendNotifyEmail(
-      `【需聯繫】${name}（${company}）申請正式報價 — ${projName}`,
-      `━━━━━━━━━━━━━━━━━━━━\n⚠ 客戶申請正式報價，請盡快聯繫確認細節\n━━━━━━━━━━━━━━━━━━━━\n客　　戶：${name}\n公　　司：${company}\n聯絡電話：${phone}\n案　　名：${projName}\n━━━━━━━━━━━━━━━━━━━━\n品項明細：\n${cart.map(i=>`  • ${i.product.model}（${i.product.series}）× ${i.qty} 盞`).join("\n")}\n━━━━━━━━━━━━━━━━━━━━\nLEDOUX 諾科照明 詢價系統自動通知`
-    );
-    if(sheetUrl){
-      await sheetPost("saveOrder",{id:"FORMAL"+Date.now(),date:new Date().toISOString().split("T")[0],customerName:name,company:company,projectName:projName,items:cart.map(i=>`${i.product.model}×${i.qty}`).join("、"),subtotal:0,tax:0,shipping:0,total:0,isVip:"否",discount:"申請正式報價-需聯繫"});
-    }
-    toast$("✓ 已送出申請，業務將盡快聯繫您");
+  // ✅ 申請正式報價：跟下載詢價單走完全一樣的流程（案名+確認事項+安裝詢問），只是標記為需聯繫
+  const handleFormalRequest = () => {
+    if(!projName.trim()){toast$("請先填寫案名");return;}
+    if(!allChecked){toast$("請先勾選確認所有注意事項");return;}
+    setIsFormalRequest(true);
+    setInstallChoice(null);
+    setInstallAskModal(true);
   };
+
+  const [isFormalRequest, setIsFormalRequest] = useState(false);
 
 // 安裝 Modal 確認後：不需要安裝 → 直接下載；需要安裝 → 開安裝 Panel 再回來
   const handleInstallAnswer = (needInstall) => {
@@ -3069,7 +3054,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           </div>
           <div className="hint-box">💡 步驟：① 從產品目錄加入產品 → ② 填寫案名、公司、姓名 → ③ 勾選確認事項 → ④ 下載詢價單 或 申請正式報價</div>
           {cart.length>0&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:16}}>
-            <button onClick={submitFormalQuoteRequest} style={{padding:"10px 24px",background:"#0e0d0c",color:"var(--gold)",border:"0.5px solid var(--gold)",fontSize:11,letterSpacing:2,cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"}}>📬 申請正式報價 · 業務將聯繫您</button>
+            <button onClick={handleFormalRequest} disabled={!projName.trim()||!allChecked} style={{padding:"10px 24px",background:"#0e0d0c",color:"var(--gold)",border:"0.5px solid var(--gold)",fontSize:11,letterSpacing:2,cursor:allChecked?"pointer":"not-allowed",fontFamily:"'Noto Sans TC',sans-serif",opacity:allChecked?1:0.5}}>📬 申請正式報價 · 業務將聯繫您</button>
           </div>}
           {/* ✅ 設計公司橫幅 */}
           <ProjBanner onContact={()=>setContactModal(true)}/>
@@ -3793,7 +3778,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           </div>
           <div className="checklist"><div className="cl-title">下載前請確認</div>{[{k:"c1",t:"單筆未滿 NT$3,000 運費由買方自付"},{k:"c2",t:"庫存不足時生產交期約 1 個月起"},{k:"c3",t:"保固室內 3 年、戶外 2 年"},{k:"c4",t:"報價單有效期 30 天請回簽確認"}].map(({k,t})=>(<label key={k} className="cl-item"><input type="checkbox" checked={checks[k]} onChange={e=>setChecks(p=>({...p,[k]:e.target.checked}))}/>{t}</label>))}</div>
           <button className="btn-pdf" onClick={handleGenPDF} disabled={!projName.trim()||!allChecked}>{allChecked?"📋 下載詢價單":"請先勾選確認事項"}</button>
-          <button onClick={submitFormalQuoteRequest} style={{width:"100%",marginTop:8,padding:"10px",background:"#0e0d0c",color:"var(--gold)",border:"0.5px solid var(--gold)",fontSize:11,letterSpacing:2,cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif"}}>📬 申請正式報價 · 業務將聯繫您</button>
+          <button onClick={handleFormalRequest} disabled={!projName.trim()||!allChecked} style={{width:"100%",marginTop:8,padding:"10px",background:"#0e0d0c",color:"var(--gold)",border:"0.5px solid var(--gold)",fontSize:11,letterSpacing:2,cursor:allChecked?"pointer":"not-allowed",fontFamily:"'Noto Sans TC',sans-serif",opacity:allChecked?1:0.5}}>📬 申請正式報價 · 業務將聯繫您</button>
         </div>}
       </div>
 
