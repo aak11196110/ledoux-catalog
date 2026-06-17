@@ -275,6 +275,7 @@
   </select>
   <select class="f-select" id="pcat" onchange="rProd()"><option value="">所有分類</option><option>崁燈</option><option>射燈</option><option>磁吸系統</option><option>軌道燈</option><option>吸頂燈</option><option>鋁條燈</option><option>軟條燈</option><option>洗牆燈</option><option>其他</option><option>驅動器</option></select>
   <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
+  <select class="f-select" id="ppromo" onchange="rProd()"><option value="">主推/一般</option><option value="是">🔥 只看主推</option><option value="否">只看一般</option></select>
 </div>
       <div class="tbl-wrap"><table><thead><tr><th style="width:58px">序</th><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="10" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
@@ -1097,15 +1098,16 @@ async function applyProdOrder(){
   toast('✅ 排序已同步');
 }
 function rProd(){
-  const q=v('pq'),series=v('pseries'),cat=v('pcat'),st=v('pst');
+  const q=v('pq'),series=v('pseries'),cat=v('pcat'),st=v('pst'),promo=v('ppromo');
   let list=[...D.products];
   if(q)list=list.filter(p=>(p.model+p.series+p.category).toLowerCase().includes(q.toLowerCase()));
   if(series)list=list.filter(p=>p.series===series);
   if(cat)list=list.filter(p=>p.category===cat);
   if(st)list=list.filter(p=>p.status===st);
-  document.getElementById('prod-tb').innerHTML=list.length?list.map((p,i)=>`<tr data-pid="${esc(p.id)}">
+  if(promo)list=list.filter(p=>(p.isPromoted||'否')===promo);
+  document.getElementById('prod-tb').innerHTML=list.length?list.map((p,i)=>`<tr data-pid="${esc(p.id)}" ${p.isPromoted==='是'?'style="background:#fdf5e8"':''}>
     <td><input type="number" class="sort-num" value="${i+1}" min="1" style="width:52px;padding:3px 5px;border:0.5px solid var(--bdr);font-size:12px;text-align:center;font-family:'Space Mono',monospace"></td>
-    <td><b>${p.model||'—'}</b></td><td style="color:var(--muted)">${p.series||'—'}</td><td>${p.category||'—'}</td>
+    <td><b>${p.isPromoted==='是'?'🔥 ':''}${p.model||'—'}</b>${p.isPromoted!=='是'&&p.moq?`<div style="font-size:9px;color:#9b6b3a">MOQ ${esc(p.moq)}</div>`:''}</td><td style="color:var(--muted)">${p.series||'—'}</td><td>${p.category||'—'}</td>
     <td>${p.watt?p.watt+'W':'—'}</td><td style="color:var(--muted)">${p.cct||'—'}</td>
     <td style="font-family:'Space Mono',monospace">NT$ ${fmt(p.stdPrice||p.price||0)}</td>
     <td>${bdg(p.status||'上架')}</td>
