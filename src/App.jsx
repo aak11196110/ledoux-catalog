@@ -4060,6 +4060,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
 const BIZ_CLIENTS_KEY = "bizClients_v1";
 function loadBizClients() { try { return JSON.parse(localStorage.getItem(BIZ_CLIENTS_KEY)||"[]"); } catch { return []; } }
 function saveBizClients(list) { try { localStorage.setItem(BIZ_CLIENTS_KEY, JSON.stringify(list)); } catch {} }
+const CLIENT_TAGS = ["設計公司","建築師","個人客戶","代理商","其他"];
 
 function BizQuotePage({ products, user }) {
   const COMPANY = { name:"台灣諾科照明有限公司", eng:"LEDOUX LIGHTING CO;LTD", email:"kim@ledouxlight.com.tw" };
@@ -4071,24 +4072,35 @@ function BizQuotePage({ products, user }) {
   const [clientList, setClientList] = useState(loadBizClients());
   const [showClientDD, setShowClientDD] = useState(false);
   const [clientSearch, setClientSearch] = useState("");
+  const [clientTag, setClientTag] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
 
   const showToast = (msg) => { setToast(msg); setTimeout(()=>setToast(""),2200); };
 
   const discountRate = Math.min(1, Math.max(0.1, (parseFloat(discountInput)||100)/100));
+  const discountLabel = discountRate<1 ? `${Math.round(discountRate*100)}折` : "";
 
   const saveClient = () => {
     if (!cust.company) return;
-    const list = loadBizClients();
-    const existing = list.find(c => c.company===cust.company && c.name===cust.name);
-    if (!existing) {
-      list.unshift({ company:cust.company, name:cust.name, phone:cust.phone, address:cust.address, savedAt: new Date().toISOString() });
-      saveBizClients(list.slice(0,100));
-      setClientList(list.slice(0,100));
-      showToast("✓ 客戶資料已儲存");
-    }
+    let list = loadBizClients();
+    const idx = list.findIndex(c => c.company===cust.company && c.name===cust.name);
+    const record = { company:cust.company, name:cust.name, phone:cust.phone, address:cust.address, tag:clientTag, savedAt: new Date().toISOString() };
+    if (idx>-1) list[idx] = { ...list[idx], ...record };
+    else list.unshift(record);
+    saveBizClients(list.slice(0,100));
+    setClientList(list.slice(0,100));
+    showToast("✓ 客戶資料已儲存");
+  };
+
+  const deleteClient = (company, name) => {
+    const list = loadBizClients().filter(c => !(c.company===company && c.name===name));
+    saveBizClients(list);
+    setClientList(list);
+    showToast("✓ 已刪除客戶資料");
   };
 
   const filteredClients = clientList.filter(c => {
+    if (tagFilter && c.tag!==tagFilter) return false;
     if (!clientSearch) return true;
     return c.company.includes(clientSearch) || (c.name||"").includes(clientSearch);
   });
@@ -4103,7 +4115,7 @@ function BizQuotePage({ products, user }) {
     setSelectedItems(prev => {
       const exists = prev.find(x => x.model === p.model);
       if (exists) return prev.map(x => x.model===p.model ? {...x, qty: x.qty+1} : x);
-      return [...prev, { ...p, qty:1, customNote:"" }];
+      return [...prev, { ...p, qty:1, customNote:"", customPrice:null }];
     });
     showToast(`已加入 ${p.model}`);
   };
@@ -4115,8 +4127,17 @@ function BizQuotePage({ products, user }) {
     setSelectedItems(prev => prev.map(x=>x.model===model?{...x,qty:n}:x));
   };
   const updateNote = (model, note) => setSelectedItems(prev => prev.map(x=>x.model===model?{...x,customNote:note}:x));
+  const updateCustomPrice = (model, val) => {
+    setSelectedItems(prev => prev.map(x=>{
+      if (x.model!==model) return x;
+      if (val==="") return { ...x, customPrice:null };
+      const n = parseFloat(val);
+      return { ...x, customPrice: isNaN(n)?null:n };
+    }));
+  };
 
   const getPrice = (p) => {
+    if (p.customPrice!=null && !isNaN(p.customPrice)) return Math.round(Number(p.customPrice));
     const base = Number(p.projPrice||p.stdPrice||0);
     return Math.round(base * discountRate / 5) * 5;
   };
@@ -4344,25 +4365,41 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
           <div style={{fontSize:10,color:"var(--gold)",alignSelf:"center"}}>
             {discountRate<1 ? `= ${Math.round(discountRate*100)}折` : "= 無折扣"}
           </div>
+          <select value={clientTag} onChange={e=>setClientTag(e.target.value)}
+            style={{padding:"6px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",color:"var(--blk)"}}>
+            <option value="">客戶分類（選填）</option>
+            {CLIENT_TAGS.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
           <button onClick={saveClient} style={{marginLeft:"auto",padding:"6px 16px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:10,cursor:"pointer",color:"var(--muted)"}}>💾 儲存客戶資料</button>
         </div>
         {/* 客戶資料快速帶入 */}
-        <div style={{position:"relative",marginBottom:8}}>
-          <input style={{...S.srch,marginBottom:0}} placeholder="🔍 搜尋已儲存客戶..." value={clientSearch}
-            onChange={e=>{setClientSearch(e.target.value);setShowClientDD(true);}}
-            onFocus={()=>setShowClientDD(true)}/>
-          {showClientDD && filteredClients.length>0 && (
-            <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"0.5px solid var(--bdr)",zIndex:99,maxHeight:180,overflowY:"auto",boxShadow:"0 4px 12px rgba(0,0,0,0.1)"}}>
-              {filteredClients.map((c,i)=>(
-                <div key={i} onClick={()=>{setCust(p=>({...p,company:c.company,name:c.name,phone:c.phone,address:c.address}));setClientSearch("");setShowClientDD(false);showToast(`已帶入 ${c.company}`);}}
-                  style={{padding:"10px 14px",cursor:"pointer",borderBottom:"0.5px solid var(--bdr2)",fontSize:12}}>
-                  <strong>{c.company}</strong>
-                  {c.name&&<span style={{color:"var(--muted)",marginLeft:8,fontSize:11}}>{c.name}</span>}
-                  {c.phone&&<span style={{color:"var(--muted)",marginLeft:8,fontSize:10}}>{c.phone}</span>}
-                </div>
-              ))}
-            </div>
-          )}
+        <div style={{display:"flex",gap:8,marginBottom:8}}>
+          <select value={tagFilter} onChange={e=>setTagFilter(e.target.value)}
+            style={{padding:"9px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,fontFamily:"'Noto Sans TC',sans-serif",color:"var(--blk)"}}>
+            <option value="">全部分類</option>
+            {CLIENT_TAGS.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+          <div style={{position:"relative",flex:1}}>
+            <input style={{...S.srch,marginBottom:0}} placeholder="🔍 搜尋已儲存客戶..." value={clientSearch}
+              onChange={e=>{setClientSearch(e.target.value);setShowClientDD(true);}}
+              onFocus={()=>setShowClientDD(true)}/>
+            {showClientDD && filteredClients.length>0 && (
+              <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:"0.5px solid var(--bdr)",zIndex:99,maxHeight:180,overflowY:"auto",boxShadow:"0 4px 12px rgba(0,0,0,0.1)"}}>
+                {filteredClients.map((c,i)=>(
+                  <div key={i} style={{padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",borderBottom:"0.5px solid var(--bdr2)",fontSize:12}}>
+                    <div onClick={()=>{setCust(p=>({...p,company:c.company,name:c.name,phone:c.phone,address:c.address}));setClientTag(c.tag||"");setClientSearch("");setShowClientDD(false);showToast(`已帶入 ${c.company}`);}} style={{flex:1}}>
+                      <strong>{c.company}</strong>
+                      {c.tag&&<span style={{color:"var(--gold)",marginLeft:8,fontSize:10,border:"0.5px solid var(--gold)",padding:"1px 6px"}}>{c.tag}</span>}
+                      {c.name&&<span style={{color:"var(--muted)",marginLeft:8,fontSize:11}}>{c.name}</span>}
+                      {c.phone&&<span style={{color:"var(--muted)",marginLeft:8,fontSize:10}}>{c.phone}</span>}
+                    </div>
+                    <button onClick={(e)=>{e.stopPropagation();if(window.confirm(`確定刪除「${c.company}」的客戶資料？`))deleteClient(c.company,c.name);}}
+                      style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:13,marginLeft:10,flexShrink:0}}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -4401,7 +4438,13 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
               {selectedItems.map(p=>(
                 <tr key={p.model}>
                   <td style={S.selTd}><strong>{p.model}</strong><div style={{fontSize:9,color:"var(--muted)"}}>{p.series}</div></td>
-                  <td style={S.selTd}>NT$ {getPrice(p).toLocaleString()}</td>
+                  <td style={S.selTd}>
+                    <input type="number" min="0" placeholder={String(getPrice(p))}
+                      style={{width:78,padding:"4px 6px",border:"0.5px solid var(--bdr)",background:p.customPrice!=null?"#fdf5e8":"transparent",fontSize:11,textAlign:"right",fontFamily:"'Noto Sans TC',sans-serif"}}
+                      value={p.customPrice!=null?p.customPrice:""}
+                      onChange={e=>updateCustomPrice(p.model,e.target.value)}/>
+                    {p.customPrice!=null&&<div style={{fontSize:8,color:"var(--gold)",marginTop:2}}>已手動調整</div>}
+                  </td>
                   <td style={S.selTd}><input type="number" min="1" style={S.qtyInp} value={p.qty} onChange={e=>updateQty(p.model,e.target.value)}/></td>
                   <td style={{...S.selTd,fontWeight:600}}>NT$ {(getPrice(p)*p.qty).toLocaleString()}</td>
                   <td style={S.selTd}>
