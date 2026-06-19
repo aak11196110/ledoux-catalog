@@ -32,6 +32,9 @@ class ErrorBoundary extends Component {
   }
 }
 
+const DIFY_API_URL = "https://api.dify.ai/v1";
+const DIFY_API_KEY = "app-9uROUbCdyOpCWqkVKKR6WILz";
+
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
 const ADMIN_USERNAME = "xxx3903052";
 const ADMIN_PASSWORD = "zzz3909086";
@@ -1416,7 +1419,7 @@ const bgUrl = scene === "indoor"
   );
 }
 
-function App() {
+function App({ preloadModels = [] }) {
   const [appLoading, setAppLoading] = useState(!!SHEET_URL);
   const [syncStatus, setSyncStatus] = useState("off");
   const [sheetUrl,   setSheetUrl]   = useState(SHEET_URL);
@@ -1780,6 +1783,14 @@ const filteredInv = inventory.filter(i=>
   };
 
  const addToCart = (p, spec={}) => { const key=p.id+JSON.stringify(spec); setCart(c=>{const ex=c.find(i=>i._key===key);return ex?c.map(i=>i._key===key?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1,spec,_key:key}];}); toast$(`${p.model} 已加入詢價單`); };
+  useEffect(() => {
+    if (!preloadModels || preloadModels.length === 0) return;
+    preloadModels.forEach(modelCode => {
+      const prod = products.find(p => p.model && p.model.toUpperCase().includes(modelCode.toUpperCase()));
+      if (prod) addToCart(prod);
+    });
+    setCartOpen(true);
+  }, [preloadModels]);
   const updateQty = (id,d) => setCart(c=>c.map(i=>i.product.id===id?{...i,qty:Math.max(1,i.qty+d)}:i));
   const removeItem = id => setCart(c=>c.filter(i=>i.product.id!==id));
   const addToSamp  = p  => { setSampCart(c=>c.find(i=>i.id===p.id)?c:[...c,p]); toast$(`${p.model} 已加入樣品清單`); };
@@ -4476,11 +4487,154 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
   );
 }
 
+// ══════════════════════════════════════════
+//  AI 智能秘書浮動視窗
+// ══════════════════════════════════════════
+function AiChatWidget({ onAddProduct }) {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: "assistant", text: "您好！我是 LEDOUX 智能燈具顧問，請問您對哪款燈具有興趣？可以詢問規格、適合場景或報價需求。" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [convId, setConvId] = useState("");
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages, open]);
+
+  function extractModels(text) {
+    const pattern = /\b([A-Z]{2,}[\w.\-]{3,})\b/g;
+    const matches = [...text.matchAll(pattern)];
+    return [...new Set(matches.map(m => m[1]))].filter(m => m.length >= 5);
+  }
+
+  async function sendMessage() {
+    const q = input.trim();
+    if (!q || loading) return;
+    setInput("");
+    setMessages(prev => [...prev, { role: "user", text: q }]);
+    setLoading(true);
+    try {
+      const body = {
+        inputs: {},
+        query: q,
+        response_mode: "blocking",
+        conversation_id: convId || "",
+        user: "ledoux-customer-" + Date.now(),
+      };
+      const res = await fetch(`${DIFY_API_URL}/chat-messages`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${DIFY_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      const answer = data.answer || "抱歉，我暫時無法回答，請聯繫我們的業務人員。";
+      if (data.conversation_id) setConvId(data.conversation_id);
+      setMessages(prev => [...prev, { role: "assistant", text: answer }]);
+      const models = extractModels(answer);
+      if (models.length > 0 && onAddProduct) {
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            role: "system",
+            text: `偵測到型號：${models.join("、")}`,
+            models,
+          }]);
+        }, 600);
+      }
+    } catch (e) {
+      setMessages(prev => [...prev, { role: "assistant", text: "連線發生錯誤，請稍後再試。" }]);
+    }
+    setLoading(false);
+  }
+
+  const S2 = {
+    fab: { position:"fixed", bottom:24, right:24, zIndex:9999, width:56, height:56, borderRadius:"50%", background:"#0e0d0c", border:"2px solid #b8935a", color:"#b8935a", fontSize:24, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 18px rgba(0,0,0,0.25)" },
+    box: { position:"fixed", bottom:92, right:24, zIndex:9998, width:340, height:480, background:"#faf8f5", border:"0.5px solid rgba(14,13,12,0.15)", display:"flex", flexDirection:"column", boxShadow:"0 8px 32px rgba(0,0,0,0.18)", fontFamily:"'Noto Sans TC',sans-serif" },
+    head: { padding:"14px 18px", background:"#0e0d0c", display:"flex", alignItems:"center", justifyContent:"space-between" },
+    headTxt: { color:"#b8935a", fontFamily:"'Cormorant Garamond',serif", fontSize:16, letterSpacing:2 },
+    msgs: { flex:1, overflowY:"auto", padding:"14px 16px", display:"flex", flexDirection:"column", gap:10 },
+    bubble: (role) => ({
+      maxWidth:"82%", padding:"9px 13px", fontSize:12, lineHeight:1.7, borderRadius:2,
+      alignSelf: role==="user" ? "flex-end" : "flex-start",
+      background: role==="user" ? "#0e0d0c" : role==="system" ? "rgba(184,147,90,0.1)" : "#fff",
+      color: role==="user" ? "#f7f4ef" : "#0e0d0c",
+      border: role==="system" ? "0.5px solid #b8935a" : "0.5px solid rgba(14,13,12,0.1)",
+    }),
+    inp: { display:"flex", borderTop:"0.5px solid rgba(14,13,12,0.12)", padding:"10px 12px", gap:8 },
+    inpBox: { flex:1, border:"0.5px solid rgba(14,13,12,0.15)", padding:"7px 10px", fontSize:12, outline:"none", fontFamily:"'Noto Sans TC',sans-serif", resize:"none", background:"transparent" },
+    send: { padding:"7px 14px", background:"#b8935a", border:"none", color:"#0e0d0c", fontSize:11, letterSpacing:1, cursor:"pointer", fontFamily:"'Noto Sans TC',sans-serif" },
+    addBtn: { marginTop:6, padding:"5px 12px", background:"#0e0d0c", border:"none", color:"#b8935a", fontSize:10, letterSpacing:1, cursor:"pointer" },
+  };
+
+  return (
+    <>
+      {open && (
+        <div style={S2.box}>
+          <div style={S2.head}>
+            <span style={S2.headTxt}>✦ AI 燈具顧問</span>
+            <button onClick={()=>setOpen(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,0.5)",fontSize:18,cursor:"pointer"}}>✕</button>
+          </div>
+          <div style={S2.msgs}>
+            {messages.map((m, i) => (
+              <div key={i} style={S2.bubble(m.role)}>
+                {m.text}
+                {m.role==="system" && m.models && onAddProduct && (
+                  <div>
+                    <button style={S2.addBtn} onClick={()=>{ m.models.forEach(md=>onAddProduct(md)); setOpen(false); }}>
+                      ＋ 加入詢價單
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {loading && <div style={{...S2.bubble("assistant"),color:"#b8935a"}}>▋ 思考中…</div>}
+            <div ref={bottomRef}/>
+          </div>
+          <div style={S2.inp}>
+            <textarea
+              style={S2.inpBox}
+              rows={2}
+              placeholder="輸入您的問題…"
+              value={input}
+              onChange={e=>setInput(e.target.value)}
+              onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} }}
+            />
+            <button style={S2.send} onClick={sendMessage} disabled={loading}>送出</button>
+          </div>
+        </div>
+      )}
+      <button style={S2.fab} onClick={()=>setOpen(o=>!o)} title="AI 燈具顧問">
+        {open ? "✕" : "💬"}
+      </button>
+    </>
+  );
+}
+
+function AppWithAI() {
+  const [aiModels, setAiModels] = useState([]);
+
+  function handleAiAddProduct(modelCode) {
+    setAiModels(prev => [...prev, modelCode]);
+  }
+
+  return (
+    <>
+      <App preloadModels={aiModels} />
+      <AiChatWidget onAddProduct={handleAiAddProduct} />
+    </>
+  );
+}
+
 // ✅ ErrorBoundary 包住整個 App，防止任何錯誤白屏
 export default function SafeApp() {
   return (
     <ErrorBoundary>
-      <App />
+      <AppWithAI />
     </ErrorBoundary>
   );
 }
