@@ -3,7 +3,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 // ══════════════════════════════════════════
 //  【Dify AI 設定區】— 上線前填入
 // ══════════════════════════════════════════
-const DIFY_API_KEY      = "app-9uROUbCdyOpCWqkVKKR6WILz";
 const DIFY_API_ENDPOINT = "https://api.dify.ai/v1";
 
 // ══════════════════════════════════════════
@@ -12,27 +11,31 @@ const DIFY_API_ENDPOINT = "https://api.dify.ai/v1";
 const NPCS = [
   {
     id: "sales", label: "業務專員", color: "#b8935a",
+    apiKey: "app-9uROUbCdyOpCWqkVKKR6WILz",
     desk: { x: 90, y: 195 },
-    greeting: "您好！我可以協助報價、產品建議與客戶開發。請問有什麼需要？",
-    difyInputs: { role: "sales" },
+    greeting: "您好！我是 Ledoux 智能業務秘書，報價、客戶開發、產品建議都找我！",
+    difyInputs: {},
   },
   {
     id: "tech", label: "技術專員", color: "#4a9b6a",
+    apiKey: "app-awrE84SxLg1OUwfbJyOeKl5M",
     desk: { x: 250, y: 195 },
-    greeting: "您好！安裝估價、規格確認、技術圖面都找我。",
-    difyInputs: { role: "tech" },
+    greeting: "您好！我是 Ledoux 技術專員，安裝估價、規格確認、施工圖面都找我。",
+    difyInputs: {},
   },
   {
-    id: "admin", label: "行政專員", color: "#7a6aab",
+    id: "admin", label: "智能秘書", color: "#7a6aab",
+    apiKey: "app-9uROUbCdyOpCWqkVKKR6WILz",
     desk: { x: 410, y: 195 },
-    greeting: "您好！訂單查詢、樣品申請、發票事宜請告訴我。",
-    difyInputs: { role: "admin" },
+    greeting: "您好！訂單查詢、樣品申請、行政事務請告訴我。",
+    difyInputs: {},
   },
   {
     id: "stock", label: "庫存管理", color: "#9b5a5a",
+    apiKey: "app-WABywuZSL6JwOvN88BaABMjX",
     desk: { x: 570, y: 195 },
-    greeting: "您好！現貨查詢、備料確認、出貨安排都由我處理。",
-    difyInputs: { role: "stock" },
+    greeting: "您好！我是庫存管理專員，現貨查詢、備料、出貨安排都由我處理。",
+    difyInputs: {},
   },
 ];
 
@@ -40,7 +43,7 @@ async function difyChat(message, conversationId, npc) {
   try {
     const res = await fetch(`${DIFY_API_ENDPOINT}/chat-messages`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${DIFY_API_KEY}`, "Content-Type": "application/json" },
+      headers: { "Authorization": `Bearer ${npc.apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         inputs: npc.difyInputs,
         query: message,
