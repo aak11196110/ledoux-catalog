@@ -7,6 +7,7 @@
 //  4. 設計公司專案提示橫幅：出現在產品目錄、詢價單、安裝服務、電子型錄、詢價側邊欄、安裝估價 Panel
 // ═══════════════════════════════════════════
 import { useState, useRef, useEffect, Component } from "react";
+import OfficePage from "./game/Office.jsx";
 
 // ✅ ErrorBoundary：防止任何 JS 錯誤導致白屏，改為顯示錯誤訊息
 class ErrorBoundary extends Component {
@@ -2331,6 +2332,9 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           <div className={`sm-item cat-item ${page==="ecatalog"?"on":""}`} onClick={()=>{setPage("ecatalog");setMenuOpen(false);}}>
             <span>電子型錄</span><span className="sm-badge gold">{catalogs.length}</span>
           </div>
+          <div className={`sm-item ${page==="office"?"on":""}`} onClick={()=>{setPage("office");setMenuOpen(false);}} style={{borderTop:"0.5px solid #2a2010",marginTop:6,paddingTop:10}}>
+            <span style={{color:"#b8935a"}}>🏢 虛擬辦公室</span>
+          </div>
           <div className={`sm-item inv ${page==="inventory"?"on":""}`} onClick={()=>{setPage("inventory");setMenuOpen(false);}}>
             <span>台灣現貨庫存</span>
             {inventory.filter(i=>Number(i.availableQty)>0).length>0&&<span className="sm-badge green">{inventory.filter(i=>Number(i.availableQty)>0).length}</span>}
@@ -3304,6 +3308,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
 
         {/* ══ 業務快速報價 ══ */}
         {page==="biz_quote"&&isAdmin&&<BizQuotePage products={products} user={user}/>}
+        {page==="office"&&<OfficePage/>}
 
         {/* ══ 產品管理 ══ */}
         {page==="products"&&isAdmin&&<>
