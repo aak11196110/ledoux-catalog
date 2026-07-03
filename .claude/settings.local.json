@@ -13,7 +13,12 @@
       "Bash(npx vite *)",
       "Bash(ping -n 4 127.0.0.1)",
       "Bash(npm install *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(grep -n \"Step 1.*客戶資料\\\\|selTd\\\\|NT\\\\$ {getPrice\" src/App.jsx)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Kim\\\\ledoux-catalog\\\\src\\\\App.jsx\")",
+      "Bash(Measure-Object -Line)",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\Kim\\\\ledoux-catalog\\\\src\\\\App.jsx\"\\).Count)",
+      "PowerShell(New-Item *)"
     ]
   }
 }

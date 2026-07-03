@@ -34,7 +34,12 @@ class ErrorBoundary extends Component {
 }
 
 const DIFY_API_URL = "https://api.dify.ai/v1";
-const DIFY_API_KEY = "app-9uROUbCdyOpCWqkVKKR6WILz";
+// 每個專員對應獨立的 Dify App Key（建好 3 個 App 後，把 Key 填入下方）
+const DIFY_KEYS = {
+  product:  "app-9uROUbCdyOpCWqkVKKR6WILz", // 🔦 產品顧問 App Key
+  sales:    "app-9uROUbCdyOpCWqkVKKR6WILz", // 💰 業務報價 App Key（建好後換）
+  schedule: "app-9uROUbCdyOpCWqkVKKR6WILz", // 📅 預約服務 App Key（建好後換）
+};
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
 const ADMIN_USERNAME = "xxx3903052";
@@ -4496,9 +4501,9 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
 //  AI 服務專員浮動視窗
 // ══════════════════════════════════════════
 const AI_SPECIALISTS = [
-  { id:"product",  name:"產品顧問", icon:"🔦", desc:"燈具規格・選燈建議・場景搭配",  greeting:"您好！我是 LEDOUX 產品顧問，可以為您介紹燈具規格、適合場景或提供選燈建議，請問有什麼可以幫您的？" },
-  { id:"sales",    name:"業務報價", icon:"💰", desc:"報價・折扣・運費・樣品申請",   greeting:"您好！我是 LEDOUX 業務報價專員，可以為您提供報價諮詢、運費說明或協助樣品申請，請問有什麼需要？" },
-  { id:"schedule", name:"預約服務", icon:"📅", desc:"安裝試算・預約拜訪・到場介紹", greeting:"您好！我是 LEDOUX 服務預約專員，可以為您安排安裝費試算、預約業務拜訪或展示間參觀，請問您想預約什麼服務？" },
+  { id:"product",  name:"產品顧問", icon:"🔦", desc:"燈具規格・選燈建議・場景搭配",  greeting:"您好！我是 LEDOUX 產品顧問，可以為您介紹燈具規格、適合場景或提供選燈建議，請問有什麼可以幫您的？",  apiKey: DIFY_KEYS.product  },
+  { id:"sales",    name:"業務報價", icon:"💰", desc:"報價・折扣・運費・樣品申請",   greeting:"您好！我是 LEDOUX 業務報價專員，可以為您提供報價諮詢、運費說明或協助樣品申請，請問有什麼需要？",   apiKey: DIFY_KEYS.sales    },
+  { id:"schedule", name:"預約服務", icon:"📅", desc:"安裝試算・預約拜訪・到場介紹", greeting:"您好！我是 LEDOUX 服務預約專員，可以為您安排安裝費試算、預約業務拜訪或展示間參觀，請問您想預約什麼服務？", apiKey: DIFY_KEYS.schedule  },
 ];
 
 function getOrCreateUID() {
@@ -4559,8 +4564,8 @@ function AiChatWidget({ onAddProduct }) {
     try {
       const res = await fetch(`${DIFY_API_URL}/chat-messages`, {
         method:"POST",
-        headers:{ "Authorization":`Bearer ${DIFY_API_KEY}`, "Content-Type":"application/json" },
-        body: JSON.stringify({ inputs:{ specialist:spec.name }, query:q, response_mode:"streaming", conversation_id:curConvId, user:getOrCreateUID() }),
+        headers:{ "Authorization":`Bearer ${spec.apiKey}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ inputs:{}, query:q, response_mode:"streaming", conversation_id:curConvId, user:getOrCreateUID() }),
       });
       setConv(spec.id, c => ({ ...c, messages:[...c.messages, { role:"assistant", text:"" }] }));
       const reader = res.body.getReader();
