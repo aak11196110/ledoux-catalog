@@ -4493,83 +4493,126 @@ ${discountRate<1?`<div class="price-note">⚠ 本報價單已套用 <strong>${di
 }
 
 // ══════════════════════════════════════════
-//  AI 智能秘書浮動視窗
+//  AI 服務專員浮動視窗
 // ══════════════════════════════════════════
+const AI_SPECIALISTS = [
+  { id:"product",  name:"產品顧問", icon:"🔦", desc:"燈具規格・選燈建議・場景搭配",  greeting:"您好！我是 LEDOUX 產品顧問，可以為您介紹燈具規格、適合場景或提供選燈建議，請問有什麼可以幫您的？" },
+  { id:"sales",    name:"業務報價", icon:"💰", desc:"報價・折扣・運費・樣品申請",   greeting:"您好！我是 LEDOUX 業務報價專員，可以為您提供報價諮詢、運費說明或協助樣品申請，請問有什麼需要？" },
+  { id:"schedule", name:"預約服務", icon:"📅", desc:"安裝試算・預約拜訪・到場介紹", greeting:"您好！我是 LEDOUX 服務預約專員，可以為您安排安裝費試算、預約業務拜訪或展示間參觀，請問您想預約什麼服務？" },
+];
+
+function getOrCreateUID() {
+  let id = localStorage.getItem("ledoux_uid");
+  if (!id) { id = "lx-" + Math.random().toString(36).slice(2,11); localStorage.setItem("ledoux_uid", id); }
+  return id;
+}
+
+function SpecCard({ spec, onSelect, S }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div style={S.card(hover)} onClick={()=>onSelect(spec)}
+      onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)}>
+      <span style={S.cardIcon}>{spec.icon}</span>
+      <div>
+        <div style={S.cardName}>{spec.name}</div>
+        <div style={S.cardDesc}>{spec.desc}</div>
+      </div>
+    </div>
+  );
+}
+
 function AiChatWidget({ onAddProduct }) {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: "assistant", text: "您好！我是 LEDOUX 智能燈具顧問，請問您對哪款燈具有興趣？可以詢問規格、適合場景或報價需求。" }
-  ]);
+  const [specId, setSpecId] = useState(null);
+  const [convs, setConvs] = useState({});
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [convId, setConvId] = useState("");
   const bottomRef = useRef(null);
 
-  useEffect(() => {
-    if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages, open]);
+  const spec = AI_SPECIALISTS.find(s => s.id === specId);
+  const conv = spec ? (convs[spec.id] || { messages:[{ role:"assistant", text:spec.greeting }], convId:"" }) : null;
+  const messages = conv?.messages || [];
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, open]);
+
+  const setConv = (sid, fn) => setConvs(prev => {
+    const cur = prev[sid] || { messages:[], convId:"" };
+    return { ...prev, [sid]: fn(cur) };
+  });
+
+  const selectSpec = (s) => {
+    setSpecId(s.id);
+    if (!convs[s.id]) setConvs(prev => ({ ...prev, [s.id]: { messages:[{ role:"assistant", text:s.greeting }], convId:"" } }));
+  };
 
   function extractModels(text) {
-    const pattern = /\b([A-Z]{2,}[\w.\-]{3,})\b/g;
-    const matches = [...text.matchAll(pattern)];
-    return [...new Set(matches.map(m => m[1]))].filter(m => m.length >= 5);
+    return [...new Set([...text.matchAll(/\b([A-Z]{2,}[\w.\-]{3,})\b/g)].map(m=>m[1]))].filter(m=>m.length>=5);
   }
 
   async function sendMessage() {
     const q = input.trim();
-    if (!q || loading) return;
+    if (!q || loading || !spec) return;
     setInput("");
-    setMessages(prev => [...prev, { role: "user", text: q }]);
+    setConv(spec.id, c => ({ ...c, messages:[...c.messages, { role:"user", text:q }] }));
     setLoading(true);
+    const curConvId = convs[spec.id]?.convId || "";
     try {
-      const body = {
-        inputs: {},
-        query: q,
-        response_mode: "blocking",
-        conversation_id: convId || "",
-        user: "ledoux-customer-" + Date.now(),
-      };
       const res = await fetch(`${DIFY_API_URL}/chat-messages`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${DIFY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+        method:"POST",
+        headers:{ "Authorization":`Bearer ${DIFY_API_KEY}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ inputs:{ specialist:spec.name }, query:q, response_mode:"streaming", conversation_id:curConvId, user:getOrCreateUID() }),
       });
-      const data = await res.json();
-      const answer = data.answer || "抱歉，我暫時無法回答，請聯繫我們的業務人員。";
-      if (data.conversation_id) setConvId(data.conversation_id);
-      setMessages(prev => [...prev, { role: "assistant", text: answer }]);
-      const models = extractModels(answer);
-      if (models.length > 0 && onAddProduct) {
-        setTimeout(() => {
-          setMessages(prev => [...prev, {
-            role: "system",
-            text: `偵測到型號：${models.join("、")}`,
-            models,
-          }]);
-        }, 600);
+      setConv(spec.id, c => ({ ...c, messages:[...c.messages, { role:"assistant", text:"" }] }));
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let full = "", newCid = curConvId;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        for (const line of dec.decode(value).split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const d = JSON.parse(line.slice(6));
+            if (d.event==="message" && d.answer) {
+              full += d.answer;
+              const sid = spec.id;
+              setConvs(prev => {
+                const c = prev[sid] || { messages:[], convId:"" };
+                const msgs = [...c.messages];
+                msgs[msgs.length-1] = { role:"assistant", text:full };
+                return { ...prev, [sid]: { ...c, messages:msgs } };
+              });
+            }
+            if (d.conversation_id) newCid = d.conversation_id;
+          } catch {}
+        }
       }
-    } catch (e) {
-      setMessages(prev => [...prev, { role: "assistant", text: "連線發生錯誤，請稍後再試。" }]);
+      setConv(spec.id, c => ({ ...c, convId:newCid }));
+      const models = extractModels(full);
+      if (models.length>0 && onAddProduct) {
+        setTimeout(() => setConv(spec.id, c => ({ ...c, messages:[...c.messages, { role:"system", text:`偵測到型號：${models.join("、")}`, models }] })), 600);
+      }
+    } catch {
+      setConv(spec.id, c => ({ ...c, messages:[...c.messages, { role:"assistant", text:"連線發生錯誤，請稍後再試。" }] }));
     }
     setLoading(false);
   }
 
   const S2 = {
     fab: { position:"fixed", bottom:24, right:24, zIndex:9999, width:56, height:56, borderRadius:"50%", background:"#0e0d0c", border:"2px solid #b8935a", color:"#b8935a", fontSize:24, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 4px 18px rgba(0,0,0,0.25)" },
-    box: { position:"fixed", bottom:92, right:24, zIndex:9998, width:340, height:480, background:"#faf8f5", border:"0.5px solid rgba(14,13,12,0.15)", display:"flex", flexDirection:"column", boxShadow:"0 8px 32px rgba(0,0,0,0.18)", fontFamily:"'Noto Sans TC',sans-serif" },
-    head: { padding:"14px 18px", background:"#0e0d0c", display:"flex", alignItems:"center", justifyContent:"space-between" },
-    headTxt: { color:"#b8935a", fontFamily:"'Cormorant Garamond',serif", fontSize:16, letterSpacing:2 },
+    box: { position:"fixed", bottom:92, right:24, zIndex:9998, width:340, height:500, background:"#faf8f5", border:"0.5px solid rgba(14,13,12,0.15)", display:"flex", flexDirection:"column", boxShadow:"0 8px 32px rgba(0,0,0,0.18)", fontFamily:"'Noto Sans TC',sans-serif" },
+    head: { padding:"14px 18px", background:"#0e0d0c", display:"flex", alignItems:"center", gap:8 },
+    headTxt: { color:"#b8935a", fontFamily:"'Cormorant Garamond',serif", fontSize:15, letterSpacing:2, flex:1 },
+    backBtn: { background:"none", border:"none", color:"rgba(255,255,255,0.55)", fontSize:12, cursor:"pointer", padding:"2px 4px", letterSpacing:0.3, flexShrink:0 },
+    closeBtn: { background:"none", border:"none", color:"rgba(255,255,255,0.5)", fontSize:18, cursor:"pointer", flexShrink:0 },
+    selBody: { flex:1, overflowY:"auto", padding:"20px 16px", display:"flex", flexDirection:"column", gap:10 },
+    selHint: { fontSize:10, color:"#8a8278", textAlign:"center", marginBottom:4, lineHeight:1.7 },
+    card: (hover) => ({ background:"#fff", border:`0.5px solid ${hover?"#b8935a":"rgba(14,13,12,0.1)"}`, padding:"14px 16px", cursor:"pointer", display:"flex", alignItems:"center", gap:14, transition:"border-color 0.15s" }),
+    cardIcon: { fontSize:22, flexShrink:0 },
+    cardName: { fontSize:13, fontWeight:500, color:"#0e0d0c", marginBottom:2 },
+    cardDesc: { fontSize:10, color:"#8a8278", letterSpacing:0.3 },
     msgs: { flex:1, overflowY:"auto", padding:"14px 16px", display:"flex", flexDirection:"column", gap:10 },
-    bubble: (role) => ({
-      maxWidth:"82%", padding:"9px 13px", fontSize:12, lineHeight:1.7, borderRadius:2,
-      alignSelf: role==="user" ? "flex-end" : "flex-start",
-      background: role==="user" ? "#0e0d0c" : role==="system" ? "rgba(184,147,90,0.1)" : "#fff",
-      color: role==="user" ? "#f7f4ef" : "#0e0d0c",
-      border: role==="system" ? "0.5px solid #b8935a" : "0.5px solid rgba(14,13,12,0.1)",
-    }),
+    bubble: (role) => ({ maxWidth:"82%", padding:"9px 13px", fontSize:12, lineHeight:1.7, borderRadius:2, alignSelf:role==="user"?"flex-end":"flex-start", background:role==="user"?"#0e0d0c":role==="system"?"rgba(184,147,90,0.1)":"#fff", color:role==="user"?"#f7f4ef":"#0e0d0c", border:role==="system"?"0.5px solid #b8935a":"0.5px solid rgba(14,13,12,0.1)" }),
     inp: { display:"flex", borderTop:"0.5px solid rgba(14,13,12,0.12)", padding:"10px 12px", gap:8 },
     inpBox: { flex:1, border:"0.5px solid rgba(14,13,12,0.15)", padding:"7px 10px", fontSize:12, outline:"none", fontFamily:"'Noto Sans TC',sans-serif", resize:"none", background:"transparent" },
     send: { padding:"7px 14px", background:"#b8935a", border:"none", color:"#0e0d0c", fontSize:11, letterSpacing:1, cursor:"pointer", fontFamily:"'Noto Sans TC',sans-serif" },
@@ -4581,39 +4624,43 @@ function AiChatWidget({ onAddProduct }) {
       {open && (
         <div style={S2.box}>
           <div style={S2.head}>
-            <span style={S2.headTxt}>✦ AI 燈具顧問</span>
-            <button onClick={()=>setOpen(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,0.5)",fontSize:18,cursor:"pointer"}}>✕</button>
+            {spec && <button style={S2.backBtn} onClick={()=>setSpecId(null)}>← 返回</button>}
+            <span style={S2.headTxt}>{spec ? `✦ ${spec.name}` : "✦ AI 服務專員"}</span>
+            <button style={S2.closeBtn} onClick={()=>setOpen(false)}>✕</button>
           </div>
-          <div style={S2.msgs}>
-            {messages.map((m, i) => (
-              <div key={i} style={S2.bubble(m.role)}>
-                {m.text}
-                {m.role==="system" && m.models && onAddProduct && (
-                  <div>
-                    <button style={S2.addBtn} onClick={()=>{ m.models.forEach(md=>onAddProduct(md)); setOpen(false); }}>
-                      ＋ 加入詢價單
-                    </button>
+          {!spec ? (
+            <div style={S2.selBody}>
+              <div style={{fontSize:"7px",letterSpacing:"3px",textTransform:"uppercase",color:"#8a8278",textAlign:"center",marginBottom:6}}>請選擇服務專員</div>
+              <div style={S2.selHint}>選擇最符合需求的專員<br/>我們將為您提供專屬服務</div>
+              {AI_SPECIALISTS.map(s => (
+                <SpecCard key={s.id} spec={s} onSelect={selectSpec} S={S2} />
+              ))}
+            </div>
+          ) : (
+            <>
+              <div style={S2.msgs}>
+                {messages.map((m, i) => (
+                  <div key={i} style={S2.bubble(m.role)}>
+                    {m.text}
+                    {m.role==="system" && m.models && onAddProduct && (
+                      <div><button style={S2.addBtn} onClick={()=>{ m.models.forEach(md=>onAddProduct(md)); setOpen(false); }}>＋ 加入詢價單</button></div>
+                    )}
                   </div>
-                )}
+                ))}
+                {loading && <div style={{...S2.bubble("assistant"),color:"#b8935a"}}>▋ 思考中…</div>}
+                <div ref={bottomRef}/>
               </div>
-            ))}
-            {loading && <div style={{...S2.bubble("assistant"),color:"#b8935a"}}>▋ 思考中…</div>}
-            <div ref={bottomRef}/>
-          </div>
-          <div style={S2.inp}>
-            <textarea
-              style={S2.inpBox}
-              rows={2}
-              placeholder="輸入您的問題…"
-              value={input}
-              onChange={e=>setInput(e.target.value)}
-              onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} }}
-            />
-            <button style={S2.send} onClick={sendMessage} disabled={loading}>送出</button>
-          </div>
+              <div style={S2.inp}>
+                <textarea style={S2.inpBox} rows={2} placeholder="輸入您的問題…" value={input}
+                  onChange={e=>setInput(e.target.value)}
+                  onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} }}/>
+                <button style={S2.send} onClick={sendMessage} disabled={loading}>送出</button>
+              </div>
+            </>
+          )}
         </div>
       )}
-      <button style={S2.fab} onClick={()=>setOpen(o=>!o)} title="AI 燈具顧問">
+      <button style={S2.fab} onClick={()=>setOpen(o=>!o)} title="AI 服務專員">
         {open ? "✕" : "💬"}
       </button>
     </>
