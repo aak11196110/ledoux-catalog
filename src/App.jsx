@@ -36,9 +36,9 @@ class ErrorBoundary extends Component {
 const DIFY_API_URL = "https://api.dify.ai/v1";
 // 每個專員對應獨立的 Dify App Key（建好 3 個 App 後，把 Key 填入下方）
 const DIFY_KEYS = {
-  product:  "app-9uROUbCdyOpCWqkVKKR6WILz", // 🔦 產品顧問 App Key
-  sales:    "app-9uROUbCdyOpCWqkVKKR6WILz", // 💰 業務報價 App Key（建好後換）
-  schedule: "app-9uROUbCdyOpCWqkVKKR6WILz", // 📅 預約服務 App Key（建好後換）
+  product:  "app-awrE84SxLg1OUwfbJyOeKl5M", // 🔦 產品顧問 (Ledoux技術專員)
+  sales:    "app-9uROUbCdyOpCWqkVKKR6WILz", // 💰 業務報價 (Ledoux智能業務秘書) ← 待更新
+  schedule: "app-9uROUbCdyOpCWqkVKKR6WILz", // 📅 預約服務 (LED業務專員) ← 待更新
 };
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
