@@ -596,6 +596,30 @@
 
       </div>
 
+      <!-- 驅動器智慧比對測試 -->
+      <div style="margin-top:18px">
+        <div class="settings-card">
+          <h3>驅動器智慧比對（測試用）</h3>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:14px">依電壓、需求瓦數、防水條件，直接從「驅動器管理」的資料庫抓最接近的驅動器。DC24V 允許少 5W 以內，DC48V 不允許少。</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">電壓</div>
+              <select class="form-input" id="test-dr-voltage" style="width:110px"><option>DC24V</option><option>DC48V</option></select>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">需求瓦數 (W)</div>
+              <input class="form-input" type="number" id="test-dr-watt" placeholder="120" style="width:100px">
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:4px">防水</div>
+              <select class="form-input" id="test-dr-waterproof" style="width:100px"><option>非防水</option><option>防水</option></select>
+            </div>
+            <button class="btn btn-gold" onclick="testFindDriver()">找驅動器</button>
+          </div>
+          <div id="test-dr-result"></div>
+        </div>
+      </div>
+
       <!-- 驅動器配置規則 -->
       <div style="margin-top:18px">
         <div class="settings-card">
@@ -1973,12 +1997,13 @@ function rDrivers(){
     <td>${esc(d.voltage||'—')}</td>
     <td>${d.watt||'—'}W</td>
     <td style="font-family:'Space Mono',monospace">NT$ ${fmt(d.price||0)}</td>
+    <td>${d.waterproof==='防水'?'💧 防水':'非防水'}</td>
     <td>${bdg(d.status||'上架')}</td>
     <td style="white-space:nowrap">
       <button class="btn btn-sm btn-outline" onclick="editDriver('${esc(d.id)}')">編輯</button>
       <button class="btn btn-sm btn-danger" onclick="delDriver('${esc(d.id)}','${esc(d.model)}')">刪除</button>
     </td>
-  </tr>`).join(''):'<tr><td colspan="6" class="no-data">尚無驅動器資料</td></tr>';
+  </tr>`).join(''):'<tr><td colspan="7" class="no-data">尚無驅動器資料</td></tr>';
 }
 function openDriverM(){
   editDriverId=null;
@@ -1986,6 +2011,7 @@ function openDriverM(){
   ['d-id','d-model','d-watt','d-price','d-length','d-width','d-height','d-img','d-dimimg','d-note'].forEach(k=>fv(k,''));
   document.getElementById('d-voltage').value='DC24V';
   document.getElementById('d-status').value='上架';
+  document.getElementById('d-waterproof').value='非防水';
   showM('modal-driver');
 }
 function editDriver(id){
@@ -1997,6 +2023,7 @@ function editDriver(id){
   fv('d-img',d.img||'');fv('d-dimimg',d.dimimg||'');fv('d-note',d.note||'');
   document.getElementById('d-voltage').value=d.voltage||'DC24V';
   document.getElementById('d-status').value=d.status||'上架';
+  document.getElementById('d-waterproof').value=d.waterproof||'非防水';
   showM('modal-driver');
 }
 async function saveDriver(){
@@ -2006,7 +2033,8 @@ async function saveDriver(){
     model,voltage:g('d-voltage').value,
     watt:Number(v('d-watt'))||0,price:Number(v('d-price'))||0,
     length:Number(v('d-length'))||0,width:Number(v('d-width'))||0,height:Number(v('d-height'))||0,
-    img:v('d-img'),dimimg:v('d-dimimg'),note:v('d-note'),status:g('d-status').value
+    img:v('d-img'),dimimg:v('d-dimimg'),note:v('d-note'),status:g('d-status').value,
+    waterproof:g('d-waterproof').value
   };
   const idx=DRIVERS.findIndex(x=>String(x.id)===String(rec.id));
   if(idx>=0)DRIVERS[idx]=rec;else DRIVERS.unshift(rec);
@@ -2162,6 +2190,31 @@ function delDriverRule(i){
   rDriverRules();toast('✓ 已刪除');
 }
 
+// ── 驅動器智慧比對（電壓＋瓦數＋防水＋上架，DC24V可少5W以內，DC48V不可少）──
+function findBestDriver(voltage, neededWatt, waterproof){
+  const tolerance = voltage==='DC24V' ? 5 : 0;
+  const pool = DRIVERS.filter(d=>
+    d.voltage===voltage &&
+    (d.status||'上架')==='上架' &&
+    (d.waterproof||'非防水')===waterproof &&
+    Number(d.watt) >= (neededWatt - tolerance)
+  ).sort((a,b)=>Number(a.watt)-Number(b.watt));
+  return pool[0]||null;
+}
+function testFindDriver(){
+  const voltage=v('test-dr-voltage');
+  const neededWatt=Number(v('test-dr-watt'))||0;
+  const waterproof=v('test-dr-waterproof');
+  const result=document.getElementById('test-dr-result');
+  if(!neededWatt){result.innerHTML='<span style="color:var(--muted)">請輸入需求瓦數</span>';return;}
+  const d=findBestDriver(voltage,neededWatt,waterproof);
+  if(d){
+    result.innerHTML=`<div style="padding:8px 12px;border:0.5px solid var(--gold);background:#fdf8ee">✦ 建議驅動器：<b>${esc(d.model)}</b>　${d.watt}W　NT$ ${fmt(d.price||0)}</div>`;
+  }else{
+    result.innerHTML='<div style="color:#e55">⚠ 找不到符合條件的驅動器，請確認驅動器管理裡有沒有對應電壓／防水／足夠瓦數的品項</div>';
+  }
+}
+
 // BADGES
 function setBadges(){
   setB('b-samples',D.samples.filter(s=>s.status==='待處理').length);
@@ -2220,6 +2273,11 @@ loadAll();
       <div class="form-group"><label class="form-label">高度 (mm)</label><input class="form-input" id="d-height" type="number" placeholder="0"></div>
       <div class="form-group"><label class="form-label">狀態</label>
         <select class="form-select" id="d-status"><option>上架</option><option>下架</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">防水</label>
+        <select class="form-select" id="d-waterproof"><option>非防水</option><option>防水</option></select>
       </div>
     </div>
     <div class="form-group"><label class="form-label">圖片網址</label><input class="form-input" id="d-img" placeholder="https://..."></div>
