@@ -1989,6 +1989,52 @@ async function loadDrivers(){
   const data=await apiGet('getDrivers');
   DRIVERS=Array.isArray(data)?data:[];
   rDrivers();
+  checkMisplacedDrivers();
+}
+function checkMisplacedDrivers(){
+  const table=document.getElementById('driver-tb');
+  if(!table)return;
+  const wrap=table.closest('table');
+  if(!wrap)return;
+  const old=document.getElementById('misplaced-driver-box');
+  if(old)old.remove();
+  const misplaced=(D.products||[]).filter(p=>p.series==='DC24V/DC48V 驅動器'||p.category==='驅動器');
+  if(!misplaced.length)return;
+  const box=document.createElement('div');
+  box.id='misplaced-driver-box';
+  box.style.cssText='border:0.5px solid #c98a3a;background:#fdf6ec;padding:14px 16px;margin-bottom:14px;font-size:12px';
+  box.innerHTML=`<div style="font-weight:600;margin-bottom:8px;color:#9b5a1e">⚠ 偵測到 ${misplaced.length} 筆驅動器資料，是透過「新增產品」建立的，不在驅動器管理資料庫裡，建議搬過來：</div>`
+    + misplaced.map(p=>`
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-top:0.5px solid #e8d5b8">
+        <b>${esc(p.model)}</b>
+        <span style="color:var(--muted)">${p.watt||'—'}　NT$ ${fmt(p.stdPrice||0)}　目前電壓欄:${esc(p.voltage||'—')}</span>
+        <select id="mv-${esc(p.id)}" style="padding:3px 6px;font-size:11px"><option>DC24V</option><option>DC48V</option></select>
+        <select id="mw-${esc(p.id)}" style="padding:3px 6px;font-size:11px"><option>非防水</option><option>防水</option></select>
+        <button class="btn btn-sm btn-gold" onclick="migrateOldDriver('${esc(p.id)}')">搬過去驅動器管理</button>
+      </div>`).join('');
+  wrap.parentNode.insertBefore(box,wrap);
+}
+async function migrateOldDriver(id){
+  const p=(D.products||[]).find(x=>String(x.id)===String(id));
+  if(!p)return;
+  const voltage=document.getElementById('mv-'+id).value;
+  const waterproof=document.getElementById('mw-'+id).value;
+  const rec={
+    id:'DRV'+Date.now(),model:p.model||'',voltage,
+    watt:Number(p.watt)||0,price:Number(p.stdPrice)||0,
+    img:(p.images&&p.images[0])||'',dimimg:p.dimImg||'',
+    length:0,width:0,height:0,note:p.note||'',status:'上架',waterproof
+  };
+  toast('搬移中...');
+  const res=await apiPost('saveDriver',rec);
+  if(res&&res.success){
+    await apiPost('upsertProduct',{...p,status:'停產'});
+    D.products=D.products.map(x=>String(x.id)===String(id)?{...x,status:'停產'}:x);
+    toast('✓ 已搬到驅動器管理，原產品標記為停產');
+    await loadDrivers();
+  }else{
+    toast('⚠ 搬移失敗');
+  }
 }
 function rDrivers(){
   const tb=document.getElementById('driver-tb');if(!tb)return;
