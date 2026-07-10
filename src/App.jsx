@@ -726,6 +726,49 @@ function ProjBanner({onContact}) {
   );
 }
 
+function findBestDriverApp(voltage, neededWatt, waterproof, driversList){
+  const tolerance = voltage==='DC24V' ? 5 : 0;
+  const pool = (driversList||[]).filter(d=>
+    d.voltage===voltage &&
+    (d.status||'上架')==='上架' &&
+    (d.waterproof||'非防水')===waterproof &&
+    Number(d.watt) >= (neededWatt - tolerance)
+  ).sort((a,b)=>Number(a.watt)-Number(b.watt));
+  return pool[0]||null;
+}
+function calcQuoteCircuit(circuit, cart, driversList){
+  const zones = (circuit.zones||[]).map(z=>{
+    const item = cart.find(c=>c.product.id===z.productId);
+    return {...z, product: item?item.product:null};
+  }).filter(z=>z.product);
+  if(!zones.length) return null;
+  const isLinear = zones[0].product.product_type==='linear';
+  const voltage = isLinear ? 'DC24V' : 'DC48V';
+  let baseWatt = 0, totalLength = 0;
+  const overSegments = [];
+  let minMaxCircuit = Infinity;
+  zones.forEach(z=>{
+    const p = z.product;
+    if(isLinear){
+      const len = parseFloat(z.length)||0;
+      totalLength += len;
+      baseWatt += len * (parseFloat(p.watt_per_meter)||0);
+      const maxLen = parseFloat(p.max_length)||Infinity;
+      if(len > maxLen) overSegments.push(`${p.model}（${z.zoneLabel||""}）：${len}m 超過單條最長 ${maxLen}m，需拆成並聯分段`);
+      const mc = parseFloat(p.max_circuit)||Infinity;
+      if(mc < minMaxCircuit) minMaxCircuit = mc;
+    } else {
+      const qty = parseFloat(z.qty)||0;
+      baseWatt += qty * (parseFloat(p.watt)||0);
+    }
+  });
+  const margin = isLinear ? 1.2 : 1.5;
+  const neededWatt = Math.ceil(baseWatt * margin);
+  const overCircuitLimit = isLinear && minMaxCircuit!==Infinity && totalLength > minMaxCircuit;
+  const driver = findBestDriverApp(voltage, neededWatt, circuit.waterproof||'非防水', driversList);
+  return {isLinear, voltage, baseWatt: Math.round(baseWatt), neededWatt, totalLength, minMaxCircuit, overCircuitLimit, overSegments, driver};
+}
+
 function generatePDF({cart, projectName, customer, installCalc=null, isVip, discountRate=1, discountLabel="", orderType="", urgentData=null, customIds={}}) {
   const today = new Date();
   const ds = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,"0")}/${String(today.getDate()).padStart(2,"0")}`;
@@ -1470,6 +1513,8 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [selProd,    setSelProd]    = useState(null);
   const [lightboxSrc,setLightboxSrc]= useState(null);
  const [selSpec, setSelSpec] = useState({beam:"", color:"", cct:"", outerColor:"", innerColor:"", customCct:"", customColor:"", addon:[], customSpecs:{}});
+ const [drivers, setDrivers] = useState([]);
+ const [quoteCircuits, setQuoteCircuits] = useState([]);
   const [addons, setAddons] = useState([]);
   const [allParts,   setAllParts]   = useState([]);
   const [editProd,   setEditProd]   = useState(null);
@@ -1583,13 +1628,15 @@ useEffect(() => {
     (async () => {
       setSyncStatus("loading");
       try {
-const [prods, invs, addonData, partsData, sinvData] = await Promise.all([
+const [prods, invs, addonData, partsData, sinvData, driverData] = await Promise.all([
   sheetGet("getProducts"),
   sheetGet("getInventory"),
   sheetGet("getAddons"),
   sheetGet("getParts"),
-    sheetGet("getSampleInventory")
+    sheetGet("getSampleInventory"),
+    sheetGet("getDrivers")
 ]);
+if (driverData?.length > 0) setDrivers(driverData);
 if (prods?.length > 0) {
   const cloudIds = new Set(prods.map(p=>String(p.id)));
   const localOnly = INIT_PRODUCTS.filter(p=>!cloudIds.has(String(p.id)));
@@ -3812,6 +3859,66 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               <span style={{color:"#9a8a7a"}}>業務聯繫確認細節</span>
             </div>
           </div>
+          {cart.length>0&&<div style={{marginBottom:14,border:"0.5px solid var(--bdr)",padding:"10px 12px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <strong style={{fontSize:11}}>⚡ 回路試算（選填）</strong>
+              <button onClick={()=>setQuoteCircuits(cs=>[...cs,{id:"qc"+Date.now(),name:`回路 ${cs.length+1}`,waterproof:"非防水",zones:[{id:"qz"+Date.now(),productId:"",zoneLabel:"",length:"",qty:"1"}]}])}
+                style={{fontSize:10,padding:"3px 10px",border:"0.5px solid var(--gold)",background:"transparent",color:"var(--gold)",cursor:"pointer"}}>＋新增回路</button>
+            </div>
+            {quoteCircuits.map((circuit,ci)=>{
+              const calc = calcQuoteCircuit(circuit, cart, drivers);
+              return (
+                <div key={circuit.id} style={{border:"0.5px solid var(--bdr2)",padding:8,marginBottom:8,background:"#faf8f4"}}>
+                  <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:6}}>
+                    <input value={circuit.name} onChange={e=>setQuoteCircuits(cs=>cs.map((c,i)=>i===ci?{...c,name:e.target.value}:c))}
+                      style={{flex:1,padding:"3px 6px",fontSize:11,border:"0.5px solid var(--bdr)",background:"transparent"}}/>
+                    <select value={circuit.waterproof} onChange={e=>setQuoteCircuits(cs=>cs.map((c,i)=>i===ci?{...c,waterproof:e.target.value}:c))}
+                      style={{fontSize:10,padding:"3px 4px"}}>
+                      <option>非防水</option><option>防水</option>
+                    </select>
+                    <button onClick={()=>setQuoteCircuits(cs=>cs.filter((_,i)=>i!==ci))} style={{fontSize:10,color:"var(--red)",background:"none",border:"none",cursor:"pointer"}}>✕刪除回路</button>
+                  </div>
+                  {circuit.zones.map((zone,zi)=>{
+                    const zp = cart.find(c=>c.product.id===zone.productId)?.product;
+                    const isLinear = zp?.product_type==='linear';
+                    return (
+                      <div key={zone.id} style={{display:"flex",gap:5,alignItems:"center",marginBottom:5,flexWrap:"wrap"}}>
+                        <select value={zone.productId} onChange={e=>setQuoteCircuits(cs=>cs.map((c,i)=>i!==ci?c:{...c,zones:c.zones.map((z,j)=>j!==zi?z:{...z,productId:e.target.value})}))}
+                          style={{fontSize:10,padding:"3px 4px",maxWidth:140}}>
+                          <option value="">選產品</option>
+                          {cart.map(item=><option key={item.product.id} value={item.product.id}>{item.product.model}</option>)}
+                        </select>
+                        <input placeholder="區域名稱" value={zone.zoneLabel} onChange={e=>setQuoteCircuits(cs=>cs.map((c,i)=>i!==ci?c:{...c,zones:c.zones.map((z,j)=>j!==zi?z:{...z,zoneLabel:e.target.value})}))}
+                          style={{fontSize:10,padding:"3px 4px",width:70}}/>
+                        {isLinear?(
+                          <input type="number" placeholder="長度m" value={zone.length} onChange={e=>setQuoteCircuits(cs=>cs.map((c,i)=>i!==ci?c:{...c,zones:c.zones.map((z,j)=>j!==zi?z:{...z,length:e.target.value})}))}
+                            style={{fontSize:10,padding:"3px 4px",width:60}}/>
+                        ):(
+                          <input type="number" placeholder="數量" value={zone.qty} onChange={e=>setQuoteCircuits(cs=>cs.map((c,i)=>i!==ci?c:{...c,zones:c.zones.map((z,j)=>j!==zi?z:{...z,qty:e.target.value})}))}
+                            style={{fontSize:10,padding:"3px 4px",width:50}}/>
+                        )}
+                        <button onClick={()=>setQuoteCircuits(cs=>cs.map((c,i)=>i!==ci?c:{...c,zones:c.zones.filter((_,j)=>j!==zi)}))} style={{fontSize:10,color:"var(--muted)",background:"none",border:"none",cursor:"pointer"}}>✕</button>
+                      </div>
+                    );
+                  })}
+                  <button onClick={()=>setQuoteCircuits(cs=>cs.map((c,i)=>i!==ci?c:{...c,zones:[...c.zones,{id:"qz"+Date.now(),productId:"",zoneLabel:"",length:"",qty:"1"}]}))}
+                    style={{fontSize:9,padding:"3px 8px",border:"0.5px dashed var(--bdr)",background:"transparent",cursor:"pointer",color:"var(--muted)",marginBottom:6}}>＋新增區域</button>
+                  {calc&&<div style={{fontSize:10,paddingTop:6,borderTop:"0.5px solid var(--bdr2)"}}>
+                    <div style={{color:"var(--muted)",marginBottom:3}}>
+                      {calc.voltage}　基礎瓦數 {calc.baseWatt}W　需求 ≥{calc.neededWatt}W
+                    </div>
+                    {calc.overSegments.map((w,wi)=><div key={wi} style={{color:"#c98a3a",marginBottom:2}}>⚠ {w}</div>)}
+                    {calc.overCircuitLimit&&<div style={{color:"var(--red)",marginBottom:2}}>⚠ 回路總長 {calc.totalLength}m 超過上限 {calc.minMaxCircuit}m，建議拆成新回路</div>}
+                    {calc.driver?(
+                      <div style={{padding:"4px 8px",border:"0.5px solid var(--gold)",background:"#fdf8ee"}}>✦ 建議驅動器：<b>{calc.driver.model}</b>　{calc.driver.watt}W　NT$ {Number(calc.driver.price||0).toLocaleString()}</div>
+                    ):(
+                      <div style={{color:"var(--red)"}}>⚠ 找不到符合條件的驅動器，請確認驅動器管理裡有沒有對應規格</div>
+                    )}
+                  </div>}
+                </div>
+              );
+            })}
+          </div>}
           <div className="cp-project"><label>案名 *</label><input value={projName} onChange={e=>setProjName(e.target.value)} placeholder="請輸入案名"/></div>
           <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:10}}>
             <input style={{flex:1,padding:"6px 9px",border:"0.5px solid #e0dbd2",background:"transparent",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none",color:"var(--muted)"}} placeholder="— — —" value={discountCode} onChange={e=>setDiscountCode(e.target.value)} onBlur={()=>applyDiscountCode(discountCode)} onKeyDown={e=>e.key==="Enter"&&applyDiscountCode(discountCode)} maxLength={8}/>
