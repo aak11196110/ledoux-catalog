@@ -36,9 +36,9 @@ class ErrorBoundary extends Component {
 const DIFY_API_URL = "https://api.dify.ai/v1";
 // 每個專員對應獨立的 Dify App Key（建好 3 個 App 後，把 Key 填入下方）
 const DIFY_KEYS = {
-  product:  "app-awrE84SxLg1OUwfbJyOeKl5M", // 🔦 產品顧問 (Ledoux技術專員)
-  sales:    "app-9uROUbCdyOpCWqkVKKR6WILz", // 💰 業務報價 (Ledoux智能業務秘書) ← 待更新
-  schedule: "app-9uROUbCdyOpCWqkVKKR6WILz", // 📅 預約服務 (LED業務專員) ← 待更新
+  product:  "app-0vDV9WlCRdMu0zLx4hsPv9gQ", // 🔦 產品顧問 (Ledoux技術專員)
+  sales:    "app-Js5kmpjaZAKB6trj1SRavDAC", // 💰 業務報價 (Ledoux智能業務秘書)
+  schedule: "app-lAwbMcjV4My0pl98dMY52XSK", // 📅 預約服務 (LED業務專員)
 };
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
@@ -2713,7 +2713,11 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
               return(
               <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[],customSpecs:{}});}}}>
                 {hasStock(p.model)&&<div className="pcard-stock-badge"><span className="pcard-stock-dot"/>台灣現貨</div>}
-                <div className="pcard-img">{p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}</div>
+                <div className="pcard-img" style={{position:"relative"}}>
+                  {p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}
+                  {p.status==="停產"&&<div style={{position:"absolute",inset:0,background:"rgba(20,20,20,0.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}><span style={{color:"#fff",fontSize:14,letterSpacing:4,fontFamily:"'Cormorant Garamond',serif",border:"1px solid rgba(255,255,255,0.55)",padding:"5px 16px"}}>已停產</span></div>}
+                  {p.status==="下架"&&<div style={{position:"absolute",inset:0,background:"rgba(160,100,40,0.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}><span style={{color:"#fff",fontSize:14,letterSpacing:4,fontFamily:"'Cormorant Garamond',serif",border:"1px solid rgba(255,255,255,0.55)",padding:"5px 16px"}}>暫時缺貨</span></div>}
+                </div>
                 <div className="pcard-body">
                   <div className="pcard-series">{p.series}</div>
                   <div className="pcard-model">{p.model}</div>
@@ -3738,7 +3742,10 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
   );
 })()}
 <div className="drawer-actions">
-              <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>{
+              {selProd.status&&selProd.status!=="上架"?(
+                <button className="btn-cart" disabled style={{opacity:0.5,cursor:"not-allowed",background:"#8a8a8a"}}>{selProd.status==="停產"?"已停產，請洽業務":"暫時缺貨，請洽業務"}</button>
+              ):(
+                <button className={`btn-cart ${isVip?"vip":""}`} onClick={()=>{
                 const extraSpec={};
                 if(drawerMeters&&parseFloat(drawerMeters)>0) extraSpec.meters=parseFloat(drawerMeters);
                 if(drawerSpaceId.trim()) extraSpec.spaceId=drawerSpaceId.trim();
@@ -3746,6 +3753,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
                 if(drawerCutOption?.label) extraSpec.cutOption=drawerCutOption.label;
                 addToCart(selProd,{...selSpec,...extraSpec});
               }}>加入詢價單</button>
+              )}
             </div>
           </div>
         </div>
