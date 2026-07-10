@@ -679,7 +679,7 @@
     <input type="hidden" id="p-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">型號 *</label><input class="form-input" id="p-model" placeholder="例：LD-H50-10W"></div>
-      <div class="form-group"><label class="form-label">系列 *</label><select class="form-select" id="p-series">
+      <div class="form-group"><label class="form-label">系列 *</label><select class="form-select" id="p-series" onchange="renderAllSpecPickers()">
 <option value="">請選擇系列</option>
 <optgroup label="── 商照燈系列 ──">
 <option>DC48V 磁吸軌道</option>
@@ -794,19 +794,13 @@
       <div id="p-dimimg-prev" style="display:none;margin-top:8px"><img id="p-dimimg-prev-img" style="max-height:80px;max-width:100%;border:0.5px solid var(--bdr)"></div>
     </div>
 <div style="border:0.5px solid var(--bdr);padding:16px;margin-bottom:8px">
-  <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">規格選項（多個選項用 / 分隔）</div>
-  <div class="form-row">
-    <div class="form-group"><label class="form-label">色溫（例：2700K/3000K/4000K）</label><input class="form-input" id="p-cct" placeholder="2700K/3000K/4000K"></div>
-    <div class="form-group"><label class="form-label">光束角（例：15°/24°/36°）</label><input class="form-input" id="p-beam" placeholder="15°/24°/36°"></div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label class="form-label">外框顏色（例：黑色/白色）</label><input class="form-input" id="p-outerColor" placeholder="黑色/白色"></div>
-    <div class="form-group"><label class="form-label">內框顏色（例：黑色/白色）</label><input class="form-input" id="p-innerColor" placeholder="黑色/白色"></div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label class="form-label">顏色（例：黑色/白色）</label><input class="form-input" id="p-color" placeholder="黑色/白色"></div>
-    <div class="form-group"><label class="form-label">電壓（例：AC110V/AC220V）</label><input class="form-input" id="p-voltage" placeholder="AC110V/AC220V"></div>
-  </div>
+  <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px">規格選項（點選常用值，或手動輸入特殊值）</div>
+  <div class="form-group"><label class="form-label">色溫</label><div id="picker-p-cct"></div><input class="form-input" id="p-cct" readonly style="margin-top:6px;background:#f5f2ed;font-size:11px" placeholder="尚未選擇"></div>
+  <div class="form-group"><label class="form-label">光束角</label><div id="picker-p-beam"></div><input class="form-input" id="p-beam" readonly style="margin-top:6px;background:#f5f2ed;font-size:11px" placeholder="尚未選擇"></div>
+  <div class="form-group"><label class="form-label">外框顏色</label><div id="picker-p-outerColor"></div><input class="form-input" id="p-outerColor" readonly style="margin-top:6px;background:#f5f2ed;font-size:11px" placeholder="尚未選擇"></div>
+  <div class="form-group"><label class="form-label">內框顏色</label><div id="picker-p-innerColor"></div><input class="form-input" id="p-innerColor" readonly style="margin-top:6px;background:#f5f2ed;font-size:11px" placeholder="尚未選擇"></div>
+  <div class="form-group"><label class="form-label">顏色</label><div id="picker-p-color"></div><input class="form-input" id="p-color" readonly style="margin-top:6px;background:#f5f2ed;font-size:11px" placeholder="尚未選擇"></div>
+  <div class="form-group"><label class="form-label">電壓</label><div id="picker-p-voltage"></div><input class="form-input" id="p-voltage" readonly style="margin-top:6px;background:#f5f2ed;font-size:11px" placeholder="尚未選擇"></div>
   <div class="form-row">
     <div class="form-group"><label class="form-label">配件（例：遙控器/變壓器）</label><input class="form-input" id="p-addon" placeholder="遙控器/變壓器"></div>
   </div>
@@ -1042,6 +1036,7 @@ async function loadAll(){
 const[pr,iv,or,sa,ins,vi,me,ad,si]=await Promise.all([apiGet('getProducts'),apiGet('getInventory'),apiGet('getOrders'),apiGet('getSampleRequests'),apiGet('getInstallOrders'),apiGet('getVisitRequests'),apiGet('getMembers'),apiGet('getAddons'),apiGet('getSampleInventory')]);
 D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(ins);D.visits=a(vi);D.members=a(me);D.addons=a(ad);D.sampleInv=a(si);
     await loadCosts();
+    await loadSpecOptions();
     renderAll();setBadges();setSS('ok');toast('✓ 資料已同步');
   }catch(e){setSS('err');toast('⚠ 同步失敗');}
   loadDrivers();
@@ -1059,6 +1054,64 @@ async function loadCosts(){
   const map={};
   costs.forEach(c=>{map[String(c.id)]=c.costPrice;});
   D.products.forEach(p=>{p.costPrice=map[String(p.id)]||0;});
+}
+
+// ── 規格選項點選器 ──
+let SPEC_OPTIONS=[];
+async function loadSpecOptions(){
+  SPEC_OPTIONS=await apiGet('getSpecOptions');
+}
+const SPEC_FIELDS=[
+  {input:'p-cct',category:'色溫'},
+  {input:'p-beam',category:'光束角'},
+  {input:'p-outerColor',category:'外框顏色'},
+  {input:'p-innerColor',category:'內框顏色'},
+  {input:'p-color',category:'顏色'},
+  {input:'p-voltage',category:'電壓'}
+];
+function renderAllSpecPickers(){
+  SPEC_FIELDS.forEach(f=>renderSpecPicker(f.input,f.category));
+}
+function getSpecValues(inputId){
+  const val=v(inputId);
+  return val?val.split('/').map(s=>s.trim()).filter(Boolean):[];
+}
+function setSpecValues(inputId,arr){
+  fv(inputId,arr.join('/'));
+}
+function renderSpecPicker(inputId,category){
+  const wrap=document.getElementById('picker-'+inputId);
+  if(!wrap)return;
+  const series=v('p-series');
+  const selected=getSpecValues(inputId);
+  const opts=(SPEC_OPTIONS||[]).filter(o=>o.category===category&&(!series||o.series==='全部系列'||(o.series||'').split(',').map(x=>x.trim()).includes(series)));
+  const names=[...new Set(opts.map(o=>o.value))];
+  wrap.innerHTML=names.map(n=>`<button type="button" onclick="toggleSpecTag('${inputId}','${category}','${String(n).replace(/'/g,"\\'")}')" style="padding:5px 12px;border:0.5px solid ${selected.includes(n)?'var(--blk)':'var(--bdr)'};background:${selected.includes(n)?'var(--blk)':'transparent'};color:${selected.includes(n)?'#fff':'var(--blk)'};font-size:11px;cursor:pointer;margin:3px 4px 3px 0">${esc(n)}</button>`).join('')
+    +`<div style="display:flex;gap:6px;margin-top:6px"><input class="form-input" id="new-${inputId}" placeholder="輸入新值，例如 7000K" style="flex:1;padding:5px 8px;font-size:11px"><button type="button" class="btn btn-sm btn-gold" onclick="addCustomSpecTag('${inputId}','${category}')">＋ 加入</button></div>`;
+}
+function toggleSpecTag(inputId,category,value){
+  let selected=getSpecValues(inputId);
+  if(selected.includes(value))selected=selected.filter(x=>x!==value);
+  else selected.push(value);
+  setSpecValues(inputId,selected);
+  renderSpecPicker(inputId,category);
+}
+async function addCustomSpecTag(inputId,category){
+  const newInput=document.getElementById('new-'+inputId);
+  const val=(newInput.value||'').trim();
+  if(!val){toast('請輸入內容');return;}
+  const series=v('p-series')||'全部系列';
+  let selected=getSpecValues(inputId);
+  if(!selected.includes(val))selected.push(val);
+  setSpecValues(inputId,selected);
+  newInput.value='';
+  const exists=(SPEC_OPTIONS||[]).some(o=>o.category===category&&o.value===val&&(o.series||'').split(',').map(x=>x.trim()).includes(series));
+  if(!exists){
+    const rec={id:'SPEC'+Date.now(),category,value:val,series};
+    SPEC_OPTIONS.push(rec);
+    apiPost('saveSpecOption',rec);
+  }
+  renderSpecPicker(inputId,category);
 }
 function a(x){return Array.isArray(x)?x:[];}
 function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();loadDriverRules();loadHints();loadOnboarding();}
@@ -1134,7 +1187,7 @@ function rProd(){
     <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button></td>
   </tr>`).join(''):'<tr><td colspan="11" class="no-data">暫無產品資料</td></tr>';
 }
-function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';showM('modal-prod');}
+function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';renderAllSpecPickers();showM('modal-prod');}
 function editProd(id){
   const p=D.products.find(x=>String(x.id)===String(id));if(!p)return;
   document.getElementById('pm-title').textContent='編輯產品';
@@ -1148,7 +1201,7 @@ fv('p-cct',p.cct||'');fv('p-beam',p.beam||'');fv('p-outerColor',p.outerColor||''
 fv('p-cutout_min',p.cutout_min||'');fv('p-cutout_max',p.cutout_max||'');fv('p-watt_min',p.watt_min||'');fv('p-watt_max',p.watt_max||'');fv('p-body_length',p.body_length||'');fv('p-body_width',p.body_width||'');fv('p-body_height',p.body_height||'');fv('p-body_diameter',p.body_diameter||'');fv('p-ip_rating',p.ip_rating||'');
 g('p-product_type').value=p.product_type||'standard';g('p-environment').value=p.environment||'室內';fv('p-watt_per_meter',p.watt_per_meter||'');fv('p-max_length',p.max_length||'');fv('p-max_circuit',p.max_circuit||'');fv('p-cutOptions',p.cutOptions||'');fv('p-lightExit',p.lightExit||'');
 g('p-promoted').value=p.isPromoted||'否';fv('p-moq',p.moq||'');toggleMoqField();
-prevImg();prevDimImg();showM('modal-prod');
+prevImg();prevDimImg();renderAllSpecPickers();showM('modal-prod');
 }
  function toggleMoqField(){const el=document.getElementById('moq-field');if(el)el.style.display=g('p-promoted').value==='是'?'none':'block';}
  function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cost','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating','p-watt_per_meter','p-max_length','p-max_circuit','p-cutOptions','p-lightExit'].forEach(k=>fv(k,''));g('p-product_type').value='standard';g('p-environment').value='室內';g('p-promoted').value='否';fv('p-moq','');toggleMoqField();document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
