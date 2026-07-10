@@ -277,7 +277,7 @@
   <select class="f-select" id="pst" onchange="rProd()"><option value="">所有狀態</option><option>上架</option><option>下架</option><option>停產</option></select>
   <select class="f-select" id="ppromo" onchange="rProd()"><option value="">主推/一般</option><option value="是">🔥 只看主推</option><option value="否">只看一般</option></select>
 </div>
-      <div class="tbl-wrap"><table><thead><tr><th style="width:58px">序</th><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="10" class="no-data">載入中...</td></tr></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th style="width:58px">序</th><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>色溫</th><th>牌價</th><th style="color:#9b5a5a">成本價</th><th>狀態</th><th>操作</th></tr></thead><tbody id="prod-tb"><tr><td colspan="11" class="no-data">載入中...</td></tr></tbody></table></div>
     </div>
 
     <!-- INVENTORY -->
@@ -727,6 +727,7 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">牌價 NT$</label><input class="form-input" id="p-price" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label" style="color:#9b5a5a">成本價 NT$（僅後台可見）</label><input class="form-input" id="p-cost" type="number" placeholder="0"></div>
      <div style="display:none"><input id="p-proj" type="number" value="0"></div>
     </div>
     <div class="form-row">
@@ -1003,6 +1004,7 @@
 const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
 
 let D = {products:[],inventory:[],orders:[],samples:[],installs:[],visits:[],members:[],addons:[],sampleInv:[]};
+const COST_KEY = "zzz3909086";
 let DISCS = JSON.parse(localStorage.getItem('ldx_discs')||JSON.stringify([
   {code:"LED006",rate:0.6,note:"設計師客戶"},
   {code:"LED007",rate:0.7,note:"一般專案"},
@@ -1037,9 +1039,24 @@ async function loadAll(){
   try{
 const[pr,iv,or,sa,ins,vi,me,ad,si]=await Promise.all([apiGet('getProducts'),apiGet('getInventory'),apiGet('getOrders'),apiGet('getSampleRequests'),apiGet('getInstallOrders'),apiGet('getVisitRequests'),apiGet('getMembers'),apiGet('getAddons'),apiGet('getSampleInventory')]);
 D.products=a(pr);D.inventory=a(iv);D.orders=a(or);D.samples=a(sa);D.installs=a(ins);D.visits=a(vi);D.members=a(me);D.addons=a(ad);D.sampleInv=a(si);
+    await loadCosts();
     renderAll();setBadges();setSS('ok');toast('✓ 資料已同步');
   }catch(e){setSS('err');toast('⚠ 同步失敗');}
   loadDrivers();
+}
+async function apiGetCost(){
+  try{
+    const payload=encodeURIComponent(JSON.stringify({key:COST_KEY}));
+    const r=await fetch(`${getURL()}?action=getProductCosts&payload=${payload}`);
+    const j=await r.json();
+    return j.success?j.data:[];
+  }catch(e){return[];}
+}
+async function loadCosts(){
+  const costs=await apiGetCost();
+  const map={};
+  costs.forEach(c=>{map[String(c.id)]=c.costPrice;});
+  D.products.forEach(p=>{p.costPrice=map[String(p.id)]||0;});
 }
 function a(x){return Array.isArray(x)?x:[];}
 function renderAll(){rDash();rProd();rInv();rOrd();rSamp();rInst();rVis();rMem();rDiscs();rParts();rAddons();rSampInv();rDrivers();loadDriverRules();loadHints();loadOnboarding();}
@@ -1110,9 +1127,10 @@ function rProd(){
     <td><b>${p.isPromoted==='是'?'🔥 ':''}${p.model||'—'}</b>${p.isPromoted!=='是'&&p.moq?`<div style="font-size:9px;color:#9b6b3a">MOQ ${esc(p.moq)}</div>`:''}</td><td style="color:var(--muted)">${p.series||'—'}</td><td>${p.category||'—'}</td>
     <td>${p.watt?p.watt+'W':'—'}</td><td style="color:var(--muted)">${p.cct||'—'}</td>
     <td style="font-family:'Space Mono',monospace">NT$ ${fmt(p.stdPrice||p.price||0)}</td>
+    <td style="font-family:'Space Mono',monospace;color:#9b5a5a">NT$ ${fmt(p.costPrice||0)}</td>
     <td>${bdg(p.status||'上架')}</td>
     <td style="white-space:nowrap"><button class="btn btn-sm btn-outline" onclick="editProd('${esc(p.id)}')">編輯</button> <button class="btn btn-sm btn-danger" onclick="delProd('${esc(p.id)}','${esc(p.model)}')">刪除</button></td>
-  </tr>`).join(''):'<tr><td colspan="10" class="no-data">暫無產品資料</td></tr>';
+  </tr>`).join(''):'<tr><td colspan="11" class="no-data">暫無產品資料</td></tr>';
 }
 function openProdM(){clearPF();document.getElementById('pm-title').textContent='新增產品';showM('modal-prod');}
 function editProd(id){
@@ -1120,7 +1138,7 @@ function editProd(id){
   document.getElementById('pm-title').textContent='編輯產品';
   fv('p-id',p.id);fv('p-model',p.model);sel('p-series',p.series||'');
   sel('p-cat',p.category||'崁燈');sel('p-status',p.status||'上架');
- fv('p-watt',p.watt||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);
+ fv('p-watt',p.watt||'');fv('p-price',p.stdPrice||p.price||0);fv('p-proj',0);fv('p-cost',p.costPrice||0);
 fv('p-cri',p.cri||'');fv('p-desc',p.desc||'');
 fv('p-img',(p.images&&p.images[0])||'');
 fv('p-dimimg',p.dimImg||'');
@@ -1131,14 +1149,14 @@ g('p-promoted').value=p.isPromoted||'否';fv('p-moq',p.moq||'');toggleMoqField()
 prevImg();prevDimImg();showM('modal-prod');
 }
  function toggleMoqField(){const el=document.getElementById('moq-field');if(el)el.style.display=g('p-promoted').value==='是'?'none':'block';}
- function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating','p-watt_per_meter','p-max_length','p-max_circuit','p-cutOptions','p-lightExit'].forEach(k=>fv(k,''));g('p-product_type').value='standard';g('p-environment').value='室內';g('p-promoted').value='否';fv('p-moq','');toggleMoqField();document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
+ function clearPF(){['p-id','p-model','p-series','p-watt','p-price','p-proj','p-cost','p-cri','p-desc','p-img','p-dimimg','p-cct','p-beam','p-outerColor','p-innerColor','p-color','p-voltage','p-addon','p-cutout_min','p-cutout_max','p-watt_min','p-watt_max','p-body_length','p-body_width','p-body_height','p-body_diameter','p-ip_rating','p-watt_per_meter','p-max_length','p-max_circuit','p-cutOptions','p-lightExit'].forEach(k=>fv(k,''));g('p-product_type').value='standard';g('p-environment').value='室內';g('p-promoted').value='否';fv('p-moq','');toggleMoqField();document.getElementById('p-prev').style.display='none';document.getElementById('p-dimimg-prev').style.display='none';}
 async function saveProd(){
   const model=v('p-model').trim();if(!model){toast('請填寫型號');return;}
   const id=v('p-id')||'P'+Date.now();
   const isPromoted=g('p-promoted').value;
   const moq=isPromoted==='是'?'':v('p-moq').trim();
   const rec={id,model,series:v('p-series'),category:g('p-cat').value,status:g('p-status').value,
-    watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,
+    watt:v('p-watt'),stdPrice:Number(v('p-price'))||0,projPrice:0,costPrice:Number(v('p-cost'))||0,
     isPromoted,moq,
 cri:v('p-cri'),desc:v('p-desc'),images:v('p-img')?[v('p-img')]:[],dimImg:v('p-dimimg'),
 catalog:['鋁條燈','軟條燈','洗牆燈'].includes(g('p-cat').value)?'線型燈':'商照燈',
