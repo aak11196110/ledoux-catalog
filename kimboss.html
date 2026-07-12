@@ -1005,6 +1005,10 @@
         <div id="crop-ov-r"></div>
         <div id="crop-box" class="crop-box">
           <div class="crop-box-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+          <div style="position:absolute;width:16px;height:16px;background:var(--gold);border:2px solid #fff;border-radius:50%;top:-8px;left:-8px;cursor:nwse-resize;z-index:20" onmousedown="cropResizeStart(event,'tl')" ontouchstart="cropResizeStart(event,'tl')"></div>
+          <div style="position:absolute;width:16px;height:16px;background:var(--gold);border:2px solid #fff;border-radius:50%;top:-8px;right:-8px;cursor:nesw-resize;z-index:20" onmousedown="cropResizeStart(event,'tr')" ontouchstart="cropResizeStart(event,'tr')"></div>
+          <div style="position:absolute;width:16px;height:16px;background:var(--gold);border:2px solid #fff;border-radius:50%;bottom:-8px;left:-8px;cursor:nesw-resize;z-index:20" onmousedown="cropResizeStart(event,'bl')" ontouchstart="cropResizeStart(event,'bl')"></div>
+          <div style="position:absolute;width:16px;height:16px;background:var(--gold);border:2px solid #fff;border-radius:50%;bottom:-8px;right:-8px;cursor:nwse-resize;z-index:20" onmousedown="cropResizeStart(event,'br')" ontouchstart="cropResizeStart(event,'br')"></div>
         </div>
       </div>
     </div>
@@ -1312,6 +1316,46 @@ async function _uploadToImgBB(base64, targetId) {
 // ── 裁切器 ──
 let _crop = {targetId:null,img:null,nW:0,nH:0,dW:0,dH:0,sc:1,x:0,y:0,size:0,drag:false,sx:0,sy:0,ox:0,oy:0};
 
+let _resizeCorner = null;
+function cropResizeStart(e, corner) {
+  e.stopPropagation();
+  e.preventDefault();
+  _resizeCorner = corner;
+  document.addEventListener('mousemove', cropResizeMove);
+  document.addEventListener('mouseup', cropResizeEnd);
+  document.addEventListener('touchmove', cropResizeMove, {passive:false});
+  document.addEventListener('touchend', cropResizeEnd);
+}
+function cropResizeMove(e) {
+  if (!_resizeCorner) return;
+  e.preventDefault();
+  const wrap = document.getElementById('crop-img-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const point = e.touches ? e.touches[0] : e;
+  const px = point.clientX - rect.left;
+  const py = point.clientY - rect.top;
+  const {x, y, size} = _crop;
+  let newSize;
+  if (_resizeCorner === 'br') { newSize = Math.max(px - x, py - y); }
+  else if (_resizeCorner === 'tl') { const right = x + size, bottom = y + size; newSize = Math.max(right - px, bottom - py); }
+  else if (_resizeCorner === 'tr') { const bottom = y + size; newSize = Math.max(px - x, bottom - py); }
+  else if (_resizeCorner === 'bl') { const right = x + size; newSize = Math.max(right - px, py - y); }
+  newSize = Math.max(40, Math.min(newSize, _crop.dW, _crop.dH));
+  if (_resizeCorner === 'br') { _crop.size = newSize; }
+  else if (_resizeCorner === 'tl') { _crop.x = x + size - newSize; _crop.y = y + size - newSize; _crop.size = newSize; }
+  else if (_resizeCorner === 'tr') { _crop.y = y + size - newSize; _crop.size = newSize; }
+  else if (_resizeCorner === 'bl') { _crop.x = x + size - newSize; _crop.size = newSize; }
+  _crop.x = Math.max(0, Math.min(_crop.x, _crop.dW - _crop.size));
+  _crop.y = Math.max(0, Math.min(_crop.y, _crop.dH - _crop.size));
+  _updateCrop();
+}
+function cropResizeEnd() {
+  _resizeCorner = null;
+  document.removeEventListener('mousemove', cropResizeMove);
+  document.removeEventListener('mouseup', cropResizeEnd);
+  document.removeEventListener('touchmove', cropResizeMove);
+  document.removeEventListener('touchend', cropResizeEnd);
+}
 function openCropperFromFile(file, targetId) {
   if (!file) { toast('未選擇檔案'); return; }
   if (!file.type.startsWith('image/')) { toast('請選擇圖片格式'); return; }
