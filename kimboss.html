@@ -1556,14 +1556,22 @@ function rOrd(){
   let list=[...D.orders].reverse();
   if(q)list=list.filter(o=>(o.customerName+o.company+o.projectName).toLowerCase().includes(q.toLowerCase()));
   if(st)list=list.filter(o=>o.status===st);
-  document.getElementById('ord-tb').innerHTML=list.length?list.map(o=>`<tr>
+  document.getElementById('ord-tb').innerHTML=list.length?list.map(o=>{
+    let itemsHtml='—';
+    try{
+      const parsed=JSON.parse(o.items);
+      if(Array.isArray(parsed)){
+        itemsHtml=parsed.map(it=>`${esc(it.model)}×${it.qty}（NT$${fmt(it.unitPrice||0)}${it.discountLabel?' · '+esc(it.discountLabel):''}）`).join('<br>');
+      }
+    }catch(e){ itemsHtml=esc(o.items||'—'); }
+    return `<tr>
     <td style="font-family:'Space Mono',monospace;font-size:10px">${String(o.id||'—').slice(0,16)}</td>
     <td style="color:var(--muted)">${o.date||'—'}</td><td><b>${o.customerName||'—'}</b></td><td>${o.company||'—'}</td><td>${o.projectName||'—'}</td>
-    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${o.items||'—'}</td>
+    <td style="max-width:220px;font-size:10px;color:var(--muted)">${itemsHtml}</td>
     <td style="font-family:'Space Mono',monospace">NT$ ${fmt(o.subtotal||o.total||0)}</td>
     <td>${bdg(o.status||'已下載')}</td>
     <td><button class="btn btn-sm btn-outline" onclick="openRec('orders','${esc(o.id)}')">處理</button></td>
-  </tr>`).join(''):'<tr><td colspan="9" class="no-data">暫無報價記錄</td></tr>';
+  </tr>`;}).join(''):'<tr><td colspan="9" class="no-data">暫無報價記錄</td></tr>';
 }
 
 // SAMPLES
