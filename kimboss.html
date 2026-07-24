@@ -1087,7 +1087,8 @@ async function loadCosts(){
 // ── 規格選項點選器 ──
 let SPEC_OPTIONS=[];
 async function loadSpecOptions(){
-  SPEC_OPTIONS=await apiGet('getSpecOptions');
+  const res=await apiGet('getSpecOptions');
+  SPEC_OPTIONS=Array.isArray(res)?res:[];
 }
 const SPEC_FIELDS=[
   {input:'p-cct',category:'色溫'},
