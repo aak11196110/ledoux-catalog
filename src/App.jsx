@@ -42,8 +42,6 @@ const DIFY_KEYS = {
 };
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
-const ADMIN_USERNAME = "xxx3903052";
-const ADMIN_PASSWORD = "zzz3909086";
 const NOTIFY_EMAIL   = "kim@ledouxlight.com.tw";
 const CONTACT_PHONE  = "0965-502-319";
 const CONTACT_EMAIL  = "kim@ledouxlight.com.tw";
@@ -1549,6 +1547,7 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [toast,      setToast]      = useState("");
   const [loginF,     setLoginF]     = useState({username:"",password:""});
   const [loginErr,   setLoginErr]   = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
   const [seriesExp,  setSeriesExp]  = useState(true);
   const [catExp,     setCatExp]     = useState(true);
 const [linearExp,  setLinearExp]  = useState(true);
@@ -1833,11 +1832,17 @@ const filteredInv = inventory.filter(i=>
   const hasStock = model => inventory.some(i=>i.model===model&&Number(i.availableQty)>0);
   const doSearch = q => { setSearchQ(q); if(q.trim()&&!searchHist.includes(q)) setSearchHist(h=>[q,...h].slice(0,8)); setSearchFocus(false); setPage("catalog"); };
 
-  const doLogin = () => {
-    if (loginF.username===ADMIN_USERNAME && loginF.password===ADMIN_PASSWORD) {
-      setUser({id:1,username:ADMIN_USERNAME,name:"管理員",position:"管理者",company:"Ledoux Taiwan",role:"admin"});
-      setLoginErr("");
-    } else { setLoginErr("帳號或密碼錯誤"); }
+  const doLogin = async () => {
+    if (loginLoading) return;
+    setLoginLoading(true);
+    setLoginErr("");
+    const res = await sheetPost("adminLogin", {username:loginF.username, password:loginF.password});
+    setLoginLoading(false);
+    if (res && res.success) {
+      setUser({id:1,username:loginF.username,name:"管理員",position:"管理者",company:"Ledoux Taiwan",role:"admin"});
+    } else {
+      setLoginErr("帳號或密碼錯誤");
+    }
   };
 
  const addToCart = (p, spec={}) => { const key=p.id+JSON.stringify(spec); setCart(c=>{const ex=c.find(i=>i._key===key);return ex?c.map(i=>i._key===key?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1,spec,_key:key}];}); toast$(`${p.model} 已加入詢價單`); };
@@ -2334,7 +2339,7 @@ innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/")
           <div className="sec-lbl">管理員登入</div>
           <div className="lf"><label>帳號</label><input value={loginF.username} onChange={e=>setLoginF(p=>({...p,username:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入帳號"/></div>
           <div className="lf"><label>密碼</label><input type="password" value={loginF.password} onChange={e=>setLoginF(p=>({...p,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入密碼"/></div>
-          <button className="btn-outline" style={{width:"100%",marginTop:6}} onClick={doLogin}>管理員登入</button>
+          <button className="btn-outline" style={{width:"100%",marginTop:6}} onClick={doLogin} disabled={loginLoading}>{loginLoading?"登入中...":"管理員登入"}</button>
           {loginErr&&<div className="auth-err">{loginErr}</div>}
         </div>
       </div>
