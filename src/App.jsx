@@ -42,6 +42,8 @@ const DIFY_KEYS = {
 };
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzMH6UsIgKwq8M4zSsXHavb8uuv9PuRRMHO9EK3MYUAjggab6GHRdC7NbwDF6f8WutlQ/exec";
+const ADMIN_USERNAME = "xxx3903052";
+const ADMIN_PASSWORD = "zzz3909086";
 const NOTIFY_EMAIL   = "kim@ledouxlight.com.tw";
 const CONTACT_PHONE  = "0965-502-319";
 const CONTACT_EMAIL  = "kim@ledouxlight.com.tw";
@@ -1210,6 +1212,78 @@ function SampleInvPage({sampleInv,setSampleInv,sheetUrl}){
     </tbody></table></div>}
   </>);
 }
+function AdminProductEditor({ product, onSave, onClose, series_list }) {
+  const FIELDS = [
+    {key:"series",    label:"系列",    type:"select", options: series_list},
+    {key:"model",     label:"型號 *",  type:"text"},
+    {key:"category",  label:"燈具類型",type:"select", options:["崁燈","軌道燈","吸頂燈","磁吸系統","壁燈","地腳燈","戶外燈","鋁條燈","燈帶","洗牆燈","軟條燈","其他"]},
+    {key:"status",    label:"狀態",    type:"select", options:["銷售中","停產","規格更新","即將上市"]},
+    {key:"watt",      label:"瓦數",    type:"text"},
+    {key:"lumen",     label:"流明",    type:"text"},
+    {key:"cct",       label:"色溫",    type:"text"},
+    {key:"beam",      label:"光束角",  type:"text"},
+    {key:"voltage",   label:"電壓",    type:"text"},
+    {key:"cri",       label:"演色性",  type:"text"},
+    {key:"color",     label:"顏色",    type:"text"},
+    {key:"cutout",    label:"開孔尺寸",type:"text"},
+    {key:"size",      label:"產品尺寸",type:"text"},
+    {key:"install",   label:"安裝方式",type:"text"},
+    {key:"cert",      label:"認證",    type:"text"},
+    {key:"stdPrice",  label:"標準牌價",type:"number"},
+    {key:"projPrice", label:"專案價",  type:"number"},
+    {key:"shipping",  label:"運費",    type:"number"},
+    {key:"desc",      label:"產品描述",type:"textarea"},
+    {key:"note",      label:"備註",    type:"textarea"},
+    {key:"images",    label:"圖片網址",type:"text"},
+    {key:"specOptions", label:"自訂規格選項（格式：名稱:選項1/選項2，每行一組）", type:"textarea"},
+  ];
+
+  const [form, setForm] = React.useState(() => {
+    const base = {};
+    FIELDS.forEach(f => { base[f.key] = product?.[f.key] ?? ""; });
+if (Array.isArray(base.specOptions)) base.specOptions = base.specOptions.join("\n");
+    if (Array.isArray(base.images)) base.images = base.images[0] || "";
+    return base;
+  });
+
+  const set = (k, v) => setForm(f => ({...f, [k]: v}));
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"var(--ivory)",border:"0.5px solid var(--bdr)",borderRadius:8,width:"100%",maxWidth:680,maxHeight:"90vh",overflow:"auto",padding:28}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <h2 style={{fontSize:16,fontWeight:600,letterSpacing:"2px"}}>{product?.model ? `編輯：${product.model}` : "新增燈具"}</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:20,color:"var(--muted)"}}>✕</button>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+          {FIELDS.map(f => (
+            <div key={f.key} style={{gridColumn: f.type==="textarea"?"1/-1":"auto"}}>
+              <label style={{fontSize:10,letterSpacing:"2px",color:"var(--muted)",display:"block",marginBottom:4}}>{f.label}</label>
+              {f.type==="select" ? (
+                <select value={form[f.key]} onChange={e=>set(f.key, e.target.value)}
+                  style={{width:"100%",padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"var(--ivory)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:13,borderRadius:4}}>
+                  <option value="">— 請選擇 —</option>
+                  {f.options.map(o=><option key={o} value={o}>{o}</option>)}
+                </select>
+              ) : f.type==="textarea" ? (
+                <textarea value={form[f.key]} onChange={e=>set(f.key, e.target.value)} rows={3}
+                  style={{width:"100%",padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"var(--ivory)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:13,borderRadius:4,resize:"vertical"}}/>
+              ) : (
+                <input type={f.type} value={form[f.key]} onChange={e=>set(f.key, e.target.value)}
+                  style={{width:"100%",padding:"8px 10px",border:"0.5px solid var(--bdr)",background:"var(--ivory)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:13,borderRadius:4}}/>
+              )}
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:10,marginTop:20,justifyContent:"flex-end"}}>
+          <button onClick={onClose} style={{padding:"10px 24px",background:"transparent",border:"0.5px solid var(--bdr)",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,letterSpacing:"2px"}}>取消</button>
+          <button onClick={()=>onSave(form)} style={{padding:"10px 32px",background:"var(--blk)",color:"var(--ivory)",border:"none",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif",fontSize:12,letterSpacing:"2px"}}>儲存同步</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ShowroomPage({ scene, setScene, hoveredLight, setHoveredLight, setPage, setSeriesF }) {
 
   // 室內燈具熱點
@@ -1418,7 +1492,9 @@ function App({ preloadModels = [] }) {
   const [page, setPage] = useState("catalog");
   const [showroomScene, setShowroomScene] = useState("indoor");
   const [adminTab,     setAdminTab]     = useState("products"); // products | inventory | install
+  const [editProduct,  setEditProduct]  = useState(null);  // null=關閉, {}=新增, {...}=編輯
   const [editInv,      setEditInv]      = useState(null);
+  const [productSaving,setProductSaving]= useState(false); // indoor | outdoor
   const [hoveredLight,  setHoveredLight]  = useState(null);
 const [cat,        setCat]        = useState("全部");
   const [seriesF,    setSeriesF]    = useState(null);
@@ -1441,6 +1517,8 @@ const [selInvColor, setSelInvColor] = useState(null);
  const [quoteCircuits, setQuoteCircuits] = useState([]);
   const [addons, setAddons] = useState([]);
   const [allParts,   setAllParts]   = useState([]);
+  const [editProd,   setEditProd]   = useState(null);
+  const [showAdd,    setShowAdd]    = useState(false);
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [cartOpen,   setCartOpen]   = useState(false);
   const [sampOpen,   setSampOpen]   = useState(false);
@@ -1471,7 +1549,6 @@ const [selInvColor, setSelInvColor] = useState(null);
   const [toast,      setToast]      = useState("");
   const [loginF,     setLoginF]     = useState({username:"",password:""});
   const [loginErr,   setLoginErr]   = useState("");
-  const [loginLoading, setLoginLoading] = useState(false);
   const [seriesExp,  setSeriesExp]  = useState(true);
   const [catExp,     setCatExp]     = useState(true);
 const [linearExp,  setLinearExp]  = useState(true);
@@ -1482,6 +1559,7 @@ const [linearExp,  setLinearExp]  = useState(true);
   const [linearMeters,  setLinearMeters]  = useState(1);
   const [quickRecessed, setQuickRecessed] = useState(10);
   const [linearGroups,  setLinearGroups]  = useState([{meters:0,ceilingId:"std"}]);
+  const [newProd,    setNewProd]    = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K/4000K",beam:"24°",voltage:"220V",cri:"Ra≥80",color:"白色",cutout:"",size:"",install:"崁入式",cert:"",shipping:"90",stdPrice:"",projPrice:"",video:"",desc:"",images:"",note:""});
   const [editInvItem,setEditInvItem]= useState(null);
   const [newInv,     setNewInv]     = useState({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""});
   const [showAddInv, setShowAddInv] = useState(false);
@@ -1499,6 +1577,8 @@ const [linearExp,  setLinearExp]  = useState(true);
   const [orderType,       setOrderType]       = useState("");   // "stock" | "new"
 const [urgentSupport,   setUrgentSupport]   = useState(false);
 const [urgentRegion,    setUrgentRegion]    = useState("");
+  const [inlineEdit, setInlineEdit] = useState(null);
+  const [inlineData, setInlineData] = useState({});
   const [visitOpen,    setVisitOpen]    = useState(false);
 const [visitStep,    setVisitStep]    = useState(1); // 1=填資料 2=選日期 3=完成
 const [visitForm,    setVisitForm]    = useState({
@@ -1592,6 +1672,7 @@ if (addonData?.length > 0) setAddons(addonData);
 useEffect(()=>{
   if(selProd) { setSelSpec({beam:"", color:"", cct:"", addon:[], customSpecs:{}}); setDrawerMeters(""); setDrawerSpaceId(""); setDrawerCircuits([{id:"c1",label:"回路 1",segments:[{id:"s1",spaceId:"",meters:""}]}]); setDrawerCutOption(null); setDrawerLightExit(null); }
 }, [selProd]);
+  const syncProducts  = async p  => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveProducts",p); setSyncStatus("ok"); };
   const syncInventory = async iv => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("saveInventory",iv); setSyncStatus("ok"); };
   const syncUpsertInv = async it => { if(!sheetUrl)return; setSyncStatus("loading"); await sheetPost("upsertInventory",it); setSyncStatus("ok"); };
 
@@ -1752,17 +1833,11 @@ const filteredInv = inventory.filter(i=>
   const hasStock = model => inventory.some(i=>i.model===model&&Number(i.availableQty)>0);
   const doSearch = q => { setSearchQ(q); if(q.trim()&&!searchHist.includes(q)) setSearchHist(h=>[q,...h].slice(0,8)); setSearchFocus(false); setPage("catalog"); };
 
-  const doLogin = async () => {
-    if (loginLoading) return;
-    setLoginLoading(true);
-    setLoginErr("");
-    const res = await sheetPost("adminLogin", {username:loginF.username, password:loginF.password});
-    setLoginLoading(false);
-    if (res && res.success) {
-      setUser({id:1,username:loginF.username,name:"管理員",position:"管理者",company:"Ledoux Taiwan",role:"admin"});
-    } else {
-      setLoginErr("帳號或密碼錯誤");
-    }
+  const doLogin = () => {
+    if (loginF.username===ADMIN_USERNAME && loginF.password===ADMIN_PASSWORD) {
+      setUser({id:1,username:ADMIN_USERNAME,name:"管理員",position:"管理者",company:"Ledoux Taiwan",role:"admin"});
+      setLoginErr("");
+    } else { setLoginErr("帳號或密碼錯誤"); }
   };
 
  const addToCart = (p, spec={}) => { const key=p.id+JSON.stringify(spec); setCart(c=>{const ex=c.find(i=>i._key===key);return ex?c.map(i=>i._key===key?{...i,qty:i.qty+1}:i):[...c,{product:p,qty:1,spec,_key:key}];}); toast$(`${p.model} 已加入詢價單`); };
@@ -2074,6 +2149,9 @@ if(typeof urgentData !== 'undefined' && urgentData){
 
   const saveCatalog = (id,field,value) => setCatalogs(cs=>cs.map(c=>c.id===id?{...c,[field]:value}:c));
 
+  const doAddProd = () => { if(!newProd.model)return; const imgs=newProd.images?newProd.images.split("\n").map(s=>s.trim()).filter(Boolean):[]; const nl=[...products,{...newProd,id:Date.now(),stdPrice:Number(newProd.stdPrice)||0,projPrice:Number(newProd.projPrice)||0,shipping:Number(newProd.shipping)||90,images:imgs}]; setProducts(nl); syncProducts(nl); setShowAdd(false); toast$("產品已新增"); };
+  const startEdit  = p => setEditProd({...p,images:(p.images||[]).join("\n")});
+  const saveEdit   = () => { const imgs=editProd.images?String(editProd.images).split("\n").map(s=>s.trim()).filter(Boolean):[]; const updated={...editProd,stdPrice:Number(editProd.stdPrice)||0,projPrice:Number(editProd.projPrice)||0,shipping:Number(editProd.shipping)||90,images:imgs}; const nl=products.map(p=>p.id===updated.id?updated:p); setProducts(nl); syncProducts(nl); if(selProd?.id===editProd.id)setSelProd(updated); setEditProd(null); toast$("產品已更新"); };
   const saveInvRow = async item => { const avail=Number(item.totalQty)-Number(item.reservedQty); const updated={...item,availableQty:avail,updatedAt:new Date().toISOString().split("T")[0]}; const nl=inventory.map(i=>i.id===updated.id?updated:i); setInventory(nl); setEditInvItem(null); await syncUpsertInv(updated); toast$(`${updated.model} 庫存已儲存`); };
   const deleteInvRow = async id => { const nl=inventory.filter(i=>i.id!==id); setInventory(nl); await syncInventory(nl); toast$("庫存項目已刪除"); };
   const doAddInv   = async () => { if(!newInv.model)return; const avail=Number(newInv.totalQty)-Number(newInv.reservedQty); const item={...newInv,id:"inv"+Date.now(),availableQty:avail,updatedAt:new Date().toISOString().split("T")[0]}; const nl=[...inventory,item]; setInventory(nl); await syncUpsertInv(item); setShowAddInv(false); setNewInv({model:"",series:"",category:"崁燈",watt:"",cct:"3000K",color:"白色",totalQty:0,reservedQty:0,availableQty:0,location:"",note:""}); toast$("庫存項目已新增"); };
@@ -2083,6 +2161,43 @@ if(typeof urgentData !== 'undefined' && urgentData){
 
   // ── Admin Page ──
   if(page==="admin" && isAdmin) {
+    const saveProduct = async (form) => {
+      if(!form.model){toast$("請填寫型號");return;}
+      setProductSaving(true);
+      const rec = {
+        ...form,
+        id: editProduct?.id || ("P"+Date.now()),
+        images: form.images ? [form.images] : [],
+        stdPrice: Number(form.stdPrice)||0,
+        projPrice: Number(form.projPrice)||0,
+        shipping: Number(form.shipping)||90,
+       catalog: COMMERCIAL_SERIES.includes(form.series) ? "商照燈" : "線型燈",
+color: (form.specOptions?.color||[]).filter(v=>v!=="其他").join("/") || form.color || "",
+beam: (form.specOptions?.beam||[]).filter(v=>v!=="其他").join("/") || form.beam || "",
+cct: (form.specOptions?.cct||[]).filter(v=>v!=="其他").join("/") || form.cct || "",
+voltage: (form.specOptions?.voltage||[]).filter(v=>v!=="其他").join("/") || form.voltage || "",
+outerColor: (form.specOptions?.outerColor||[]).filter(v=>v!=="其他").join("/") || form.outerColor || "",
+innerColor: (form.specOptions?.innerColor||[]).filter(v=>v!=="其他").join("/") || form.innerColor || "",
+      };
+      // 更新本地
+      setProducts(ps => {
+        const idx = ps.findIndex(p=>p.id===rec.id);
+        if(idx>=0){const arr=[...ps];arr[idx]=rec;return arr;}
+        return [...ps, rec];
+      });
+      // 同步到 Google Sheets
+      if(sheetUrl) await sheetPost("upsertProduct", rec);
+      setProductSaving(false);
+      setEditProduct(null);
+      toast$("✅ 已儲存並同步到 Google Sheets");
+    };
+
+    const deleteProduct = async (p) => {
+      if(!confirm(`確定要刪除 ${p.model}？`)) return;
+      setProducts(ps => ps.filter(x=>x.id!==p.id));
+      toast$("已從網頁移除（請在 Google Sheets 同步刪除該行）");
+    };
+
     const seriesList = [...COMMERCIAL_SERIES, ...LINEAR_SERIES_LIST];
 
     return (
@@ -2109,20 +2224,27 @@ if(typeof urgentData !== 'undefined' && urgentData){
             ))}
           </div>
 
-          {/* 燈具產品管理（唯讀，新增/編輯/刪除請至 kimboss.html 後台操作） */}
+          {/* 燈具產品管理 */}
           {adminTab==="products"&&<>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <div style={{fontSize:13,color:"var(--muted)"}}>共 {products.length} 筆產品</div>
+              <button onClick={()=>setEditProduct({})} style={{padding:"10px 24px",background:"var(--gold)",border:"none",cursor:"pointer",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,letterSpacing:"2px",fontWeight:600}}>＋ 新增燈具</button>
             </div>
-            <div style={{fontSize:11,color:"var(--muted)",background:"#f9f5ef",border:"0.5px solid var(--bdr2)",padding:"10px 14px",marginBottom:16}}>💡 產品資料的新增／編輯／刪除請至後台管理系統（kimboss.html）操作，這裡僅供檢視。</div>
             {/* 系列分組 */}
             {seriesList.map(s=>{
               const sp = products.filter(p=>p.series===s);
-              if(sp.length===0) return null;
+              if(sp.length===0) return(
+                <div key={s} style={{marginBottom:8,display:"flex",alignItems:"center",gap:12}}>
+                  <span style={{fontSize:10,letterSpacing:"2px",color:"var(--muted)",minWidth:200}}>{s}</span>
+                  <span style={{fontSize:10,color:"var(--bdr2)"}}>— 尚無產品</span>
+                  <button onClick={()=>setEditProduct({series:s})} style={{padding:"3px 12px",background:"transparent",border:"0.5px solid var(--bdr)",cursor:"pointer",fontSize:9,letterSpacing:"1px",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif"}}>＋ 新增</button>
+                </div>
+              );
               return(
                 <div key={s} style={{marginBottom:20}}>
-                  <div style={{fontSize:10,letterSpacing:"3px",color:"var(--gold)",marginBottom:8,borderBottom:"0.5px solid var(--bdr2)",paddingBottom:6}}>
+                  <div style={{fontSize:10,letterSpacing:"3px",color:"var(--gold)",marginBottom:8,borderBottom:"0.5px solid var(--bdr2)",paddingBottom:6,display:"flex",justifyContent:"space-between"}}>
                     <span>{s} ({sp.length})</span>
+                    <button onClick={()=>setEditProduct({series:s})} style={{padding:"3px 12px",background:"transparent",border:"0.5px solid var(--bdr)",cursor:"pointer",fontSize:9,letterSpacing:"1px",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif"}}>＋ 新增</button>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:10}}>
                     {sp.map(p=>(
@@ -2133,6 +2255,10 @@ if(typeof urgentData !== 'undefined' && urgentData){
                           <div style={{fontSize:10,color:"var(--muted)",marginBottom:3}}>{p.category} · {p.watt}</div>
                           <div style={{fontSize:11,color:"var(--gold)"}}>NT$ {Number(p.stdPrice||0).toLocaleString()}</div>
                           <span style={{fontSize:9,padding:"2px 8px",background:p.status==="停產"?"#fdf0f0":p.status==="銷售中"?"#f0fdf4":"#fdf9f0",color:p.status==="停產"?"var(--red)":p.status==="銷售中"?"#2d6a4f":"#a07020",borderRadius:10,marginTop:4,display:"inline-block"}}>{p.status||"銷售中"}</span>
+                        </div>
+                        <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
+                          <button onClick={()=>setEditProduct(p)} style={{padding:"5px 12px",background:"var(--blk)",color:"var(--ivory)",border:"none",cursor:"pointer",fontSize:10,letterSpacing:"1px",fontFamily:"'Noto Sans TC',sans-serif"}}>編輯</button>
+                          <button onClick={()=>deleteProduct(p)} style={{padding:"5px 12px",background:"transparent",color:"var(--muted)",border:"0.5px solid var(--bdr)",cursor:"pointer",fontSize:10,fontFamily:"'Noto Sans TC',sans-serif"}}>刪除</button>
                         </div>
                       </div>
                     ))}
@@ -2167,6 +2293,17 @@ if(typeof urgentData !== 'undefined' && urgentData){
             </div>
           </>}
         </div>
+
+        {/* 新增/編輯 Modal */}
+        {editProduct!==null&&(
+          <AdminProductEditor
+            product={editProduct?.model?editProduct:null}
+            onSave={saveProduct}
+            onClose={()=>setEditProduct(null)}
+            series_list={seriesList}
+          />
+        )}
+        {productSaving&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16,letterSpacing:"2px"}}>同步中...</div>}
       </div>
       </>
     );
@@ -2197,7 +2334,7 @@ if(typeof urgentData !== 'undefined' && urgentData){
           <div className="sec-lbl">管理員登入</div>
           <div className="lf"><label>帳號</label><input value={loginF.username} onChange={e=>setLoginF(p=>({...p,username:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入帳號"/></div>
           <div className="lf"><label>密碼</label><input type="password" value={loginF.password} onChange={e=>setLoginF(p=>({...p,password:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="請輸入密碼"/></div>
-          <button className="btn-outline" style={{width:"100%",marginTop:6}} onClick={doLogin} disabled={loginLoading}>{loginLoading?"登入中...":"管理員登入"}</button>
+          <button className="btn-outline" style={{width:"100%",marginTop:6}} onClick={doLogin}>管理員登入</button>
           {loginErr&&<div className="auth-err">{loginErr}</div>}
         </div>
       </div>
@@ -2624,8 +2761,10 @@ if(typeof urgentData !== 'undefined' && urgentData){
           </div>
           <div className="pgrid">
             {filtered.map(p=>{
+              const isEditing=isAdmin&&inlineEdit===p.id;
+              const d=isEditing?inlineData:p;
               return(
-              <div key={p.id} className="pcard" onClick={()=>{setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[],customSpecs:{}});}}>
+              <div key={p.id} className="pcard" onClick={()=>{if(!isEditing){setSelProd(p);setSelSpec({beam:"",color:"",cct:"",outerColor:"",innerColor:"",customCct:"",customColor:"",addon:[],customSpecs:{}});}}}>
                 {hasStock(p.model)&&<div className="pcard-stock-badge"><span className="pcard-stock-dot"/>台灣現貨</div>}
                 <div className="pcard-img" style={{position:"relative"}}>
                   {p.images?.[0]?<img src={p.images[0]} alt={p.model}/>:<PlaceholderIcon/>}
@@ -2635,7 +2774,20 @@ if(typeof urgentData !== 'undefined' && urgentData){
                 <div className="pcard-body">
                   <div className="pcard-series">{p.series}</div>
                   <div className="pcard-model">{p.model}</div>
-                  <div className="pcard-desc">{p.desc}</div>
+                  {isEditing?(
+                    <div onClick={e=>e.stopPropagation()} style={{marginBottom:8}}>
+                      {[["瓦數","watt"],["開孔","cutout"],["建議牌價","stdPrice"],["備註","note"]].map(([l,k])=>(
+                        <div key={k} style={{marginBottom:6}}>
+                          <div style={{fontSize:"7px",letterSpacing:"2px",textTransform:"uppercase",color:"var(--muted)",marginBottom:2}}>{l}</div>
+                          <input type={k==="stdPrice"?"number":"text"} value={d[k]||""} onChange={e=>setInlineData(x=>({...x,[k]:e.target.value}))} style={{width:"100%",padding:"5px 7px",border:"0.5px solid var(--gold)",background:"#fffef9",fontFamily:"'Noto Sans TC',sans-serif",fontSize:11,outline:"none"}}/>
+                        </div>
+                      ))}
+                      <div style={{display:"flex",gap:6,marginTop:8}}>
+                        <button className="btn-save-inv" onClick={()=>{const updated={...p,...inlineData,stdPrice:Number(inlineData.stdPrice||p.stdPrice),projPrice:Number(inlineData.projPrice||p.projPrice)};const nl=products.map(x=>x.id===p.id?updated:x);setProducts(nl);syncProducts(nl);setInlineEdit(null);toast$(`${p.model} 已儲存`);}}>儲存</button>
+                        <button className="btn-cancel-sm" style={{padding:"4px 9px",fontSize:9}} onClick={()=>setInlineEdit(null)}>取消</button>
+                      </div>
+                    </div>
+                  ):<div className="pcard-desc">{p.desc}</div>}
                   <div className="pcard-tags">
                     {p.isPromoted==="是"&&<span className="ptag" style={{background:"var(--gold)",color:"#fff",borderColor:"var(--gold)",fontWeight:700}}>🔥 主推 · 無MOQ</span>}
                     {p.isPromoted!=="是"&&p.moq&&<span className="ptag" style={{color:"#9b6b3a",borderColor:"#9b6b3a"}}>MOQ {p.moq}</span>}
@@ -2648,6 +2800,7 @@ if(typeof urgentData !== 'undefined' && urgentData){
                     <div style={{fontSize:"7px",letterSpacing:"2px",color:"var(--muted)",textTransform:"uppercase",marginBottom:2}}>建議牌價</div>
                     {p.stdPrice>0?<div className="price-val">NT$ {p.stdPrice?.toLocaleString()}</div>:<div className="price-nq">請洽業務報價</div>}
                   </div>
+                  {isAdmin&&!isEditing&&<button onClick={e=>{e.stopPropagation();setInlineEdit(p.id);setInlineData({watt:p.watt,cct:p.cct,cutout:p.cutout,stdPrice:p.stdPrice,projPrice:p.projPrice,note:p.note});}} style={{marginTop:8,width:"100%",padding:"5px",background:"transparent",border:"0.5px solid var(--bdr)",color:"var(--muted)",fontFamily:"'Noto Sans TC',sans-serif",fontSize:"8px",letterSpacing:"2px",cursor:"pointer",textTransform:"uppercase"}}>編輯規格</button>}
                 </div>
               </div>
             );})}
@@ -3221,8 +3374,7 @@ if(typeof urgentData !== 'undefined' && urgentData){
 
         {/* ══ 產品管理 ══ */}
         {page==="products"&&isAdmin&&<>
-          <div className="phead"><div><div className="ptitle">產品管理</div><div className="psub">{products.length} 件商品 · 唯讀檢視</div></div></div>
-          <div className="hint-box">💡 產品資料的新增／編輯／刪除請至後台管理系統（kimboss.html）操作，這裡僅供檢視。</div>
+          <div className="phead"><div><div className="ptitle">產品管理</div><div className="psub">{products.length} 件商品</div></div><button className="btn-add2" onClick={()=>setShowAdd(v=>!v)}>新增產品</button></div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",margin:"8px 0 12px",alignItems:"center"}}>
             <select onChange={e=>setSeriesF(e.target.value||null)} style={{padding:"5px 10px",border:"0.5px solid var(--bdr)",background:"transparent",fontSize:11,color:"var(--blk)",cursor:"pointer"}}>
               <option value="">所有系列</option>
@@ -3237,7 +3389,26 @@ if(typeof urgentData !== 'undefined' && urgentData){
               {["銷售中","停產","規格更新","即將上市"].map(s=><option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <div className="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>標準價</th><th>專案價</th></tr></thead><tbody>{products.map(p=>(<tr key={p.id}><td style={{fontWeight:400}}>{p.model}</td><td>{p.series}</td><td>{p.category}</td><td>{p.watt}</td><td>NT$ {p.stdPrice?.toLocaleString()}</td><td style={{color:"var(--gold)"}}>NT$ {p.projPrice?.toLocaleString()}</td></tr>))}</tbody></table></div>
+          {showAdd&&<div className="form-panel"><div className="fp-title">新增產品</div>
+            <div className="fgrid">
+              {[["型號","model"],["系列","series"],["瓦數","watt"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={newProd[k]} onChange={e=>setNewProd(p=>({...p,[k]:e.target.value}))}/></div>))}
+              <div className="ff"><label>分類</label><select value={newProd.category} onChange={e=>setNewProd(p=>({...p,category:e.target.value}))}><option>崁燈</option><option>軌道燈</option><option>磁吸系統</option><option>吸頂燈</option><option>壁燈</option><option>戶外燈</option><option>鋁條燈</option></select></div>
+              <div className="ff full"><label>產品描述</label><input value={newProd.desc} onChange={e=>setNewProd(p=>({...p,desc:e.target.value}))}/></div>
+              <div className="ff full"><label>圖片網址（每行一個）</label><textarea rows={2} value={newProd.images} onChange={e=>setNewProd(p=>({...p,images:e.target.value}))} placeholder="https://..."/></div>
+              <div className="ff full"><label>備註</label><input value={newProd.note} onChange={e=>setNewProd(p=>({...p,note:e.target.value}))}/></div>
+            </div>
+            <div className="form-actions"><button className="btn-confirm" onClick={doAddProd}>確認新增</button><button className="btn-cancel-sm" onClick={()=>setShowAdd(false)}>取消</button></div>
+          </div>}
+          {editProd&&<div className="form-panel" style={{background:"#f0ebe2"}}><div className="fp-title">編輯：{editProd.model}</div>
+            <div className="fgrid">
+              {[["型號","model"],["系列","series"],["瓦數","watt"],["光束角","beam"],["電壓","voltage"],["演色性","cri"],["顏色","color"],["開孔尺寸","cutout"],["產品尺寸","size"],["標準價","stdPrice"],["專案價","projPrice"],["運費","shipping"]].map(([l,k])=>(<div key={k} className="ff"><label>{l}</label><input type={["stdPrice","projPrice","shipping"].includes(k)?"number":"text"} value={editProd[k]||""} onChange={e=>setEditProd(p=>({...p,[k]:e.target.value}))}/></div>))}
+              <div className="ff full"><label>產品描述</label><input value={editProd.desc||""} onChange={e=>setEditProd(p=>({...p,desc:e.target.value}))}/></div>
+              <div className="ff full"><label>圖片網址（每行一個）</label><textarea rows={2} value={typeof editProd.images==="string"?editProd.images:(editProd.images||[]).join("\n")} onChange={e=>setEditProd(p=>({...p,images:e.target.value}))}/></div>
+              <div className="ff full"><label>備註</label><input value={editProd.note||""} onChange={e=>setEditProd(p=>({...p,note:e.target.value}))}/></div>
+            </div>
+            <div className="form-actions"><button className="btn-confirm" onClick={saveEdit}>儲存修改</button><button className="btn-cancel-sm" onClick={()=>setEditProd(null)}>取消</button></div>
+          </div>}
+          <div className="tbl-wrap"><table><thead><tr><th>型號</th><th>系列</th><th>分類</th><th>瓦數</th><th>標準價</th><th>專案價</th><th>操作</th></tr></thead><tbody>{products.map(p=>(<tr key={p.id}><td style={{fontWeight:400}}>{p.model}</td><td>{p.series}</td><td>{p.category}</td><td>{p.watt}</td><td>NT$ {p.stdPrice?.toLocaleString()}</td><td style={{color:"var(--gold)"}}>NT$ {p.projPrice?.toLocaleString()}</td><td style={{display:"flex",gap:6}}><button className="btn-edit2" onClick={()=>startEdit(p)}>編輯</button><button className="btn-del2" onClick={()=>{const nl=products.filter(x=>x.id!==p.id);setProducts(nl);syncProducts(nl);toast$("已刪除");}}><CloseIcon/></button></td></tr>))}</tbody></table></div>
         </>}
 
         {/* ══ 庫存管理 ══ */}
